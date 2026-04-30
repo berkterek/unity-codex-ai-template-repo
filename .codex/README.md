@@ -126,3 +126,15 @@ If an instruction is true only for one repository, put it in `project/`.
 If it is true for one technology stack, put it in `packs/`.
 If it is true for every repository using this workflow, then it can belong in
 `core/`.
+
+## Unity Pack
+
+The Unity pack is intentionally small and reusable:
+
+```text
+.codex/packs/unity-game/
+```
+
+It includes Unity MCP workflow, New Input System guidance, serialization safety,
+and Unity setup-agent behavior. Larger gameplay, genre, platform, engine-system,
+or third-party package references should remain optional per project.

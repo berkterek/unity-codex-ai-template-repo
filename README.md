@@ -13,7 +13,8 @@ It provides:
 - Core workflow command templates.
 - Progress, event, mailbox, and checkpoint protocols.
 - Project overlay files that each Unity project fills in.
-- A Unity pack area for Unity-specific setup and rules.
+- A small Unity pack for Unity MCP, New Input System, serialization safety, and
+  setup rules.
 - Coding convention templates.
 
 ## Folder Layout
@@ -37,6 +38,13 @@ It provides:
 │   └── CODING_CONVENTIONS.md
 ├── packs/
 │   └── unity-game/
+│       ├── README.md
+│       ├── agents/
+│       │   └── unity-setup.md
+│       └── guides/
+│           ├── unity-mcp.md
+│           ├── input-system.md
+│           └── serialization-safety.md
 └── manifests/
 ```
 
@@ -53,6 +61,31 @@ Do not put project-specific coding style into `core/`. Put it in
 
 Do not put project-specific folder or module structure into `core/`. Put it in
 `.codex/project/STRUCTURE.md`.
+
+Do not put full gameplay, genre, platform, engine-system, or third-party package
+references into the base template. Keep those as optional per-project packs.
+
+## Unity Pack
+
+The included Unity pack is intentionally small and reusable:
+
+```text
+.codex/packs/unity-game/
+```
+
+It includes:
+
+- `agents/unity-setup.md`: Unity Editor, scene, prefab, asset, and runtime setup
+  agent guidance.
+- `guides/unity-mcp.md`: Unity MCP workflow, batching, console checks, and MCP
+  vs file-edit rules.
+- `guides/input-system.md`: New Input System as the default input approach for
+  new Unity projects.
+- `guides/serialization-safety.md`: serialized field rename, prefab, asset, and
+  ScriptableObject safety rules.
+
+The base template does not include large genre or package-specific references.
+Those should be added only when a project needs them.
 
 ## First-Time Use In A Unity Project
 
@@ -98,6 +131,10 @@ Use .codex/core/commands/orchestrate.md and execute Phase 1 from
 | `.codex/project/CODING_CONVENTIONS.md` | Concrete coding style for the project. |
 | `.codex/project/WORKFLOW.md` | Phase/task execution plan. |
 | `.codex/project/PROGRESS.md` | Human-readable orchestration status. |
+| `.codex/packs/unity-game/README.md` | Unity pack overview. |
+| `.codex/packs/unity-game/guides/unity-mcp.md` | Unity MCP workflow and verification loop. |
+| `.codex/packs/unity-game/guides/input-system.md` | New Input System default guidance. |
+| `.codex/packs/unity-game/guides/serialization-safety.md` | Unity serialized data safety rules. |
 
 ## Recommended `.gitignore`
 
@@ -115,4 +152,3 @@ If you use this template inside a project, ignore runtime state:
 
 This is a template repo. It is intended to be copied into other Unity projects
 and customized through `.codex/project/`.
-
