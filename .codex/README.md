@@ -56,12 +56,16 @@ this order:
    - Soft rules that guide implementation.
    - Security, performance, documentation, and review rules.
 
-6. `project/WORKFLOW.md`
+6. `project/LEARNED.md`
+   - Repeated project-specific patterns discovered during work.
+   - Keep generic rules out of this file.
+
+7. `project/WORKFLOW.md`
    - Phase/task plan.
    - Inputs, outputs, acceptance criteria, dependencies, and parallel groups.
    - This is what orchestration executes.
 
-7. `project/PROGRESS.md`
+8. `project/PROGRESS.md`
    - Starts as `not-started`.
    - Orchestration updates it during execution.
    - Do not use it as the only recovery source once `EVENTS.jsonl` exists.
@@ -104,6 +108,7 @@ and .codex/runtime checkpoints.
 | Build/test/lint commands | `project/TOOLING.md` |
 | Coding style | `project/CODING_CONVENTIONS.md` |
 | Repo-specific hard rules | `project/RULES.md` |
+| Learned project-specific patterns | `project/LEARNED.md` |
 | Phase/task execution plan | `project/WORKFLOW.md` |
 | Runtime status | `project/PROGRESS.md` and `project/EVENTS.jsonl` |
 | Technology-specific guidance | `packs/<pack-name>/` |
@@ -136,5 +141,6 @@ The Unity pack is intentionally small and reusable:
 ```
 
 It includes Unity MCP workflow, New Input System guidance, serialization safety,
-and Unity setup-agent behavior. Larger gameplay, genre, platform, engine-system,
-or third-party package references should remain optional per project.
+Unity guardrails, and Unity setup-agent behavior. Larger gameplay, genre,
+platform, engine-system, or third-party package references should remain
+optional per project.

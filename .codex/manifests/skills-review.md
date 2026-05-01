@@ -24,6 +24,15 @@ Reason:
 | `core/input-system` | `.codex/packs/unity-game/guides/input-system.md` | New Input System is the default input policy for new Unity projects. |
 | `core/serialization-safety` | `.codex/packs/unity-game/guides/serialization-safety.md` | Prevents Unity data loss and should be a default safety rule. |
 
+## Added From External Workflow Kit Review
+
+| Source Idea | Target | Reason |
+|-------------|--------|--------|
+| Game Design Document template | `.codex/templates/GDD_TEMPLATE.md` | Clarifies game/product intent before implementation. |
+| Technical Design Document template | `.codex/templates/TDD_TEMPLATE.md` | Clarifies technical design before task execution. |
+| Unity hook/guardrail ideas | `.codex/packs/unity-game/guides/guardrails.md` | Captures high-risk Unity safety checks without adding executable hooks to the base temp. |
+| Learned project patterns | `.codex/project/LEARNED.md` | Gives projects a place to store repeated project-specific lessons. |
+
 ## Keep As Optional Per-Project Guidance
 
 | Group | Skills | Reason |

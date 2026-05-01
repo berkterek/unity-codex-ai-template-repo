@@ -19,7 +19,9 @@ Read these when they exist:
 - `.codex/project/CODING_CONVENTIONS.md`
 - `.codex/project/TOOLING.md`
 - `.codex/project/RULES.md`
+- `.codex/project/LEARNED.md`
 - `.codex/packs/unity-game/`
+- `.codex/packs/unity-game/guides/guardrails.md`
 - `.codex/packs/unity-game/guides/unity-mcp.md`
 - `.codex/packs/unity-game/guides/serialization-safety.md`
 - The task assignment and acceptance criteria.

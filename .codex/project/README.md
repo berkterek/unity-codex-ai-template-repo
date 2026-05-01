@@ -10,5 +10,6 @@ This directory adapts `.codex/core` to this repository.
 | `RULES.md` | Repository-specific hard and soft rules. |
 | `STRUCTURE.md` | Repository-specific folder, module, ownership, and pattern map. |
 | `CODING_CONVENTIONS.md` | Concrete coding style for this project. |
+| `LEARNED.md` | Repeated project-specific patterns discovered during work. |
 | `PROGRESS.md` | Human-readable orchestration status. |
 | `EVENTS.jsonl` | Append-only event journal, created when orchestration starts. |
