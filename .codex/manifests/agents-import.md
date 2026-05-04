@@ -87,6 +87,18 @@ Reason:
   Unity MCP, and Unity asset safety.
 - It is useful, but not project-agnostic.
 
+### `debugger.md`, `migrator.md`, `silent-failure-hunter.md`
+
+Moved to `.codex/packs/unity-game/commands/` (not agents).
+
+Reason:
+
+- These are directly invocable by the developer, not orchestration role templates.
+- In the Codex model, agents are role templates the orchestrator spawns for tasks.
+  These three behave as commands: the developer triggers them with a prompt.
+- All three assume Unity-specific patterns (UniTask, VContainer, ECS, Addressables)
+  so they belong in the unity-game pack.
+
 ## Not Imported
 
 - Model routing names from Claude (`haiku`, `sonnet`, `opus`).

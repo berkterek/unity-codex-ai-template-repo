@@ -102,24 +102,41 @@ Moved to packs:
 - `mailbox.md`: agent progress and heartbeat reporting.
 - `checkpoint.md`: agent and orchestrator recovery state.
 
-## Not Imported Yet
+## Added To Unity Pack Commands
 
-The following commands are intentionally deferred:
+The following commands were ported from the source and placed in
+`.codex/packs/unity-game/commands/` after being converted to Codex format:
 
-- `game-idea.md`
-- `architect.md`
-- `plan-workflow.md`
-- `build-game.md`
-- `init-project.md`
-- `add-feature.md`
-- `refine-gdd.md`
-- `refine-tdd.md`
-- `review-code.md`
-- `catch-up.md`
-- `clean-slop.md`
-- `learn.md`
-- `benchmark.md`
+| Command | Notes |
+|---------|-------|
+| `game-idea.md` | GDD creation — Unity game design pipeline. |
+| `architect.md` | TDD creation from GDD. |
+| `add-feature.md` | Incremental pipeline update for new features. |
+| `new-module.md` | 5-file module generator (VContainer, IEventBus pattern). |
+| `refine-gdd.md` | GDD iteration with cascade warnings. |
+| `refine-tdd.md` | TDD iteration with impact assessment. |
+| `review-code.md` | Manual code review against unity-game pack rules. |
+| `catch-up.md` | Codebase comprehension guide generator. |
+| `clean-slop.md` | Dead-code and over-abstraction removal. |
+| `learn.md` | Pattern extraction into `.codex/project/LEARNED.md`. |
+| `debugger.md` | Root cause analysis for Unity runtime bugs. |
+| `migrator.md` | Legacy pattern modernizer (coroutines, singletons, etc.). |
+| `silent-failure-hunter.md` | Silent error audit for C# files. |
 
-Some are reusable, but they need a separate pass to split generic planning from
-Unity/game-specific design.
+Conversion changes applied:
+- `CLAUDE.md` → `.codex/project/RULES.md` / `.codex/project/PROJECT.md`
+- `docs/WORKFLOW.md` → `.codex/project/WORKFLOW.md`
+- `docs/PROGRESS.md` → `.codex/project/PROGRESS.md`
+- `.claude/agents/` → `.codex/core/agents/` / `.codex/packs/unity-game/agents/`
+- `.claude/skills/learned/` → `.codex/project/LEARNED.md`
+- `$ARGUMENTS` removed (Codex does not use this convention)
+
+## Still Not Imported
+
+| Command | Reason |
+|---------|--------|
+| `plan-workflow.md` | Was part of original claude repo; equivalent is `orchestrate.md` in core. |
+| `build-game.md` | Too project-specific; belongs in `project/TOOLING.md`. |
+| `init-project.md` | Covered by `core/README.md` first-time setup instructions. |
+| `benchmark.md` | Too platform-specific; not in source repo. |
 

@@ -1,18 +1,14 @@
 # Coding Conventions Template
 
-Bu dosya, projeye özel kodlama kurallarını başlatmak için kullanılan
-doldurulabilir bir şablondur. Base `.codex` kuralı değildir; her projede
-`project/CODING_CONVENTIONS.md` veya benzeri bir overlay olarak kopyalanıp
-projenin teknoloji seçimine göre doldurulur.
-
-Kaynak: `00_CodingConventions.md` dosyasındaki SpaceTroopers kurallarından
-genelleştirilmiştir.
+This is a fillable template for project-specific coding conventions. It is not a
+base `.codex` rule. Copy it into `project/CODING_CONVENTIONS.md` and fill it
+according to the project's technology choices.
 
 ---
 
 ## Project Decisions
 
-Bu tabloyu proje başında doldur.
+Fill this table at the start of the project.
 
 | Karar | Seçim |
 |-------|-------|

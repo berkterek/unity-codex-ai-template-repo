@@ -1,7 +1,7 @@
 # Coding Conventions Import Manifest
 
 Source file:
-`/Users/berkterek/Downloads/00_CodingConventions.md`
+Project-specific coding conventions document (local, not versioned here).
 
 Generated template:
 `.codex/templates/CODING_CONVENTIONS.md`
