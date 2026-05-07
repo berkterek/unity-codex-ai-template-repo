@@ -12,7 +12,30 @@ specific task types.
 
 | Agent | Purpose |
 |-------|---------|
+| `agents/debugger.md` | Root cause analysis — stack traces, ECS, VContainer bugs. |
+| `agents/migrator.md` | Legacy pattern migration (coroutines → UniTask, singletons → VContainer). |
+| `agents/silent-failure-hunter.md` | Audits C# files for silent error patterns. |
+| `agents/unity-build-runner.md` | Configures and triggers Unity builds via MCP. |
+| `agents/unity-coder.md` | Full Unity C# implementation — primary coder for pipelines. |
+| `agents/unity-coder-lite.md` | Lightweight coder for simple, well-scoped changes. |
+| `agents/unity-critic.md` | Adversarial plan challenger — stress-tests architecture decisions. |
+| `agents/unity-developer.md` | Unity 6 specialist reviewer — deep review across 10 points. |
+| `agents/unity-fixer.md` | Bug fixer with MCP console inspection and live reflection. |
+| `agents/unity-fixer-lite.md` | Quick targeted fix for a single well-scoped defect. |
+| `agents/unity-git-master.md` | Unity-aware git — LFS, .meta hygiene, .gitattributes, merge conflicts. |
+| `agents/unity-linter.md` | Fast read-only validation against Unity rules. |
+| `agents/unity-network-dev.md` | Multiplayer networking — Netcode for GameObjects, Mirror, Photon, Fish-Net. |
+| `agents/unity-optimizer.md` | Profiles and fixes CPU/GPU/memory performance bottlenecks. |
+| `agents/unity-prototyper.md` | Rapid prototype scaffolding — speed over correctness, with TODO markers. |
+| `agents/unity-reviewer.md` | Unity-specific code review — correctness, performance, serialization safety. |
+| `agents/unity-scene-builder.md` | Builds Unity scenes from descriptions via MCP tools. |
+| `agents/unity-scout.md` | Codebase explorer — maps dependencies, surfaces risks, no writes. |
+| `agents/unity-security-reviewer.md` | Security audit — data exposure, keys, network, IAP receipts. |
 | `agents/unity-setup.md` | Unity Editor, scene, prefab, asset, and runtime setup tasks. |
+| `agents/unity-shader-dev.md` | URP shaders — HLSL, ShaderGraph, SRP Batcher, mobile optimization. |
+| `agents/unity-test-runner.md` | Writes and executes EditMode and PlayMode tests via MCP. |
+| `agents/unity-ui-builder.md` | UI Toolkit specialist — UXML, USS, runtime panels, data binding. |
+| `agents/unity-verifier.md` | Verify-fix loop — auto-fixes common issues, re-verifies up to 3 iterations. |
 
 ## Included Commands
 
@@ -39,10 +62,13 @@ a Codex session or as instructions in a task assignment.
 
 | Guide | Purpose |
 |-------|---------|
+| `guides/director-gates.md` | Named review gates (TD-ARCHITECTURE, TD-PERFORMANCE, TD-COMPILE, CD-SCOPE) for use in pipeline commands. |
 | `guides/guardrails.md` | Unity high-risk change checklist. |
-| `guides/unity-mcp.md` | Unity MCP usage rules and verification loop. |
 | `guides/input-system.md` | New Input System default guidance. |
+| `guides/nsubstitute.md` | NSubstitute mocking patterns for Unity tests. |
 | `guides/serialization-safety.md` | Unity serialized data safety rules. |
+| `guides/unity-mcp.md` | Unity MCP usage rules and verification loop. |
+| `guides/vcontainer.md` | VContainer DI scope hierarchy and registration patterns. |
 
 ## Included Rules
 
