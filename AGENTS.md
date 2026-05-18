@@ -152,6 +152,7 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `/create-test` | Create a single test |
 | `/qa` | QA verification process |
 | `/debug-session` | Interactive debug session |
+| `/debugger` | Root cause analysis and bug diagnosis |
 
 #### Review & Quality
 | Command | Role |
@@ -160,7 +161,7 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `/clean-slop` | Remove low-quality / unnecessary code |
 | `/performance-audit` | Performance audit |
 | `/check-portability` | Platform portability check |
-| `/silent-failure-hunt` | Silent failure scan |
+| `/silent-failure-hunter` | Silent failure scan |
 
 #### Git & Versioning
 | Command | Role |

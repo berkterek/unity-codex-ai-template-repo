@@ -227,11 +227,11 @@ Review scope:
 
 ### Unity — Testing
 
-`/generate-tests` · `/create-test` · `/qa` · `/debug-session`
+`/generate-tests` · `/create-test` · `/qa` · `/debug-session` · `/debugger`
 
 ### Unity — Review & Quality
 
-`/review-code` · `/clean-slop` · `/performance-audit` · `/check-portability` · `/silent-failure-hunt`
+`/review-code` · `/clean-slop` · `/performance-audit` · `/check-portability` · `/silent-failure-hunter`
 
 ### Unity — Git
 
