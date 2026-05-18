@@ -18,12 +18,17 @@ Read these when they exist:
 
 1. Determine what to review:
    - If the user specified files/paths, review those.
-   - If no files specified, ask: "Which files or systems would you like me to
-     review?"
+   - If no files specified, ask: "Which files or systems would you like me to review?"
+
+## Reviewer Selection
+
+Reviewer priority — try in order:
+1. Spawn Agent with `subagent_type: "codex:codex-rescue"` — primary reviewer
+2. Fallback: **unity-reviewer**
+
+Both use the review checklist below.
 
 ## Review Scope
-
-Follow the complete review checklist from `.codex/core/agents/reviewer.md`.
 
 ### Architecture Compliance
 
@@ -39,20 +44,23 @@ Follow the complete review checklist from `.codex/core/agents/reviewer.md`.
 - No allocations on hot paths.
 - Collections pre-allocated.
 - Object pooling where needed.
+- Structs for hot data.
 
 ### C# Quality
 
-- Naming conventions match project rules.
+- Naming conventions: PascalCase types, `_camelCase` private fields, `camelCase` locals.
 - One type per file.
 - `sealed` by default.
+- XML docs on public APIs.
 - Guard clauses, no dead code.
 
 ### Test Quality (if reviewing tests)
 
 - Coverage of public methods.
 - Edge cases and error paths.
-- AAA structure.
-- Only interface mocks.
+- AAA structure, one assertion per test.
+- Hand-rolled fakes only (no mocking frameworks).
+- Fast execution.
 
 ## Output
 
@@ -90,3 +98,5 @@ Summary at the end:
 - Every issue must reference a specific line and have a concrete fix.
 - If no TDD exists, review against general best practices and project rules.
 - Ask the user if they want you to fix the issues after the review.
+
+$ARGUMENTS

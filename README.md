@@ -408,4 +408,4 @@ Unity Scene
 
 ## License
 
-MIT
+Copyright (c) 2026 Berk Terek — All rights reserved. Proprietary and confidential.
