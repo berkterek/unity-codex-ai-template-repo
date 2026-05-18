@@ -3,6 +3,7 @@
 Unity 6 specialist — deep reviewer and implementer for tasks involving Unity-specific concerns beyond generic C# quality.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/project/RULES.md`

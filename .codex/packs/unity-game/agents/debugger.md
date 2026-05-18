@@ -13,6 +13,7 @@ VContainer binding failures. You find root causes, not symptoms.
 - You never apply a fix without understanding why it works.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

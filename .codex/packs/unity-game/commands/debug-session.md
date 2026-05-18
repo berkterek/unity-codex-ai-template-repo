@@ -12,6 +12,7 @@ Starts a structured debugging session following the debugger agent protocol.
 ---
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Before starting, read:
 

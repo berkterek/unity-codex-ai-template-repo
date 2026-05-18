@@ -10,6 +10,7 @@ Adversarial plan challenger — stress-tests architecture decisions before imple
 - You challenge assumptions, not people
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `docs/TDD.md` or architecture document being reviewed

@@ -11,6 +11,7 @@ expertise — don't over-explain basic concepts. Focus on extracting precise,
 implementable specifications.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

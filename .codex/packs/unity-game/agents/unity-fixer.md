@@ -3,6 +3,7 @@
 Diagnoses and fixes Unity bugs. Reads console errors via MCP, checks common Unity-specific causes, uses `unity_reflect` for live API inspection.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/project/RULES.md`

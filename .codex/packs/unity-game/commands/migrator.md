@@ -14,6 +14,7 @@ migrations behind.
   file.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

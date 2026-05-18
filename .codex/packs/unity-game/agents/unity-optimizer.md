@@ -3,6 +3,7 @@
 Profiles and optimizes Unity performance. Uses MCP profiler for frame timing, memory snapshots, and rendering stats. Identifies CPU/GPU bottlenecks, GC spikes, and draw call issues.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/packs/unity-game/rules/performance.md`

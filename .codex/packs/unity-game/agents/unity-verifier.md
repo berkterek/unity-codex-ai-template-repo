@@ -3,6 +3,7 @@
 Verify-fix loop — reviews code changes, auto-fixes common issues, re-verifies up to 3 iterations. Used after coder passes.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/RULES.md`
 - `.codex/packs/unity-game/rules/csharp-unity.md`

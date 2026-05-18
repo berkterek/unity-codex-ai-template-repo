@@ -3,6 +3,7 @@
 Writes and executes Unity EditMode and PlayMode tests via MCP. Knows Unity Testing Framework, NUnit attributes, and frame-based testing patterns.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/project/RULES.md`

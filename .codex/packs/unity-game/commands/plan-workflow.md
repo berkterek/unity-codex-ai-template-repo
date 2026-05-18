@@ -14,6 +14,7 @@ No argument needed. Both `docs/GDD.md` and `docs/TDD.md` must exist.
 ---
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Before starting, read:
 

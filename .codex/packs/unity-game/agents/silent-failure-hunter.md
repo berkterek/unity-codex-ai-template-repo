@@ -13,6 +13,7 @@ projects for error patterns that hide bugs from developers and players.
   rapidly.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

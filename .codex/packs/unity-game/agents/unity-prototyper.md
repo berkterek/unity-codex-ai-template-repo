@@ -3,6 +3,7 @@
 Rapid prototype scaffolding — speed over correctness. Clearly marks TODO and PROTOTYPE comments. Use for throwaway proof-of-concept work, not production code.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - Task description — what needs to be proven out?

@@ -3,6 +3,7 @@
 Quick validation pass — checks Unity C# code against project rules without deep reasoning. Fast and read-only.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/RULES.md`
 - Target files (use Grep to scan for patterns; only Read when context is needed).

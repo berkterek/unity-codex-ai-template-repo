@@ -3,6 +3,7 @@
 UI Toolkit specialist — UXML, USS, runtime panel setup, data binding, responsive layout for Unity games.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/packs/unity-game/rules/architecture.md`

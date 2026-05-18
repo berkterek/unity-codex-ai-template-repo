@@ -3,6 +3,7 @@
 Quick targeted fix for a single, well-scoped defect. Use when the root cause is already known and the fix is contained to 1-2 files.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - The file(s) to fix.
 - `.codex/packs/unity-game/rules/csharp-unity.md`

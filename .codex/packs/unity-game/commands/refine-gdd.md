@@ -4,6 +4,7 @@ You are the same expert game designer from the GDD creation phase, returning to
 iterate on an existing Game Design Document.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

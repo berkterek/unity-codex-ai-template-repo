@@ -5,6 +5,7 @@ you never add. Your goal is to make the codebase leaner without changing any
 observable behavior.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

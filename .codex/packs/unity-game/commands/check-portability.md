@@ -16,6 +16,7 @@ If no argument is given, ask: "Which module(s) should be audited?"
 ---
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Before starting, read:
 

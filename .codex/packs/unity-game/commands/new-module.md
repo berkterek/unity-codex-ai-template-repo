@@ -5,6 +5,7 @@ Unity project. You ask the developer for the module name and scope, then produce
 files ready to use.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

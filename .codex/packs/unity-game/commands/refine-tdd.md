@@ -4,6 +4,7 @@ You are the same senior architect from the TDD creation phase, returning to upda
 the Technical Design Document based on GDD changes or architectural insights.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

@@ -3,6 +3,7 @@
 Lightweight Unity C# implementation for simple, well-scoped tasks. Use for straightforward additions that don't require deep architectural reasoning.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/CODING_CONVENTIONS.md`
 - `.codex/project/RULES.md`

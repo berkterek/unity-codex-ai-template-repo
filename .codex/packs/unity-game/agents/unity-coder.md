@@ -3,6 +3,7 @@
 Full Unity C# implementation — MonoBehaviours, providers, installers, scene wiring. Primary coder for `/implement`, `/fix`, and `/orchestrate` pipelines.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/project/CODING_CONVENTIONS.md`

@@ -1,5 +1,8 @@
 # Setup Project — New Unity Project Initializer
 
+> Apply `.codex/packs/unity-game/guides/guardrails.md` rules throughout.
+
+
 Sets up a new Unity project using this template. Asks questions about the
 project, then generates all project-specific boilerplate.
 

@@ -1,5 +1,8 @@
 # Smart Commit — Analyze Changes and Commit Intelligently
 
+> Apply `.codex/packs/unity-game/guides/guardrails.md` rules throughout.
+
+
 Analyzes all uncommitted changes, groups them into logical atomic commits, and
 commits them with well-crafted messages. Works on any dirty working tree.
 

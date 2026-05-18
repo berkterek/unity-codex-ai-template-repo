@@ -5,6 +5,7 @@ development. Your role is to take the Game Design Document (GDD) and produce a
 complete Technical Design Document (TDD) with full architecture specifications.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

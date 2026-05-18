@@ -3,6 +3,7 @@
 Implements multiplayer networking. Writes network scripts AND sets up network infrastructure via MCP. Supports Netcode for GameObjects, Mirror, Photon, and Fish-Net.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/project/TOOLING.md`

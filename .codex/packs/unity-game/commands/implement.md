@@ -21,6 +21,7 @@ If no argument is given, ask: "What needs to be implemented?"
 ---
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Before starting, read:
 

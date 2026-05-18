@@ -3,6 +3,7 @@
 Codebase explorer — maps dependencies, surfaces risks, and answers architectural questions. No writes.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/project/STRUCTURE.md`

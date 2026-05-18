@@ -105,6 +105,9 @@ Added to `.codex/packs/unity-game/agents/`:
 
 | Agent | Source | Notes |
 |-------|--------|-------|
+| `audio-clip-agent.md` | new | Audio clip import settings and AudioSource configuration specialist. |
+| `graphics-setup-agent.md` | new | URP graphics settings, render pipeline asset, and quality tier specialist. |
+| `package-analyzer.md` | new | Reads `Packages/manifest.json` and summarizes package capabilities and risks. |
 | `unity-build-runner.md` | `unity-build-runner.md` | YAML frontmatter removed; MCP tool names kept. |
 | `unity-coder.md` | `unity-coder.md` | YAML frontmatter removed; full implementation agent for pipelines. |
 | `unity-coder-lite.md` | `unity-coder-lite.md` | YAML frontmatter removed; lightweight variant. |
@@ -114,6 +117,7 @@ Added to `.codex/packs/unity-game/agents/`:
 | `unity-fixer-lite.md` | `unity-fixer-lite.md` | YAML frontmatter removed; scoped single-defect fix. |
 | `unity-git-master.md` | `unity-git-master.md` | YAML frontmatter removed; git-only Bash restriction kept. |
 | `unity-linter.md` | `unity-linter.md` | YAML frontmatter removed; haiku-speed read-only validator. |
+| `unity-migrator.md` | new | Unity-specific migration agent: coroutines→UniTask, singletons→VContainer, legacy Input→New Input System. |
 | `unity-network-dev.md` | `unity-network-dev.md` | YAML frontmatter removed; multi-framework networking. |
 | `unity-optimizer.md` | `unity-optimizer.md` | YAML frontmatter removed; MCP profiler workflow. |
 | `unity-prototyper.md` | `unity-prototyper.md` | YAML frontmatter removed; PROTOTYPE marker requirement kept. |
@@ -122,6 +126,7 @@ Added to `.codex/packs/unity-game/agents/`:
 | `unity-scout.md` | `unity-scout.md` | YAML frontmatter removed; read-only exploration. |
 | `unity-security-reviewer.md` | `unity-security-reviewer.md` | YAML frontmatter removed; read-only security audit. |
 | `unity-shader-dev.md` | `unity-shader-dev.md` | YAML frontmatter removed; mobile-first URP shader rules. |
+| `unity-test-builder.md` | new | Generates full test infrastructure (EditMode / PlayMode-ECS / PlayMode-Scene) from a feature name. |
 | `unity-test-runner.md` | `unity-test-runner.md` | YAML frontmatter removed; EditMode/PlayMode test workflow. |
 | `unity-ui-builder.md` | `unity-ui-builder.md` | YAML frontmatter removed; UI Toolkit specialist. |
 | `unity-verifier.md` | `unity-verifier.md` | YAML frontmatter removed; 3-iteration verify-fix loop. |

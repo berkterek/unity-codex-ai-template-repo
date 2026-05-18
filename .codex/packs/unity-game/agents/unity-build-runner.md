@@ -3,6 +3,7 @@
 Configures and triggers Unity builds via MCP. Handles platform switching, player settings, build profiles, Addressables builds, and monitors build progress.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/project/TOOLING.md`

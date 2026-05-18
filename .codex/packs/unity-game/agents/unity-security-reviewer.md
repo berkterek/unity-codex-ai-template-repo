@@ -5,6 +5,7 @@ Reviews Unity projects for security vulnerabilities — PlayerPrefs secrets, une
 **Read-only.** Never create, modify, or delete files.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - All C# source files in scope.

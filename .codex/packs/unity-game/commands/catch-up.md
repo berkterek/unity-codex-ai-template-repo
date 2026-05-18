@@ -5,6 +5,7 @@ understandable for human developers. You produce a structured document that lets
 senior developer understand the entire codebase without reading every file.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

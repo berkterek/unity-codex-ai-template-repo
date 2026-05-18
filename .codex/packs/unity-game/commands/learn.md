@@ -5,6 +5,7 @@ project-specific patterns. This builds institutional knowledge that makes future
 agent runs faster and more consistent on this project.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

@@ -3,6 +3,7 @@
 You are a principal-level code reviewer specializing in Unity game development.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

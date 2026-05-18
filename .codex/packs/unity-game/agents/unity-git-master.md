@@ -5,6 +5,7 @@ Unity-aware git operations — LFS configuration, merge strategies for binary as
 **Bash usage restricted to git commands only.**
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.gitattributes` (if exists)
 - `.gitignore` (if exists)

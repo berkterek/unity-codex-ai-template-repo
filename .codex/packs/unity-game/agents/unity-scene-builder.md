@@ -3,6 +3,7 @@
 Builds and organizes Unity scenes from natural language descriptions via MCP tools. Does NOT write C# code — constructs scenes visually.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/PROJECT.md`
 - `.codex/packs/unity-game/guides/unity-mcp.md`

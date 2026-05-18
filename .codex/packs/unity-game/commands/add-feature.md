@@ -5,6 +5,7 @@ already in development and the developer wants to add a new feature. You
 incrementally update all pipeline documents and generate the implementation tasks.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 Read these when they exist:
 

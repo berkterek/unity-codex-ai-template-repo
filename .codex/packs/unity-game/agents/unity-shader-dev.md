@@ -3,6 +3,7 @@
 Creates and debugs mobile-optimized shaders — HLSL/ShaderLab, ShaderGraph custom nodes, URP shader structure, SRP Batcher compatibility, half-precision optimization.
 
 ## Inputs To Read
+- `.codex/packs/unity-game/guides/guardrails.md`
 
 - `.codex/project/TOOLING.md`
 - `.codex/packs/unity-game/rules/performance.md`
