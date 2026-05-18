@@ -1,7 +1,6 @@
 # Plan Workflow — GDD + TDD → Parallelized Execution Plan
 
-Reads the GDD and TDD and produces a comprehensive, parallelism-optimized
-execution workflow plan that orchestration agents will follow.
+Reads the GDD and TDD and produces a comprehensive, parallelism-optimized execution workflow plan that orchestration agents will follow.
 
 ## Usage
 
@@ -13,20 +12,15 @@ No argument needed. Both `docs/GDD.md` and `docs/TDD.md` must exist.
 
 ---
 
-## Inputs To Read
-- `.codex/packs/unity-game/guides/guardrails.md`
+## Initialization
 
-Before starting, read:
+**Prerequisite check:** Verify both `docs/GDD.md` and `docs/TDD.md` exist. If either is missing, stop immediately — tell the user which is missing and which command to run (`/game-idea` for GDD, `/architect` for TDD). Do NOT proceed without both.
 
-- `docs/GDD.md` (REQUIRED — if missing, stop and tell user to run `/game-idea`)
-- `docs/TDD.md` (REQUIRED — if missing, stop and tell user to run `/architect`)
-- `.codex/project/PROJECT.md`
+Read:
+- `docs/GDD.md` thoroughly
+- `docs/TDD.md` thoroughly
 - `.codex/project/RULES.md`
-- `.codex/project/WORKFLOW.md`
 - `.codex/packs/unity-game/rules/architecture.md`
-
-If either `docs/GDD.md` or `docs/TDD.md` is missing, stop immediately and
-tell the user which document is missing and which command to run.
 
 ---
 
@@ -34,28 +28,26 @@ tell the user which document is missing and which command to run.
 
 ### Parallelism is Key
 
-- Multiple agents will execute this plan simultaneously.
+- Multiple AI agents will execute this plan simultaneously.
 - Independent systems MUST be scheduled in parallel.
 - Identify the critical path and optimize around it.
+- Agent teams: ~4 coders, ~2 testers, 1 reviewer (adjust based on project size).
 
 ### Correct Build Order
 
-1. **Infrastructure First** — core frameworks everything depends on (event
-   system, pools, config, service locator).
-2. **Pure C# Logic** — all game logic in pure C# with zero Unity dependencies.
-3. **Tests for Logic** — unit tests for every pure C# system.
-4. **Unity Integration Layer** — MonoBehaviour adapters, ScriptableObject
-   definitions.
-5. **Unity Scene Setup** — create scene hierarchy, prefabs, pools.
-6. **Integration Tests** — tests that require Unity runtime.
-7. **Polish and Wiring** — final assembly, configuration, edge cases.
+1. **Infrastructure First** — core frameworks everything depends on (event system, pools, config)
+2. **Pure C# Logic** — all game logic in pure C# with zero Unity dependencies
+3. **Tests for Logic** — unit tests for every pure C# system
+4. **Unity Integration Layer** — MonoBehaviour adapters, ScriptableObject definitions
+5. **Unity Scene Setup** — create scene hierarchy, prefabs, pools via MCP
+6. **Integration Tests** — tests that require Unity runtime
+7. **Polish and Wiring** — final assembly, configuration, edge cases
 
 ### Task Granularity
 
-- Each task should be completable by ONE agent in ONE session.
-- Tasks should produce 1–3 files typically.
-- Each task must have clear inputs (what files to read) and outputs (what
-  files to produce).
+- Each task completable by ONE agent in ONE session.
+- Tasks produce 1–3 files typically (a system + its interface, or a test class).
+- Each task must have clear inputs (what files to read) and outputs (what files to produce).
 
 ---
 
@@ -66,7 +58,7 @@ tell the user which document is missing and which command to run.
 Build a complete dependency graph:
 - List every deliverable (class, interface, test, SO, prefab).
 - Map dependencies between them.
-- Identify the critical path.
+- Identify the critical path (longest chain of sequential dependencies).
 
 ### Step 2: Phase Definition
 
@@ -76,48 +68,60 @@ Group tasks into phases. Within each phase, tasks are parallelizable.
 
 For each task, define:
 - **Task ID**: `P{phase}.T{task}` (e.g., P1.T3)
-- **Title**: Clear, concise description.
-- **Type**: `infrastructure` | `logic` | `test` | `integration` |
-  `unity-setup` | `polish`
+- **Title**: Clear, concise description
+- **Type**: `infrastructure` | `logic` | `test` | `integration` | `unity-setup` | `polish`
 - **Agent Type**: `coder` | `tester` | `unity-setup`
-- **Inputs**: Files/interfaces this task depends on.
-- **Outputs**: Files this task will produce (full paths).
-- **Description**: Detailed implementation instructions.
-- **Acceptance Criteria**: Exact, verifiable conditions for "done".
-- **Complexity**: `S` (<100 LOC) | `M` (100–300) | `L` (300–600) | `XL`
-  (600+, should be split)
-- **Parallel Group**: Which tasks can run simultaneously.
+- **Inputs**: Files/interfaces this task depends on (must exist before starting)
+- **Outputs**: Files this task will produce (full paths)
+- **Description**: Detailed implementation instructions referencing specific TDD sections
+- **Acceptance Criteria**: Exact, verifiable conditions for "done"
+- **Complexity**: `S` (<100 LOC) | `M` (100–300) | `L` (300–600) | `XL` (600+, should be split)
+- **parallel_group**: Integer (1, 2, 3…) or `—` if sequential. See Parallel Group Rules below.
+
+### Parallel Group Rules
+
+1. **Compile-time dependency (most important):** If Task B's code references a type introduced by Task A → Task B MUST be sequential after Task A. Different files ≠ safe to parallelize when there is a type dependency.
+2. **File write conflict:** If two tasks write to the same file → they MUST be sequential.
+3. **Independent:** If two tasks write to entirely different files AND neither references types introduced by the other → assign same integer `parallel_group`.
+4. Tasks with no parallel candidate get `—`.
+
+**Format required by `/orchestrate`** — use integer column:
+
+| parallel_group | Meaning |
+|----------------|---------|
+| `1` | Can run simultaneously with other group-1 tasks |
+| `2` | Can run simultaneously with other group-2 tasks |
+| `—` | Sequential |
 
 ### Step 4: Agent Team Plan
 
 Recommend:
-- Number of coder agents needed per phase.
-- Number of tester agents needed per phase.
-- Review checkpoints.
-- Unity MCP setup scheduling.
+- Number of coder agents needed per phase
+- Number of tester agents needed per phase
+- Review checkpoints (after which tasks should reviewer run?)
+- Unity MCP setup scheduling
 
 ### Step 5: Risk Assessment
 
 Identify:
-- Tasks most likely to cause merge conflicts.
-- Tasks with highest technical risk.
-- Bottleneck tasks on the critical path.
-- Suggested mitigation for each risk.
+- Tasks most likely to cause merge conflicts (agents writing to same files)
+- Tasks with highest technical risk
+- Bottleneck tasks on the critical path
+- Suggested mitigation for each risk
 
-### Step 6: Verify with Developer
+### Step 6: Verification Questions
 
 Ask the developer:
-- Does the parallelism level seem right?
-- Any phases they prefer to do manually?
-- Any systems to prioritize or deprioritize?
+- Does the parallelism level seem right for their machine?
+- Any phases they'd prefer to do manually?
+- Any systems they want to prioritize or deprioritize?
+- Preferences on agent team size?
 
 Wait for answers before finalizing.
 
 ---
 
 ## Output — Save to docs/WORKFLOW.md
-
-Use this structure:
 
 ```markdown
 # [Game Name] — Execution Workflow Plan
@@ -131,6 +135,7 @@ Use this structure:
 ## 1. Overview
 - Total phases: X
 - Total tasks: Y
+- Estimated parallel efficiency: Z% (parallel tasks / total tasks)
 - Critical path length: N tasks
 - Recommended agent team: X coders, Y testers, 1 reviewer
 
@@ -141,7 +146,7 @@ Use this structure:
 
 ### Phase 1: Infrastructure Foundation
 **Goal:** Establish core frameworks.
-**Parallel Capacity:** [how many agents]
+**Parallel Capacity:** [how many agents can work simultaneously]
 **Entry Criteria:** None (first phase)
 **Exit Criteria:** All infrastructure systems pass unit tests
 
@@ -149,31 +154,54 @@ Use this structure:
 - **Type:** infrastructure
 - **Agent:** coder
 - **Inputs:** None
-- **Outputs:** [file paths]
-- **Description:** [implementation notes]
+- **Outputs:**
+  - `Assets/_Framework/Events/IEventBus.cs`
+  - `Assets/_Framework/Events/EventBus.cs`
+- **Description:** [detailed implementation notes referencing TDD sections]
 - **Acceptance Criteria:**
-  - [ ] Criterion
+  - [ ] Interface defines Subscribe<T>, Unsubscribe<T>, Publish<T>
+  - [ ] Implementation uses dictionary of delegate lists
+  - [ ] Zero allocation on Publish
 - **Complexity:** M
-- **Parallel Group:** P1-A
+- **parallel_group:** 1
 
 ...
 
-## 4. Review Checkpoints
+## 4. Agent Team Configuration
+- Coder agents: phases active, task assignments
+- Tester agents: phases active, task assignments
+- Reviewer: checkpoints and criteria
+- Unity Setup agent: Phase 5 task plan
+
+## 5. Review Checkpoints
 - After each phase completion
 - After any XL-complexity task
 - Before phase transitions
 
-## 5. Risk Register
+## 6. Risk Register
 | Risk | Impact | Likelihood | Mitigation |
 |------|--------|------------|------------|
-| ... | ... | ... | ... |
+
+## 7. Merge Strategy
+- File ownership rules (each task owns specific files)
+- Conflict resolution strategy
+- Integration verification steps
 ```
 
-After generating, ask the developer to review the plan and make adjustments.
+After generating, ask the developer to review the plan. Make adjustments.
 
-Once confirmed, print:
-
+Once confirmed:
 ```
 Workflow plan saved: docs/WORKFLOW.md
 Run /orchestrate to begin automated execution.
 ```
+
+## Rules
+
+- **Be precise with file paths.** Every task must specify exact output file paths matching the TDD folder structure.
+- **No circular dependencies between tasks.** Restructure if found.
+- **Maximize parallelism** without sacrificing correctness.
+- **Each task must be self-contained** — completable with only the listed inputs.
+- **Acceptance criteria must be verifiable** — no subjective criteria like "good quality."
+
+$ARGUMENTS
