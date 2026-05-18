@@ -188,6 +188,7 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `/grill-me` | Query the codebase |
 | `/ralph` | Retrospective analysis |
 | `/mermaid` | Generate a Mermaid diagram |
+| `/update-rules` | Sync project rules index with actual .codex/ folder state |
 
 ---
 

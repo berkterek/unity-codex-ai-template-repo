@@ -239,7 +239,7 @@ Review scope:
 
 ### Unity — Utilities
 
-`/catch-up` · `/learn` · `/discover` · `/search` · `/context-prime` · `/checkpoint` · `/migrate` · `/migrator` · `/graphics-setup` · `/audio-clip-setup` · `/instincts` · `/dump` · `/caveman` · `/five` · `/grill-me` · `/ralph` · `/mermaid`
+`/catch-up` · `/learn` · `/discover` · `/search` · `/context-prime` · `/checkpoint` · `/migrate` · `/migrator` · `/graphics-setup` · `/audio-clip-setup` · `/instincts` · `/dump` · `/caveman` · `/five` · `/grill-me` · `/ralph` · `/mermaid` · `/update-rules`
 
 ---
 
