@@ -22,11 +22,15 @@ Read these when they exist:
 
 ## Reviewer Selection
 
-Reviewer priority — try in order:
-1. Spawn Agent with `subagent_type: "codex:codex-rescue"` — primary reviewer
-2. Fallback: **unity-reviewer**
+Check available plugins before spawning a reviewer:
 
-Both use the review checklist below.
+| Priority | Condition | Action |
+|----------|-----------|--------|
+| 1 | `claude-code` plugin is available | Spawn Agent with `subagent_type: "claude-code"` |
+| 2 | `claude-code` unavailable, `codex:codex-rescue` available | Spawn Agent with `subagent_type: "codex:codex-rescue"` |
+| 3 | Neither available | Use **unity-reviewer** agent directly |
+
+All three use the review checklist below.
 
 ## Review Scope
 
