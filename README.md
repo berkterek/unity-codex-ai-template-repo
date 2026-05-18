@@ -29,7 +29,7 @@ Codex CLI reads `AGENTS.md` and `.codex/` at the project root. This template
 ships that folder pre-configured with:
 
 - **Guardrails** — Hook equivalents: BLOCK (git push, .unity text edit, UnityEvent, static singleton), WARN (async void, hot-path alloc, LINQ, null propagation), GATE (Director Gate, reviewer requirement)
-- **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer` (Claude-based), `unity-tester`, `unity-setup` and 25+ more
+- **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 25+ more
 - **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/review-code`, `/architect`, `/new-module`, `/smart-commit` and 48+ more
 - **Rules** — Architecture, naming, testing, ECS, serialization, and Addressables standards
 - **Skills** — 62 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, and more
@@ -182,7 +182,8 @@ Review scope:
 | `unity-fixer` | Bug — root cause + regression test + fix |
 | `unity-fixer-lite` | Fast single-file fix |
 | `unity-reviewer` | **Full Claude-based reviewer** |
-| `unity-tester` | EditMode / PlayMode test authoring |
+| `tester` | EditMode / PlayMode test authoring — NUnit, hand-rolled fakes, AAA pattern |
+| `committer` | Smart phase commits — groups by system boundary, dependency-ordered |
 | `unity-test-runner` | Test execution and reporting |
 | `unity-test-builder` | PlayMode test scene creation |
 | `unity-developer` | Full cycle: coder + tester + reviewer |

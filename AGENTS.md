@@ -75,7 +75,8 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `unity-fixer.md` | Bug fixing — root cause analysis + regression test |
 | `unity-fixer-lite.md` | Fast single-file fixes |
 | `unity-reviewer.md` | **Full Claude-based reviewer** — compile + runtime verification |
-| `unity-tester.md` | EditMode / PlayMode test authoring |
+| `tester.md` | EditMode / PlayMode test authoring — NUnit, hand-rolled fakes, AAA pattern |
+| `committer.md` | Smart phase commits — groups by system boundary, dependency-ordered |
 | `unity-test-runner.md` | Test execution and result reporting |
 | `unity-test-builder.md` | PlayMode test scene creation |
 | `unity-developer.md` | Full-cycle developer — coder + tester + reviewer |
