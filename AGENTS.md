@@ -221,6 +221,98 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 
 ---
 
+## Skills (`.codex/packs/unity-game/skills/`)
+
+Read-only reference files loaded by commands on demand. They do not execute code — they inform agent decisions.
+
+### Core (`skills/core/`)
+
+| Skill | Covers |
+|-------|--------|
+| `model-routing` | Automatic model selection heuristics — file count, complexity, risk factors |
+| `deep-interview` | 5-dimension ambiguity gating before implementation starts |
+| `learner` | Post-debug insight extraction — writes findings to project notes |
+| `unity-instincts` | Instinct system for learned Unity patterns — capture, score, promote, apply |
+| `assembly-definitions` | .asmdef authoring — references, platforms, define constraints |
+| `source-driven-development` | Fetch official Unity docs before writing API calls — cites sources, flags deprecated APIs |
+| `documentation-and-adrs` | ADR creation — `/adr` command writes to `docs/decisions/`, lifecycle management |
+| `planning-and-task-breakdown` | Vertical slice decomposition + per-task acceptance criteria |
+| `code-simplification` | Chesterton's Fence discipline for `/clean-slop` — understand before removing |
+| `commit-trailers` | Conventional commit trailers — co-author, ticket links, sign-off |
+| `event-systems` | IEventBus patterns — pub/sub, struct events, subscribe/unsubscribe lifecycle |
+| `event-bus` | Project-specific IEventBus implementation — location, namespace, code examples |
+| `logging` | Project-specific DLog pattern — logging implementation, location, and usage |
+| `save-load` | Project-specific SaveLoadSystem pattern — location, namespace, and usage |
+| `tdd-nsubstitute` | Project-specific TDD pattern — assembly structure, test templates, mock rules |
+| `hud-statusline` | In-session status line rendering for pipeline progress |
+| `object-pooling` | ObjectPool<T> setup, return-to-pool patterns, warm-up |
+| `scriptable-objects` | ScriptableObject config authoring, CreateAssetMenu, validation |
+| `serialization-safety` | FormerlySerializedAs, SerializeReference, Unity null semantics |
+| `unity-mcp-patterns` | MCP tool call patterns for scene/prefab/asset operations |
+| `playmode-scene-testing` | Play Mode scene test pattern — TestBootstrap prefab, TestScope, UnityTest patterns |
+| `mcp-preflight` | 3-state MCP availability check — connected / disconnected / not installed |
+| `test-type-router` | Determines test type (EditMode / PlayMode-ECS / PlayMode-Programmatic / PlayMode-Scene / NoTest) |
+| `caveman` | Plain-language explanation mode |
+| `context-prime` | Context priming — loads project structure and key patterns |
+| `create-changelog` | Changelog generation from git history |
+| `dump` | Context dump — exports current session state |
+| `five` | Quick 5-minute codebase summary |
+| `grill-me` | Codebase interrogation mode |
+| `mermaid` | Mermaid diagram generation |
+
+### Platform (`skills/platform/`)
+
+| Skill | Covers |
+|-------|--------|
+| `mobile` | Touch input, safe area, haptics, app lifecycle |
+
+### Systems (`skills/systems/`)
+
+| Skill | Covers |
+|-------|--------|
+| `addressables` | Loading, handle lifecycle, label groups, preload |
+| `animation` | Animator parameters, state machine behaviours, blend trees |
+| `audio` | AudioMixer groups, snapshots, pooled AudioSource, spatial audio |
+| `audio-mixer` | AudioMixer routing, exposed parameters, ducking, snapshot transitions |
+| `audio-settings` | Audio settings UI, volume persistence, IAudioSettingsService + VContainer wiring |
+| `audio-clip-settings` | AudioClip import settings — PCM/ADPCM/Vorbis format, load type, platform overrides |
+| `cinemachine` | Virtual cameras, blends, impulse, follow targets |
+| `navmesh` | NavMeshAgent setup, dynamic obstacles, off-mesh links |
+| `physics` | Layer matrix, non-alloc queries, trigger vs collision |
+| `shader-graph` | URP shader nodes, property exposure, keyword variants |
+| `ui-toolkit` | USS, UXML, data binding, runtime panel setup |
+| `urp-pipeline` | Renderer features, camera stacking, custom render passes, SRP Batcher, Forward+ |
+| `urp-quality-settings` | URP quality tiers, runtime asset swap, auto-detect, adaptive performance |
+| `urp-lighting-shadows` | Directional/point/spot lights, shadow cascades, light layers, reflection probes |
+| `urp-post-processing` | Bloom, DOF, Motion Blur, SSAO, Tonemapping, Color Grading, Vignette |
+| `audio-mixer-mcp` | AudioMixer exposed parameters, AudioSource routing via MCP |
+| `srp-batcher-mcp` | SRP Batcher enable/verify, UI Raycast Target audit via MCP |
+
+### Third-Party (`skills/third-party/`)
+
+| Skill | Covers |
+|-------|--------|
+| `dotween` | Tween creation, sequences, callbacks, memory management |
+| `nsubstitute` | NSubstitute mock setup, argument matchers, received verification |
+| `odin-inspector` | Custom attributes, validators, group drawers |
+| `textmeshpro` | Font assets, rich text, SDF materials, localization |
+| `unitask` | Async patterns, cancellation, `Forget()`, UniTaskVoid |
+| `vcontainer` | Scope hierarchy, registration patterns, `IInitializable`/`IDisposable` lifecycle |
+| `unity-asmdef` | Assembly definition authoring, references, define constraints |
+| `unity-editor-tools` | Custom Editor windows, PropertyDrawers, EditorUtility patterns |
+| `unity-uitoolkit` | UI Toolkit runtime panels, UXML, USS, data binding |
+
+### Plugins (`skills/plugins/`)
+
+| Skill | Covers |
+|-------|--------|
+| `odin-inspector` | Custom attributes, validators, group drawers |
+| `primetween` | PrimeTween setup, tween API, sequences, UniTask integration |
+| `r3` | R3 (Cysharp) Observable, Subject, ReactiveProperty, UniTask integration |
+| `unitask` | Async patterns, cancellation, `Forget()`, UniTaskVoid |
+
+---
+
 ## Required Stack
 
 | Package | Source | Purpose |
