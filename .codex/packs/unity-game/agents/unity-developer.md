@@ -36,10 +36,17 @@ Unity 6 specialist — deep reviewer and implementer for tasks involving Unity-s
 - Handle lifecycle, `Addressables.ReleaseInstance` vs `Destroy`
 - Texture compression per platform (ASTC, DXT, ETC2)
 
-### Networking
+### Networking (Netcode for GameObjects)
 - NetworkObject lifecycle and ownership transfer
-- ClientRpc / ServerRpc patterns
+- ClientRpc / ServerRpc call patterns
 - NetworkVariable vs custom NetworkBehaviour sync
+- Client-side prediction and reconciliation basics
+
+### Cross-Platform
+- `#if` platform defines with always-present fallback
+- Mobile: touch input via New Input System, battery/thermal considerations
+- WebGL: no threading, no Burst on unsupported browsers, IL2CPP constraints
+- Console: platform SDK wrappers, cert requirements
 
 ## Review Checklist (10 Points)
 

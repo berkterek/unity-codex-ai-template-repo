@@ -1,13 +1,19 @@
 # Unity Scene Builder
 
-Builds and organizes Unity scenes from natural language descriptions via MCP tools. Does NOT write C# code — constructs scenes visually.
+> Apply `.codex/packs/unity-game/guides/guardrails.md` rules throughout.
+
+Builds and organizes Unity scenes from natural language descriptions via MCP
+tools. Does NOT write C# code — constructs scenes visually.
 
 ## Inputs To Read
-- `.codex/packs/unity-game/guides/guardrails.md`
 
+- `.codex/packs/unity-game/guides/guardrails.md`
 - `.codex/project/PROJECT.md`
 - `.codex/packs/unity-game/guides/unity-mcp.md`
+- `.codex/packs/unity-game/rules/scene-hierarchy.md`
 - Task description and acceptance criteria.
+
+---
 
 ## Workflow
 
@@ -21,66 +27,104 @@ From the description, identify:
 - Lighting setup
 
 ### Step 2: Create or Load Scene
+
 ```
-manage_scene → create new or load existing
+manage_scene → create new scene or load existing
 ```
 
 Scene templates:
-- `3d_basic` — directional light + camera
-- `2d_basic` — orthographic camera
+- `3d_basic` — default 3D scene with directional light + camera
+- `2d_basic` — default 2D scene with camera
 
 ### Step 3: Build Hierarchy
 
-Use parent objects to organize:
+Read `.codex/packs/unity-game/rules/scene-hierarchy.md` before placing any
+GameObject.
+
+**First action in every scene — create all six standard containers via
+`batch_execute`:**
+
 ```
-@Environment/
+[Setup] → [Services] → [UI] → [Environment] → [Characters] → [VFX]
+```
+
+These are bare GameObjects (no components). All subsequent GOs are placed as
+children of the correct container using the classification table in
+`scene-hierarchy.md`. Never place a GO at root level.
+
+```
+[Setup]/
+    GameScope (prefab instance)
+[Services]/
+    AudioProvider (prefab instance)
+[UI]/
+    Canvas_HUD (prefab instance)
+[Environment]/
     Ground
     Walls
     Platforms
-@Characters/
+[Characters]/
     Player
-    NPCs
-@UI/
-    HUD
-@Managers/
-    GameManager
-    AudioManager
+    Enemies/
+[VFX]/
+    ExplosionEffect
 ```
 
-Use `create_gameobject` with parent specified. Prefix with `@` for folder nodes (no components).
+### Step 4: Create GameObjects via batch_execute
 
-### Step 4: Configure Components
+ALWAYS use `batch_execute` for multiple operations — it's 10-100x faster than
+individual calls.
+
+```json
+{
+  "tool": "batch_execute",
+  "operations": [
+    {"tool": "manage_gameobject", "action": "create", "name": "Player", "parent": "@Characters"},
+    {"tool": "manage_components", "target": "Player", "action": "add", "component_type": "Rigidbody2D"},
+    {"tool": "manage_components", "target": "Player", "action": "add", "component_type": "BoxCollider2D"},
+    {"tool": "manage_components", "target": "Player", "action": "add", "component_type": "SpriteRenderer"}
+  ]
+}
 ```
-manage_components action:"add_component" → add to GameObjects
-manage_components action:"set_component" → configure values
-```
 
-For colliders: match shape to mesh, set correct layer, configure `isTrigger` if needed.
+### Step 5: Configure Components
 
-### Step 5: Lighting Setup
-```
-manage_lighting → directional light, ambient, skybox
-manage_lighting action:"configure_light" → intensity, color, shadows
-```
+- Set transform positions, rotations, scales.
+- Configure Rigidbody properties (mass, drag, gravity, constraints).
+- Set collider sizes and offsets.
+- Configure camera viewport and rendering settings.
 
-Mobile: use baked lighting, avoid real-time shadows on low-end.
+### Step 6: Set Up Physics
 
-### Step 6: Verify
-1. `refresh_unity` — trigger recompile
-2. `read_console` — check for errors
-3. Enter Play mode for smoke test if runtime wiring needed
+- Configure collision layers via `manage_physics`.
+- Set up layer collision matrix.
+- Add physics materials for bounce/friction.
 
-## Output
+### Step 7: Set Up Camera
 
-Return:
-- Objects created and configured
-- Hierarchy structure
-- Verification result
-- Manual Editor steps still required (if any)
+- Use `manage_camera` for Cinemachine setup.
+- Configure follow target, dead zone, look-ahead.
+- Set up camera blending.
 
-## Rules
+### Step 8: Verify
 
-- Never write to `.unity` or `.prefab` files directly — use MCP only
-- Every scene GameObject should be a prefab instance where possible
-- Logic components on root; visual components on `Body` child
-- No bare GameObjects except hierarchy organizers
+- `read_console` — check for errors.
+- `manage_scene` with action "validate" — check for missing references.
+
+---
+
+## Scene Organization Rules
+
+- Use a `_Dynamic` object under the appropriate container for runtime-spawned objects.
+- Keep hierarchy depth under 5 levels (deep hierarchies slow Unity).
+- Empty parent objects for organization are fine — negligible cost.
+
+---
+
+## What NOT To Do
+
+- Never edit `.unity` files as text — always use MCP tools.
+- Never create scenes without a camera.
+- Never leave GameObjects at world origin unless intentional.
+- Never create deeply nested hierarchies (>5 levels).
+- Never place GameObjects at scene root — always under the correct container.

@@ -1,86 +1,138 @@
 # Unity Performance Optimizer
 
-Profiles and optimizes Unity performance. Uses MCP profiler for frame timing, memory snapshots, and rendering stats. Identifies CPU/GPU bottlenecks, GC spikes, and draw call issues.
+> Apply `.codex/packs/unity-game/guides/guardrails.md` rules throughout.
+
+Profiles and optimizes Unity performance. Uses MCP profiler for frame timing,
+memory snapshots, and rendering stats. Identifies CPU/GPU bottlenecks, GC
+spikes, draw call issues, and shader variant bloat.
 
 ## Inputs To Read
-- `.codex/packs/unity-game/guides/guardrails.md`
 
+- `.codex/packs/unity-game/guides/guardrails.md`
 - `.codex/project/PROJECT.md`
 - `.codex/packs/unity-game/rules/performance.md`
-- Source files for identified hot paths.
+- `.codex/packs/unity-game/skills/systems/urp-pipeline/SKILL.md`
+
+---
 
 ## Profiling Workflow
 
 ### Step 1: Capture Profile Data
+
 ```
-manage_profiler action:"start_session"
-manage_profiler action:"get_frame_timing" → CPU/GPU frame times
-manage_profiler action:"memory_snapshot" → detailed memory breakdown
-manage_graphics action:"get_rendering_stats" → draw calls, batches, triangles
+manage_profiler action:"start_session"       → begin profiling
+manage_profiler action:"get_frame_timing"    → CPU/GPU frame times
+manage_profiler action:"get_counters"        → specific performance counters
+manage_profiler action:"memory_snapshot"     → detailed memory breakdown
+manage_graphics action:"get_rendering_stats" → draw calls, batches, triangles, set passes
 ```
 
 ### Step 2: Identify Bottleneck Type
 
-**CPU-bound** (frame time > 16.6ms):
+**CPU-bound** (frame time > 16.6ms, GPU waiting):
 - GC allocations in gameplay code
 - Expensive Update loops
 - Physics queries
+- Animation evaluation
 - UI rebuilds
 
-**GPU-bound** (GPU time > CPU time):
+**GPU-bound** (GPU frame time > CPU frame time):
 - Too many draw calls (>100 on mobile)
-- Overdraw (transparent layers stacking)
-- Complex shaders (too many instructions)
-- High fill rate
+- Overdraw (transparent layers — expensive on tile-based mobile GPUs)
+- Complex shaders (too many instructions, too many texture samples)
+- High fill rate (large particles, post-processing, alpha-tested geometry)
+- Too many shader variants
 
 **Memory issues:**
-- Texture memory
+- Texture memory (usually largest consumer)
+- Mesh memory
 - Audio clips loaded uncompressed
-- Addressables handles not released
+- Addressables not released
 - Object pool sizing
 
-### Step 3: Code Analysis
+### Step 3: Code-Level Analysis
 
-Grep for anti-patterns in hot paths:
+Grep for common performance anti-patterns:
 - `GetComponent` in Update methods
 - `Camera.main` without caching
-- `FindObjectOfType` in gameplay code
-- LINQ in Update/FixedUpdate
+- `FindObjectOfType` in hot paths
+- LINQ usage in gameplay code
 - String concatenation in Update
 - `new` keyword inside Update/FixedUpdate
 
 ### Step 4: Fix and Verify
 
 Apply fixes, then re-profile to confirm improvement:
+
 ```
 manage_profiler action:"start_session" → new profile after fix
 manage_profiler action:"get_frame_timing" → compare before/after
 ```
 
-## Performance Budgets
-
-| Metric | Low-End Mobile | Mid-Range Mobile |
-|--------|---------------|-----------------|
-| Draw calls | < 50 | < 100 |
-| Frame time | 33ms (30fps) | 16.6ms (60fps) |
-| Texture memory | < 100MB | < 150MB |
-| GC alloc per frame | 0 bytes | 0 bytes |
+---
 
 ## Common Optimizations
+
+### CPU
 
 | Issue | Fix |
 |-------|-----|
 | GC spikes | Remove allocations from Update, pool objects |
 | Expensive GetComponent | Cache in Awake |
-| Too many draw calls | SRP Batcher, GPU instancing, static batching |
-| Large textures | ASTC compression, reduce max size |
-| Audio memory | Compress, stream music, decompress-on-load for SFX |
-| Addressables leaks | Release all handles in Dispose |
+| Too many Update calls | Use manager pattern, tick system |
+| Physics queries | NonAlloc variants, reduce frequency |
+| String building | StringBuilder, cache formatted strings |
 
-## Rules
+### GPU
 
-- Don't optimize without profiling first — measure, then fix
-- Don't optimize initialization code (runs once)
-- Don't sacrifice readability for micro-optimizations
-- Always test on actual devices — Editor profiler is not representative of mobile
-- No VFX Graph or compute shaders — they don't work on mobile
+| Issue | Fix |
+|-------|-----|
+| High draw calls | Enable SRP Batcher, GPU instancing, static batching |
+| Overdraw | Reduce transparent layers, optimize particle count |
+| Shader complexity | Simplify shaders, reduce variant count |
+| Large textures | Compress (ASTC mobile), reduce resolution, use mipmaps |
+| Post-processing | Reduce effects, lower resolution for effects |
+
+### Memory
+
+| Issue | Fix |
+|-------|-----|
+| Large textures | Compress, reduce max size, stream with Addressables |
+| Audio clips | Compress, use streaming for music, decompress on load for SFX |
+| Duplicate assets | Addressables deduplication, shared materials |
+| Leaked references | Release Addressables handles, clear event subscriptions |
+
+---
+
+## Performance Budgets
+
+| Metric | Low-End Mobile | Mid-Range Mobile | High-End Mobile |
+|--------|----------------|------------------|-----------------|
+| Draw calls | < 50 | < 100 | < 200 |
+| Triangles | < 50k | < 100k | < 200k |
+| Frame time | 33ms (30fps) | 16.6ms (60fps) | 16.6ms (60fps) |
+| Texture memory | < 100MB | < 150MB | < 256MB |
+| Total memory | < 300MB | < 500MB | < 800MB |
+| Build size | < 100MB | < 200MB | < 500MB |
+| GC alloc per frame | 0 bytes | 0 bytes | 0 bytes |
+
+---
+
+## Mobile-Specific Optimization
+
+- **Thermal throttling:** monitor `AdaptivePerformance` and downscale resolution dynamically.
+- **Battery:** target 30fps for casual games, 60fps opt-in for action games.
+- **Tile-based GPU:** minimize overdraw, avoid alpha-tested geometry, keep fragment shaders simple.
+- **ASTC textures:** best quality/size ratio for both iOS and Android.
+- **Particle System over VFX Graph:** VFX Graph requires compute shaders (not available on mobile).
+
+---
+
+## What NOT To Do
+
+- Don't optimize without profiling first — measure, then fix.
+- Don't optimize code that runs once (initialization, loading).
+- Don't sacrifice readability for micro-optimizations.
+- Don't assume mobile performance from Editor profiling — always test on actual devices.
+- Don't use VFX Graph or compute shaders — they don't work on mobile.
+- Don't skip thermal throttling handling — sustained performance matters more than peak.
