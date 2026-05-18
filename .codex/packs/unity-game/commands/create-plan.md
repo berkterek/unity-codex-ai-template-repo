@@ -66,7 +66,27 @@ Output format:
 
 ---
 
+## Step 1.5 — Complexity Assessment
+
+Before writing tasks, score the plan (0.0–1.0):
+
+| Score | Label | Action |
+|-------|-------|--------|
+| 0.0–0.3 | Simple | Write tasks directly |
+| 0.4–0.6 | Medium | Propose 2 approaches with trade-offs, document chosen in `## Chosen Approach` |
+| 0.7–1.0 | Complex | Propose 3 approaches; after choosing, run internal critique for hot-path allocations, missing CancellationTokens, incomplete DI wiring |
+
+Signals: new module folder +0.3, IEventBus events +0.2, ECS/Addressables +0.3, single file/method −0.3.
+
+Print score and label at the top of the plan.
+
+---
+
 ## Step 2 — Write Plan
+
+After writing all tasks, assign `parallel_group` numbers in the Status table:
+- Same group = tasks that write to different files AND have no compile-time type dependency.
+- Sequential (`—`) = tasks that share a file OR where Task B references a type Task A introduces.
 
 Write the plan file using this exact structure:
 

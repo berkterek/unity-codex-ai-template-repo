@@ -15,7 +15,7 @@ If no argument is given, ask: "Describe the bug."
 ## Pipeline
 
 ```
-[1] INVESTIGATE → [2] REGRESSION TEST → [3] FIX → [4] VALIDATE → [5] REVIEW → [6] COMMIT
+[1] INVESTIGATE → [2] REGRESSION TEST → [3] FIX → [4] VALIDATE → [5] REVIEW → [5.7] SILENT FAILURE AUDIT → [6] COMMIT
 ```
 
 ---
@@ -120,6 +120,25 @@ Review the fix against these criteria:
 
 If issues found → fix and re-review (max 3 passes). After 3 failed passes →
 show remaining issues, ask `skip` or `stop`.
+
+---
+
+## Step 5.7 — Silent Failure Audit
+
+Scan changed `.cs` files for:
+1. `catch` blocks that swallow exceptions without logging or rethrowing.
+2. `async void` outside Unity lifecycle methods.
+3. `IEventBus` subscriptions without matching `Unsubscribe` in Dispose/OnDisable.
+4. `UniTask.Forget()` without an `onException` handler.
+5. Empty `catch { }` blocks.
+
+If findings → show them and ask: `fix` / `skip` / `stop`.
+
+### Director Gate — COMMIT_GATE
+
+Show the COMMIT_GATE from `.codex/packs/unity-game/guides/director-gates.md`.
+Pass: bug description, changed files, reviewer verdict.
+Wait for `go` before committing.
 
 ---
 

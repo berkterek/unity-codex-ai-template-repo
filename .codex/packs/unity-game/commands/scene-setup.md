@@ -12,12 +12,37 @@ Unity Editor via MCP, reviews, commits.
 
 If no argument is given, ask: "What needs to be set up in the scene?"
 
+## Complexity Scoring
+
+Score the task on a 0.0–1.0 scale:
+
+| Score | Label | Coder Agent |
+|-------|-------|-------------|
+| 0.0–0.3 | Simple | `unity-coder-lite` |
+| 0.4–0.6 | Medium | `unity-coder` |
+| 0.7–1.0 | Complex | `unity-coder` + `unity-developer` second review |
+
+Signals: new module folder +0.3, IEventBus events +0.2, ECS/Addressables +0.3, AppScope/Installer +0.2, single MonoBehaviour −0.3.
+
+Print: `Complexity: [score] — [Label]`
+
+**For Complex tasks:** fire ARCHITECTURE_GATE from `.codex/packs/unity-game/guides/director-gates.md`. Show proposed module/prefab structure and wait for `go`.
+
+### Director Gate — SCOPE_GATE
+
+Show the SCOPE_GATE from `.codex/packs/unity-game/guides/director-gates.md`.
+Pass: scene setup description, complexity score, expected scripts and Unity assets.
+Wait for `go` before spawning any agents.
+
+---
+
 ## Pipeline
 
 ```
 [1a] C# SCRIPTS
 [1b] UNITY EDITOR WIRING  ← runs after step 1a
 [2]  REVIEW
+[2.5] UNITY VERIFIER (bounded check)
 [3]  COMMIT
 ```
 
@@ -84,6 +109,23 @@ text):
 
 If issues found → fix C# files and re-review (max 3 passes). After 3 failed
 passes → show remaining issues, ask `skip` or `stop`.
+
+---
+
+## Step 2.5 — Unity Verifier (bounded check)
+
+Spawn a `unity-verifier` subagent (max 3 internal iterations):
+1. Compile check via `refresh_unity` + `read_console`.
+2. Verify prefab structure: root=logic, Body=visual, correct `_GameFolders/Prefabs/<Domain>/` location.
+3. Quick scan for Unity-specific issues.
+
+If cannot fix → surface blockers before committing.
+
+### Director Gate — COMMIT_GATE
+
+Show the COMMIT_GATE from `.codex/packs/unity-game/guides/director-gates.md`.
+Pass: setup description, changed files, reviewer verdict.
+Wait for `go` before committing.
 
 ---
 

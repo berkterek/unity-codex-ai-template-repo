@@ -95,6 +95,56 @@ Section 13 (Rendering & GPU) is NON-NEGOTIABLE. Include draw call minimization
 plan, sprite atlas plan, material sharing strategy, batching approach, UI canvas
 split plan, and overdraw risks.
 
+## Phase 7 — Iterative Refinement (2 passes before presenting to developer)
+
+### Pass 1: Self-Critique
+
+Score the TDD on these axes (0–10):
+
+| Axis | Check |
+|------|-------|
+| Completeness | Every GDD system has a TDD section |
+| Testability | Every system can be tested in isolation |
+| Performance | Hot paths identified, mitigation specified |
+| Rendering | Section 13 fully filled (atlas plan, draw calls, canvas split) |
+| Clarity | No "TBD", no vague language |
+
+If any axis scores below 7 → rewrite that section inline and re-score.
+
+### Pass 2: Consistency Check
+
+- Do class names in Section 16 match names used in system sections?
+- Do event names match between publisher and subscriber sections?
+- Does the assembly layout cover all classes in Section 16?
+
+Fix inconsistencies inline.
+
+Print refinement summary before proceeding:
+```
+TDD Refinement Summary
+Completeness : [before]/10 → [after]/10
+Testability  : [before]/10 → [after]/10
+Performance  : [before]/10 → [after]/10
+Rendering    : [before]/10 → [after]/10
+Clarity      : [before]/10 → [after]/10
+Issues fixed : [N]
+```
+
+## Phase 8 — Adversarial Critique
+
+After refinement, spawn a `unity-critic` subagent with the TDD content and this task:
+1. Identify architectural weaknesses or gaps.
+2. Find edge cases the design doesn't handle.
+3. Spot Unity-specific performance risks.
+4. Challenge pattern choices.
+5. Suggest concrete improvements.
+
+Output: severity (CRITICAL / MAJOR / MINOR) for each concern.
+
+Incorporate all CRITICAL and MAJOR feedback into the TDD before presenting to the developer. List MINOR items as open questions.
+
+---
+
 ## Rules
 
 - Architecture over implementation. Describe WHAT, WHY, and HOW systems connect.

@@ -71,6 +71,15 @@ Based on previous answers, drill into EACH identified system:
 - Content volume (levels, items, characters, etc.)
 - What is the acceptance criteria for "done"?
 
+### Step 2.5: Assumption Surfacing
+
+Before gap analysis, explicitly list the key assumptions being made:
+- What are we betting is true about the player, market, or technology?
+- What could kill this idea if it turns out to be wrong?
+- What are we deliberately ignoring and why?
+
+Ask the developer to confirm or challenge each assumption before proceeding.
+
 ### Step 3: Gap Analysis
 
 Before finalizing, review ALL collected answers:

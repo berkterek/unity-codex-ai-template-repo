@@ -15,8 +15,34 @@ If no argument is given, ask: "What needs to be implemented?"
 ## Pipeline
 
 ```
-[1] TESTS → [2] IMPLEMENTATION → [3] VALIDATION → [4] REVIEW → [5] COMMIT
+[1] TESTS → [2] IMPLEMENTATION → [3] VALIDATION → [4] REVIEW → [4.7] SILENT FAILURE AUDIT → [5] COMMIT
 ```
+
+---
+
+## Complexity Scoring
+
+Before starting, score the task on a 0.0–1.0 scale:
+
+| Score | Label | Signals | Action |
+|-------|-------|---------|--------|
+| 0.0–0.3 | Simple | Single class, no new interfaces, no DI wiring | Skip Step 1 (no tests) |
+| 0.4–0.6 | Medium | 2–4 classes, new interface, or touches event bus | Full pipeline |
+| 0.7–1.0 | Complex | New module, cross-system events, ECS, or Addressables | Full pipeline + unity-developer review after Step 4 |
+
+Scoring signals: new module folder +0.3, IEventBus events +0.2, ECS/Addressables +0.3, AppScope/InputView/Installer +0.2, single method addition −0.3.
+
+Print:
+```
+Complexity: [score] — [Label]
+Rationale: [one sentence]
+```
+
+### Director Gate
+
+Show the SCOPE_GATE from `.codex/packs/unity-game/guides/director-gates.md`.
+Pass: task description, complexity score, known affected files.
+Wait for `go` before spawning any agents.
 
 ---
 
@@ -80,7 +106,20 @@ Use Unity MCP to verify the project compiles and all tests pass:
 
 ---
 
+## Step 3.5 — Unity Verifier (after validation, before review)
+
+Spawn a `unity-verifier` subagent for a final bounded check (max 3 iterations):
+1. Compile check via `refresh_unity` + `read_console`.
+2. Run all Edit Mode tests via `run_tests`.
+3. Auto-fix any auto-fixable issues found.
+
+If still failing → stop, surface blockers.
+
+---
+
 ## Step 4 — Review
+
+**For Complex tasks (score ≥ 0.7):** also run `unity-developer` as a second reviewer after Step 4.
 
 Review the implementation against these criteria:
 
@@ -96,6 +135,25 @@ Review the implementation against these criteria:
 
 If issues found → fix them and re-review (max 3 review passes). After 3 failed
 passes → show remaining issues and ask `skip` or `stop`.
+
+---
+
+## Step 4.7 — Silent Failure Audit
+
+Scan changed `.cs` files for:
+1. `catch` blocks that swallow exceptions without logging or rethrowing.
+2. `async void` outside Unity lifecycle methods.
+3. `IEventBus` subscriptions without matching `Unsubscribe` in Dispose/OnDisable.
+4. `UniTask.Forget()` without an `onException` handler.
+5. Empty `catch { }` blocks.
+
+If findings → show them and ask: `fix` / `skip` / `stop`.
+
+### Director Gate — COMMIT_GATE
+
+Show the COMMIT_GATE from `.codex/packs/unity-game/guides/director-gates.md`.
+Pass: task description, changed files, reviewer verdict.
+Wait for `go` before committing.
 
 ---
 

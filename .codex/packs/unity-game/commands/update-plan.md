@@ -65,10 +65,13 @@ needed." and stop.
 Update the plan file:
 
 1. Add a revision note at the top: `> **v{N+1} — <date>:** [summary of changes]`
-2. Update the status table if any phases changed.
+2. Update the status table if any phases changed. Add `parallel_group` column if missing:
+   - Same group = tasks that write to different files AND have no compile-time type dependency.
+   - Sequential (`—`) = tasks that share a file OR where Task B references a type Task A introduces.
 3. Add new Task sections at the bottom (`Task N+1`, `Task N+2`, etc.) with:
    - Exact file paths.
    - Numbered steps with `[ ]` checkboxes.
+   - **Test Type:** field per task (EditMode / PlayMode-ECS / PlayMode-Scene / NoTest).
    - Code snippets showing method signatures and key logic.
    - Clear acceptance criteria.
 4. Keep existing tasks and content untouched — only append.

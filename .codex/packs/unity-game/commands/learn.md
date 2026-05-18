@@ -27,6 +27,11 @@ Otherwise:
 
 ### Step 2: Extract Candidate Patterns
 
+> **Post-debug/fix session?** If this `/learn` run follows a debugging or fix
+> session, also extract post-debug insights with these quality gates:
+> Non-Googleable, Codebase-Specific, Required Real Effort. Append them to
+> `.codex/project/LEARNED.md` under `## Project Learnings`.
+
 Look for patterns that are:
 - **Project-specific** — not generic C# knowledge (that's already in
   `.codex/packs/unity-game/rules/`).
