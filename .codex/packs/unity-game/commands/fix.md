@@ -282,8 +282,9 @@ Re-run validator after fixes. After 2 failed passes → ask: `skip` or `stop`.
 ## Step 5 — Reviewer (skip in `solo` mode)
 
 Reviewer priority — try in order:
-1. Spawn Agent with `subagent_type: "codex:codex-rescue"`
-2. Fallback: **unity-reviewer**
+1. Spawn Agent with `subagent_type: "claude-code"` — if plugin available
+2. Spawn Agent with `subagent_type: "codex:codex-rescue"` — if claude-code unavailable
+3. Fallback: **unity-reviewer**
 
 ```
 Review this bug fix.
