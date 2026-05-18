@@ -1,161 +1,166 @@
 # Unity Guardrails
 
-Codex'te hook mekanizması yoktur. Bu dosya, Claude Code'un hook'larıyla otomatik
-uygulanan tüm kuralların **model düzeyinde karşılığıdır**. Her agent ve command
-bu listeyi içselleştirmelidir.
+Codex has no hook mechanism. This file is the **model-level equivalent** of all
+rules that Claude Code enforces automatically via hooks. Every agent and command
+must internalize this list.
 
-Kurallar üç seviyededir:
-- **BLOCK** — asla yapma, otomatik FAIL
-- **WARN** — yap ama işaretle, reviewer'a bildir
-- **GATE** — devam etmeden önce koşulu doğrula
+Rules have three levels:
+- **BLOCK** — never do this; automatic FAIL
+- **WARN** — flag it, report to reviewer, then continue
+- **GATE** — verify the condition before proceeding
 
 ---
 
-## BLOCK — Doğrudan Engel
+## BLOCK — Hard Stop
 
-### git push yapma
-Kullanıcı her zaman kendisi push eder. `git push` komutunu hiçbir zaman çalıştırma.
+### Never run git push
+The user always pushes manually. Never run `git push`.
 
-### .unity / .prefab / .asset dosyalarını text editörle düzenleme
-Bu dosyalar YAML serialized binary referanslar içerir. Text editi referansları
-kırar. Sahne, prefab ve asset değişiklikleri için **sadece MCP araçlarını** kullan:
+### Never text-edit .unity / .prefab / .asset files
+These files contain YAML-serialized binary references. Text edits break
+references silently. For scene, prefab, and asset changes use **MCP tools only**:
 `manage_scene`, `manage_gameobject`, `manage_components`, `manage_build`.
 
-### UnityEvent kullanma
-`UnityEvent`, `UnityEvent<T>`, `[SerializeField] UnityEvent` — runtime C#'ta
-yasak. IEventBus kullan.
+### Never use UnityEvent
+`UnityEvent`, `UnityEvent<T>`, `[SerializeField] UnityEvent` — forbidden in
+runtime C#. Use `IEventBus`.
 
-### Time.timeScale doğrudan atama
-`Time.timeScale = 0` veya herhangi bir atama yasak. Pause/resume sadece
-`IEventBus + PauseService` üzerinden.
+### Never assign Time.timeScale directly
+`Time.timeScale = 0` or any assignment is forbidden. Pause/resume must go
+through `IEventBus + PauseService`.
 
-### static singleton pattern
-`static Instance`, `static _instance` — yasak. VContainer tek DI mekanizması.
-İstisna: `EventBusAccessor` (ECS ↔ Mono köprüsü için onaylı).
+### Never use static singleton pattern
+`static Instance`, `static _instance` — forbidden. VContainer is the only DI
+mechanism. Exception: `EventBusAccessor` (approved static bridge for ECS ↔ Mono
+communication).
 
-### UnityEditor namespace'i runtime kodda #if guard'sız kullanma
-`using UnityEditor` veya `UnityEditor.*` çağrısı runtime assembly'de yasak.
-`#if UNITY_EDITOR` guard'ı olmadan derleme player build'ında çöker.
+### Never use UnityEditor namespace without #if UNITY_EDITOR
+`using UnityEditor` or any `UnityEditor.*` call in a runtime assembly is
+forbidden. Without the `#if UNITY_EDITOR` guard the player build will fail to
+compile.
 
-### Kritik mimari dosyaları okumadan düzenleme
-`AppScope`, `InputView`, `ModuleInstaller`, `AppInstaller`, `.asmdef`, `EventBus`
-dosyalarını bağımlılıkları okumadan değiştirme. Önce `Read` + `Grep` ile
-etki alanını anla.
+### Never modify critical architecture files without reading dependencies first
+`AppScope`, `InputView`, `ModuleInstaller`, `AppInstaller`, `.asmdef`,
+`EventBus` files must not be modified before reading their dependents. Use
+`Read` + `Grep` to map the impact area first.
 
-### config dosyalarını zayıflatma
-`.asmdef`, `settings.json`, `.inputactions`, `ProjectSettings/` — kod sorununu
-config'i gevşeterek çözme. Kodu düzelt.
+### Never weaken config files to work around code problems
+`.asmdef`, `settings.json`, `.inputactions`, `ProjectSettings/` — fix the code,
+not the config.
 
 ---
 
-## WARN — İşaretle ve Devam Et
+## WARN — Flag and Continue
 
 ### async void
-Unity lifecycle dışında (`Awake`, `Start`, `OnEnable`, `OnDisable`, `OnDestroy`)
-`async void` yasak. `async UniTask` + `.Forget()` kullan.
-Lifecycle metodlarında Unity imzası zorladığı için muaf.
+`async void` is forbidden outside Unity lifecycle methods (`Awake`, `Start`,
+`OnEnable`, `OnDisable`, `OnDestroy`). Use `async UniTask` + `.Forget()`.
+Lifecycle methods are exempt because Unity forces the void return type.
 
-### GetComponent Awake içinde
-`GetComponent<T>()`, `GetComponentInChildren<T>()` Awake'te kullanılmamalı.
-Aynı GO veya child bileşenler `[SerializeField]` ile Inspector'dan atanmalı —
-sıfır runtime maliyet, bağımlılık derleme zamanında görünür.
+### GetComponent in Awake
+`GetComponent<T>()`, `GetComponentInChildren<T>()` should not be called in
+`Awake`. Components on the same GameObject or its children should be assigned
+via `[SerializeField]` in the Inspector — zero runtime cost, dependency visible
+at edit time.
 
-### Input System ihlalleri
-- Legacy API yasak: `Input.GetKey`, `Input.GetAxis`, `Input.GetButton`, `Input.mousePosition`
-- `InputAction` enable/disable Awake/OnEnable içinde yapılmalı, OnDisable'da temizlenmeli
-- Her `+=` için eşleşen `-=` olmalı
-- `FixedUpdate` içinde input okuma yasak, `Update` kullan
-- Sistemler input'tan bağımsız olmalı: `SetMoveInput(Vector2)`, `Jump()` gibi methodlar
+### Input System violations
+- Legacy API forbidden: `Input.GetKey`, `Input.GetAxis`, `Input.GetButton`, `Input.mousePosition`
+- `InputAction` must be enabled/disabled in `OnEnable`/`OnDisable`
+- Every `+=` subscription must have a matching `-=` unsubscription
+- Reading input in `FixedUpdate` is forbidden — use `Update`
+- Systems must be input-agnostic: expose `SetMoveInput(Vector2)`, `Jump()`, etc.
 
-### Namespace formatı
-`Layer.Module` formatı zorunlu: `Framework.Events`, `Game.Abstracts`,
-`Game.Concretes`, `Game.Ecs`. Tek segment namespace uyarı.
+### Namespace format
+`Layer.Module` format required: `Framework.Events`, `Game.Abstracts`,
+`Game.Concretes`, `Game.Ecs`. Single-segment namespaces trigger a warning.
 
-### Naming convention ihlalleri
+### Naming convention violations
 - Types, methods, properties: `PascalCase`
 - Private fields: `_camelCase`
 - Parameters, locals: `camelCase`
-- Interface: `I` prefix
-- IEvent struct: `Event` suffix (örn. `LevelStartedEvent`)
+- Interfaces: `I` prefix
+- IEvent structs: `Event` suffix (e.g. `LevelStartedEvent`)
 
 ### Hot path expensive calls
-`Update`, `FixedUpdate`, `LateUpdate`, `Tick`, `FixedTick`, `LateTick` içinde:
+Inside `Update`, `FixedUpdate`, `LateUpdate`, `Tick`, `FixedTick`, `LateTick`:
 - `GetComponent`, `Camera.main`, `FindObjectOfType`, `FindObjectsOfType`
-- `tag == "..."` (CompareTag kullan)
+- `tag == "..."` (use `CompareTag`)
 - `SendMessage`, `BroadcastMessage`
-- `transform` property (cache et)
+- Uncached `transform` property access
 
-### LINQ hot path içinde
-`Update` / `FixedUpdate` / `LateUpdate` içinde LINQ kullanma (allocation üretir).
+### LINQ in hot paths
+Do not use LINQ inside `Update` / `FixedUpdate` / `LateUpdate` — it allocates.
 
 ### Runtime Instantiate
-`GameObject.Instantiate` runtime'da yasak. Object pool kullan.
+`GameObject.Instantiate` at runtime is forbidden. Use an object pool.
 
-### Null propagation Unity object'lerinde
-`?.` ve `??` operatörlerini `MonoBehaviour`, `Component`, `ScriptableObject`
-üzerinde kullanma. Unity `== null`'ı destroyed object tespiti için override eder;
-C# referans eşitliği destroyed objeye method çağırır — en yaygın Unity bug.
+### Null propagation on Unity objects
+Do not use `?.` or `??` on `MonoBehaviour`, `Component`, or `ScriptableObject`.
+Unity overrides `== null` to detect destroyed objects; C# reference equality
+will call methods on a destroyed object — the most common subtle Unity bug.
 
-### Pure C# servislerde UnityEngine import
-`_Framework/`, `Game/Abstracts/`, `Game/Concretes/` klasörlerinde (provider'lar
-hariç) `using UnityEngine` yasak.
+### UnityEngine import in pure C# services
+`using UnityEngine` is forbidden in `_Framework/`, `Game/Abstracts/`,
+`Game/Concretes/` (except provider classes).
 
-### ECS structural changes query loop içinde
+### ECS structural changes inside a query loop
 `EntityManager.AddComponent`, `RemoveComponent`, `DestroyEntity`, `Instantiate`
-query döngüsü içinde yasak. `EntityCommandBuffer` kullan.
+are forbidden inside a query loop. Use `EntityCommandBuffer`.
 
-### ECS enum byte base eksik
-ECS component veya `IEvent` struct içindeki enum'lar `byte` base tipine sahip
-olmalı: `enum State : byte`.
+### ECS enum missing byte base
+Enums inside ECS components or `IEvent` structs must have a `byte` base type:
+`enum State : byte`.
 
-### UniTask CancellationToken eksik
-`async UniTask` metodları `CancellationToken` parametresi almalı. Muaflar:
-override metodlar, Unity lifecycle wrapper'ları, 5 satırdan kısa private helper'lar.
+### UniTask missing CancellationToken
+`async UniTask` methods must accept a `CancellationToken` parameter. Exempt:
+override methods, Unity lifecycle wrappers, private helpers under 5 lines.
 
-### Kullanılmayan kod
-Kullanılmayan private member, kullanılmayan `using`, kullanılmayan parametre —
-uyar ve reviewer'a bildir.
+### Unused code
+Unused private members, unused `using` directives, unused parameters — flag
+and report to the reviewer.
 
-### Dosya adı / class adı uyumsuzluğu
-C# dosya adı birincil class/struct adıyla eşleşmeli. Unity MonoBehaviour ve
-ScriptableObject için bu zorunlu; diğer tipler için de aynı kuralı uygula.
+### File name / class name mismatch
+C# file name must match the primary class or struct name. Mandatory for
+MonoBehaviour and ScriptableObject; apply the same rule to all other types.
 
-### SerializeField rename — FormerlySerializedAs eksik
-`[SerializeField]` alan yeniden adlandırılıyorsa `[FormerlySerializedAs("eskiAd")]`
-eklenmeli. Eksikse sahne/prefab'daki tüm atanmış değerler sessizce sıfırlanır.
+### SerializeField rename without FormerlySerializedAs
+When renaming a `[SerializeField]` field, add `[FormerlySerializedAs("oldName")]`.
+Without it every configured value in every scene and prefab will silently reset
+to the default.
 
-### Test dosyası eksik
-Logic C# dosyasının karşılığı `Tests/` altında yoksa uyar.
+### Missing test file
+If a logic C# file has no corresponding test file under `Tests/`, warn.
 
-### PlayMode test sahnesi eksik
-PlayMode test dosyası bir sahneye referans veriyorsa, o sahne
-`_Scenes/TestScenes/` altında bulunmalı.
+### Missing PlayMode test scene
+If a PlayMode test file references a scene, that scene must exist under
+`_Scenes/TestScenes/`.
 
 ---
 
-## GATE — Devam Etmeden Önce Doğrula
+## GATE — Verify Before Proceeding
 
 ### Director Gate
-Pipeline agent'ları (coder, tester, committer) spawn edilmeden önce Director Gate
-gösterilmiş ve kullanıcı `go` yazmış olmalı. Gate geçilmeden pipeline başlamaz.
+Pipeline agents (coder, tester, committer) must not be spawned until the
+Director Gate has been shown and the user has typed `go`. The pipeline does not
+start without the gate.
 
-### Reviewer sırası
-Bu projede reviewer **Claude** (`unity-reviewer`). Kodun review edilmesi için
-`unity-reviewer` agent'ını çağır. Commit öncesi review zorunlu.
+### Reviewer order
+The reviewer in this project is **Claude** (`unity-reviewer`). Call
+`unity-reviewer` to review code. Review is required before every commit.
 
-### Gate cleared durumu
-`.codex/project/PROGRESS.md` veya task notları incelenerek mevcut pipeline
-aşamasının tamamlanıp tamamlanmadığını doğrula.
+### Gate cleared state
+Check `.codex/project/PROGRESS.md` or task notes to verify that the current
+pipeline phase has been completed before moving to the next.
 
 ---
 
-## Doğrulama Checklist (Her C# Yazımı Sonrası)
+## Verification Checklist (After Every C# Write)
 
-- [ ] Unity console kontrol edildi (MCP: `read_console` errors)
-- [ ] Compilation hatası yok (`refresh_unity` + `read_console`)
-- [ ] SerializeField rename varsa `FormerlySerializedAs` eklendi
-- [ ] Runtime/editor sınırı korundu
-- [ ] Input boundary korundu (input varsa)
-- [ ] Singleton veya static state yok
-- [ ] Hot path'lerde allocation yok
-- [ ] Test dosyası var veya NoTest kararı verildi
+- [ ] Unity console checked (MCP: `read_console` errors)
+- [ ] No compilation errors (`refresh_unity` + `read_console`)
+- [ ] `FormerlySerializedAs` added if a SerializeField was renamed
+- [ ] Runtime/editor boundary preserved
+- [ ] Input boundary preserved (if input was touched)
+- [ ] No singletons or static mutable state
+- [ ] No allocations in hot paths
+- [ ] Test file exists or NoTest decision recorded

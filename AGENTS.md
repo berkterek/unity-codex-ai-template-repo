@@ -1,257 +1,255 @@
 # Unity Codex AI Template
 
-Bu repo, Unity projelerinde Codex CLI ile çalışmak için hazır bir şablon.
-Tüm agent'lar, command'lar, kurallar ve kılavuzlar `.codex/` altında organize edilmiştir.
+A ready-to-use Codex CLI template for Unity projects. All agents, commands,
+rules, and guides are organized under `.codex/`.
 
 ---
 
-## Yapı
+## Structure
 
 ```
 .codex/
-├── core/          — Platform-agnostik agent ve command'lar
+├── core/          — Platform-agnostic agents and commands
 ├── packs/
-│   └── unity-game/   — Unity'e özgü agent, command, rule, guide, skill
-├── project/       — Projeye özel overlay dosyaları (her projede doldur)
-├── manifests/     — Import kararları ve dönüşüm notları
-└── templates/     — Başlangıç şablonları
+│   └── unity-game/   — Unity-specific agents, commands, rules, guides, skills
+├── project/       — Per-project overlay files (fill in each project)
+├── manifests/     — Import decisions and migration notes
+└── templates/     — Starter templates
 ```
 
 ---
 
-## Zorunlu Okumalar (Her Konuşma Başında)
+## Required Reads (Start of Every Session)
 
-Her agent ve command başlamadan önce şunları okur:
+Every agent and command reads these before starting:
 
-1. `AGENTS.md` — bu dosya
-2. `.codex/packs/unity-game/guides/guardrails.md` — hook karşılığı tüm kurallar
-3. `.codex/project/PROJECT.md` — proje kimliği ve kısıtları
-4. `.codex/project/RULES.md` — proje hard rules
+1. `AGENTS.md` — this file
+2. `.codex/packs/unity-game/guides/guardrails.md` — all rules as hook equivalents
+3. `.codex/project/PROJECT.md` — project identity and constraints
+4. `.codex/project/RULES.md` — project hard rules
 
 ---
 
-## Guardrails (Hook Karşılığı)
+## Guardrails (Hook Equivalents)
 
-Codex'te hook mekanizması yoktur. `.codex/packs/unity-game/guides/guardrails.md`
-bu boşluğu doldurur. **Tüm agent ve command'lar bu dosyayı içselleştirmelidir.**
+Codex has no hook mechanism. `.codex/packs/unity-game/guides/guardrails.md`
+fills that gap. **All agents and commands must internalize this file.**
 
-Üç seviye:
+Three levels:
 
-| Seviye | Örnekler |
-|--------|---------|
-| **BLOCK** | `git push`, `.unity`/`.prefab` text edit, `UnityEvent`, `Time.timeScale`, static singleton, `UnityEditor` guard'sız |
-| **WARN** | `async void`, `GetComponent` in Awake, legacy Input API, hot-path LINQ/alloc, null propagation Unity obj'ler üzerinde |
-| **GATE** | Director Gate geçilmeden pipeline başlamaz; commit öncesi `unity-reviewer` zorunlu |
+| Level | Examples |
+|-------|---------|
+| **BLOCK** | `git push`, `.unity`/`.prefab` text edit, `UnityEvent`, `Time.timeScale`, static singleton, `UnityEditor` without guard |
+| **WARN** | `async void`, `GetComponent` in Awake, legacy Input API, hot-path LINQ/alloc, null propagation on Unity objects |
+| **GATE** | Pipeline cannot start without Director Gate; `unity-reviewer` required before commit |
 
 ---
 
 ## Reviewer
 
-Bu projede reviewer **Claude** (`unity-reviewer` agent).
+The reviewer in this project is **Claude** (`unity-reviewer` agent).
 
-- Tam checklist: derleme doğrulama (MCP), runtime doğrulama (Play mode), mimari, performans, encapsulation, input system, kullanılmayan kod tespiti
-- Commit öncesi review **zorunlu**
-- `unity-reviewer` agent: `.codex/packs/unity-game/agents/unity-reviewer.md`
+- Full checklist: compilation verification (MCP), runtime validation (Play mode), architecture, performance, encapsulation, input system, unused code detection
+- Review is **required** before every commit
+- Agent file: `.codex/packs/unity-game/agents/unity-reviewer.md`
 
 ---
 
-## Agent Dizini
+## Agent Directory
 
 ### Core Agents (`.codex/core/agents/`)
 
-| Agent | Görev |
-|-------|-------|
-| `coder.md` | Genel implementasyon |
-| `tester.md` | Test yazımı |
-| `reviewer.md` | Genel review → Unity projeler için `unity-reviewer` kullan |
-| `committer.md` | Commit ve versiyon işlemleri |
+| Agent | Role |
+|-------|------|
+| `coder.md` | General implementation |
+| `tester.md` | Test authoring |
+| `reviewer.md` | General review → use `unity-reviewer` for Unity projects |
+| `committer.md` | Commit and versioning |
 
 ### Unity Specialist Agents (`.codex/packs/unity-game/agents/`)
 
-| Agent | Görev |
-|-------|-------|
-| `unity-coder.md` | MonoBehaviour, provider, installer, scene wiring implementasyonu |
-| `unity-coder-lite.md` | Küçük C# değişiklikleri, kural uyumu yüksek |
-| `unity-fixer.md` | Bug düzeltme — root cause analizi + regression test |
-| `unity-fixer-lite.md` | Hızlı tek dosya fix'leri |
-| `unity-reviewer.md` | **Claude tabanlı tam reviewer** — compile + runtime doğrulama |
-| `unity-tester.md` | EditMode / PlayMode test yazımı |
-| `unity-test-runner.md` | Test çalıştırma ve sonuç raporlama |
-| `unity-test-builder.md` | PlayMode test sahnesi oluşturma |
-| `unity-developer.md` | Tam döngü geliştirici — coder + tester + reviewer |
-| `unity-setup.md` | Sahne, prefab, asset, Unity ayar kurulumu |
-| `unity-scene-builder.md` | Sahne hiyerarşisi oluşturma ve yapılandırma |
-| `unity-ui-builder.md` | UI Toolkit / UGUI panel ve view oluşturma |
-| `unity-shader-dev.md` | Shader Graph ve HLSL shader geliştirme |
-| `unity-network-dev.md` | Ağ katmanı implementasyonu |
-| `unity-optimizer.md` | Performans profiling ve optimizasyon |
-| `unity-linter.md` | Kod kalitesi ve kural uyumu denetimi |
-| `unity-critic.md` | Mimari ve tasarım eleştirisi |
-| `unity-verifier.md` | 3 iterasyonlu doğrulama ve fix döngüsü |
-| `unity-scout.md` | Kod tabanı keşfi ve analizi |
-| `unity-prototyper.md` | Hızlı prototip implementasyonu |
-| `unity-migrator.md` | Unity versiyon ve render pipeline migrasyonu |
-| `unity-git-master.md` | Git operasyonları ve branch yönetimi |
-| `unity-build-runner.md` | Build pipeline yönetimi |
-| `unity-security-reviewer.md` | Güvenlik açığı taraması |
-| `debugger.md` | Genel debug süreci |
-| `migrator.md` | Kod pattern migrasyonu (Coroutine → UniTask, Singleton → VContainer) |
-| `silent-failure-hunter.md` | Sessiz hata tespiti |
-| `audio-clip-agent.md` | AudioClip import ayarları toplu uygulama |
-| `graphics-setup-agent.md` | URP / grafik ayarları kurulumu |
-| `package-analyzer.md` | Package bağımlılık analizi |
+| Agent | Role |
+|-------|------|
+| `unity-coder.md` | MonoBehaviour, provider, installer, scene wiring implementation |
+| `unity-coder-lite.md` | Small C# changes with high rule compliance |
+| `unity-fixer.md` | Bug fixing — root cause analysis + regression test |
+| `unity-fixer-lite.md` | Fast single-file fixes |
+| `unity-reviewer.md` | **Full Claude-based reviewer** — compile + runtime verification |
+| `unity-tester.md` | EditMode / PlayMode test authoring |
+| `unity-test-runner.md` | Test execution and result reporting |
+| `unity-test-builder.md` | PlayMode test scene creation |
+| `unity-developer.md` | Full-cycle developer — coder + tester + reviewer |
+| `unity-setup.md` | Scene, prefab, asset, Unity settings setup |
+| `unity-scene-builder.md` | Scene hierarchy creation and configuration |
+| `unity-ui-builder.md` | UI Toolkit / UGUI panel and view creation |
+| `unity-shader-dev.md` | Shader Graph and HLSL shader development |
+| `unity-network-dev.md` | Network layer implementation |
+| `unity-optimizer.md` | Performance profiling and optimization |
+| `unity-linter.md` | Code quality and rule compliance audit |
+| `unity-critic.md` | Architecture and design critique |
+| `unity-verifier.md` | 3-iteration verification and fix loop |
+| `unity-scout.md` | Codebase exploration and analysis |
+| `unity-prototyper.md` | Rapid prototype implementation |
+| `unity-migrator.md` | Unity version and render pipeline migration |
+| `unity-git-master.md` | Git operations and branch management |
+| `unity-build-runner.md` | Build pipeline management |
+| `unity-security-reviewer.md` | Security vulnerability scanning |
+| `debugger.md` | General debug process |
+| `migrator.md` | Code pattern migration (Coroutine → UniTask, Singleton → VContainer) |
+| `silent-failure-hunter.md` | Silent failure detection |
+| `audio-clip-agent.md` | Batch AudioClip import settings application |
+| `graphics-setup-agent.md` | URP / graphics settings setup |
+| `package-analyzer.md` | Package dependency analysis |
 
 ---
 
-## Command Dizini
+## Command Directory
 
 ### Core Commands (`.codex/core/commands/`)
 
-| Command | Görev |
-|---------|-------|
-| `/orchestrate` | Tam workflow pipeline çalıştırma |
-| `/continue` | Kesilmiş pipeline'ı devam ettirme |
-| `/dry-run` | Pipeline simülasyonu — dosya değiştirmez |
-| `/status` | Mevcut workflow durumu |
-| `/stop` | Pipeline durdurma |
-| `/validate` | Tamamlanan işi doğrulama |
+| Command | Role |
+|---------|------|
+| `/orchestrate` | Run full workflow pipeline |
+| `/continue` | Resume an interrupted pipeline |
+| `/dry-run` | Simulate pipeline — no file changes |
+| `/status` | Current workflow status |
+| `/stop` | Stop pipeline |
+| `/validate` | Verify completed work |
 
 ### Unity Commands (`.codex/packs/unity-game/commands/`)
 
-#### Planlama ve Mimari
-| Command | Görev |
-|---------|-------|
-| `/architect` | Mimari tasarım ve karar verme |
-| `/create-plan` | Görev planı oluşturma |
-| `/update-plan` | Mevcut planı güncelleme |
-| `/plan-workflow` | Workflow tasarımı |
-| `/game-idea` | Oyun fikri geliştirme |
-| `/refine-gdd` | GDD iyileştirme |
-| `/refine-tdd` | TDD iyileştirme |
-| `/adr` | Architecture Decision Record yazma |
+#### Planning & Architecture
+| Command | Role |
+|---------|------|
+| `/architect` | Architectural design and decision making |
+| `/create-plan` | Create a task plan |
+| `/update-plan` | Update an existing plan |
+| `/plan-workflow` | Workflow design |
+| `/game-idea` | Game idea development |
+| `/refine-gdd` | GDD refinement |
+| `/refine-tdd` | TDD refinement |
+| `/adr` | Write an Architecture Decision Record |
 
-#### İmplementasyon
-| Command | Görev |
-|---------|-------|
-| `/implement` | TDD pipeline ile feature implementasyonu |
-| `/add-feature` | Mevcut sisteme feature ekleme |
-| `/new-module` | Yeni modül iskelet oluşturma |
-| `/fix` | Bug düzeltme pipeline'ı |
-| `/fix-deep` | Derin root-cause analizi ile bug düzeltme |
-| `/scene-setup` | Sahne kurulumu |
-| `/create-prefab-scene` | Prefab ve sahne oluşturma |
-| `/unity-scene-update` | Sahne güncelleme |
-| `/update-scene-hierarchy` | Sahne hiyerarşi güncellemesi |
-| `/setup-project` | Proje ilk kurulum |
+#### Implementation
+| Command | Role |
+|---------|------|
+| `/implement` | Feature implementation via TDD pipeline |
+| `/add-feature` | Add a feature to an existing system |
+| `/new-module` | Scaffold a new module |
+| `/fix` | Bug fix pipeline |
+| `/fix-deep` | Deep root-cause analysis and bug fix |
+| `/scene-setup` | Scene setup |
+| `/create-prefab-scene` | Create prefab and scene |
+| `/unity-scene-update` | Scene update |
+| `/update-scene-hierarchy` | Scene hierarchy update |
+| `/setup-project` | Initial project setup |
 
-#### Test
-| Command | Görev |
-|---------|-------|
-| `/generate-tests` | Test dosyaları oluşturma |
-| `/create-test` | Tek test oluşturma |
-| `/qa` | QA doğrulama süreci |
-| `/debug-session` | Interaktif debug oturumu |
+#### Testing
+| Command | Role |
+|---------|------|
+| `/generate-tests` | Generate test files |
+| `/create-test` | Create a single test |
+| `/qa` | QA verification process |
+| `/debug-session` | Interactive debug session |
 
-#### Review ve Kalite
-| Command | Görev |
-|---------|-------|
-| `/review-code` | Kod review (Claude reviewer) |
-| `/clean-slop` | Gereksiz/düşük kaliteli kod temizleme |
-| `/performance-audit` | Performans denetimi |
-| `/check-portability` | Platform taşınabilirlik kontrolü |
-| `/silent-failure-hunt` | Sessiz hata taraması |
-| `/security-review` | Güvenlik denetimi |
+#### Review & Quality
+| Command | Role |
+|---------|------|
+| `/review-code` | Code review (Claude reviewer) |
+| `/clean-slop` | Remove low-quality / unnecessary code |
+| `/performance-audit` | Performance audit |
+| `/check-portability` | Platform portability check |
+| `/silent-failure-hunt` | Silent failure scan |
 
-#### Git ve Versiyon
-| Command | Görev |
-|---------|-------|
-| `/smart-commit` | Akıllı commit mesajı ve staging |
-| `/create-changelog` | Changelog oluşturma |
-| `/adr` | Mimari karar kaydı |
+#### Git & Versioning
+| Command | Role |
+|---------|------|
+| `/smart-commit` | Smart commit message and staging |
+| `/create-changelog` | Generate changelog |
 
-#### Yardımcı
-| Command | Görev |
-|---------|-------|
-| `/catch-up` | Kod tabanını öğren ve özetle |
-| `/learn` | Belirli bir pattern veya sistemi öğren |
-| `/discover` | Kod tabanını keşfet |
-| `/search` | Kod içinde arama |
-| `/context-prime` | Bağlam oluşturma |
-| `/checkpoint` | Durum kaydetme |
-| `/migrate` | Kod migrasyonu |
-| `/migrator` | Pattern migrasyonu pipeline'ı |
-| `/graphics-setup` | Grafik ayarları kurulumu |
-| `/audio-clip-setup` | AudioClip import ayarları |
-| `/instincts` | Proje içgüdüleri / öğrenilen patterns |
-| `/dump` | Bağlam dump'ı |
-| `/caveman` | Sade açıklama modü |
-| `/five` | 5 dakikalık hızlı özet |
-| `/grill-me` | Kod tabanı hakkında sorgu |
-| `/ralph` | Retrospektif analiz |
-| `/mermaid` | Mermaid diyagramı oluşturma |
+#### Utilities
+| Command | Role |
+|---------|------|
+| `/catch-up` | Learn and summarize the codebase |
+| `/learn` | Learn a specific pattern or system |
+| `/discover` | Explore the codebase |
+| `/search` | Search within code |
+| `/context-prime` | Build context |
+| `/checkpoint` | Save state |
+| `/migrate` | Code migration |
+| `/migrator` | Pattern migration pipeline |
+| `/graphics-setup` | Graphics settings setup |
+| `/audio-clip-setup` | AudioClip import settings |
+| `/instincts` | Project instincts / learned patterns |
+| `/dump` | Context dump |
+| `/caveman` | Plain-language explanation mode |
+| `/five` | Quick 5-minute summary |
+| `/grill-me` | Query the codebase |
+| `/ralph` | Retrospective analysis |
+| `/mermaid` | Generate a Mermaid diagram |
 
 ---
 
-## Kurallar (`.codex/packs/unity-game/rules/`)
+## Rules (`.codex/packs/unity-game/rules/`)
 
-| Dosya | Kapsam |
-|-------|--------|
+| File | Covers |
+|------|--------|
 | `architecture.md` | VContainer DI, IEventBus, Provider, InputView, AppScope |
 | `csharp-unity.md` | Naming, namespace, null check, UniTask, encapsulation |
-| `performance.md` | Zero-alloc hot path, caching, pooling, draw call, UI canvas |
-| `testing.md` | Test tipi kararı (EditMode/PlayMode/ECS/NoTest), NSubstitute, AAA |
-| `unity-specifics.md` | Editor guard, platform define, lifecycle sırası |
+| `performance.md` | Zero-alloc hot path, caching, pooling, draw calls, UI canvas |
+| `testing.md` | Test type decision (EditMode/PlayMode/ECS/NoTest), NSubstitute, AAA |
+| `unity-specifics.md` | Editor guard, platform defines, lifecycle order |
 | `serialization.md` | FormerlySerializedAs, Unity null, SerializeReference |
-| `event-patterns.md` | UnityEvent yasak, IEventBus vs Action vs C# event karar ağacı |
-| `scene-hierarchy.md` | 6 zorunlu root container, prefab domain, logic/visual ayrımı |
+| `event-patterns.md` | UnityEvent forbidden, IEventBus vs Action vs C# event decision tree |
+| `scene-hierarchy.md` | 6 required root containers, prefab domain, logic/visual separation |
 | `ecs-dots.md` | Authoring/Baker, ISystem+IJobEntity, ECB, Hybrid linking |
-| `addressables.md` | Resources.Load yasak, async yükleme, handle lifecycle |
+| `addressables.md` | No Resources.Load, async loading, handle lifecycle |
 
 ---
 
-## Kılavuzlar (`.codex/packs/unity-game/guides/`)
+## Guides (`.codex/packs/unity-game/guides/`)
 
-| Dosya | Kapsam |
-|-------|--------|
-| `guardrails.md` | **Hook karşılığı tüm kurallar — BLOCK / WARN / GATE** |
-| `director-gates.md` | Pipeline gate'leri ve geçiş koşulları |
-| `unity-mcp.md` | MCP araç kullanım rehberi |
-| `input-system.md` | New Input System implementasyon rehberi |
-| `serialization-safety.md` | Serialization güvenli değişim rehberi |
-| `nsubstitute.md` | NSubstitute kullanım rehberi |
-| `vcontainer.md` | VContainer DI rehberi |
-
----
-
-## Gerekli Stack
-
-| Paket | Kaynak | Amaç |
-|-------|--------|-------|
-| **VContainer** | OpenUPM | DI — singleton yasak |
-| **UniTask** | OpenUPM | Async/await — coroutine yasak |
-| **New Input System** | Package Manager | Input — legacy API yasak |
-
-## Opsiyonel Özellikler
-
-| Paket | Feature Flag | Devre dışıysa |
-|-------|-------------|----------------|
-| Addressables | `addressables` | Addressables kuralları atlanır |
-| NSubstitute | `testing` | Test hook'ları ve asmdef atlanır |
-| Unity ECS DOTS | `ecs` | ECS klasör ve kuralları atlanır |
+| File | Covers |
+|------|--------|
+| `guardrails.md` | **All rules as hook equivalents — BLOCK / WARN / GATE** |
+| `director-gates.md` | Pipeline gates and pass conditions |
+| `unity-mcp.md` | MCP tool usage guide |
+| `input-system.md` | New Input System implementation guide |
+| `serialization-safety.md` | Safe serialization change guide |
+| `nsubstitute.md` | NSubstitute usage guide |
+| `vcontainer.md` | VContainer DI guide |
 
 ---
 
-## Yeni Proje Kurulumu
+## Required Stack
+
+| Package | Source | Purpose |
+|---------|--------|---------|
+| **VContainer** | OpenUPM | DI — no singletons |
+| **UniTask** | OpenUPM | Async/await — no coroutines |
+| **New Input System** | Package Manager | Input — legacy API forbidden |
+
+## Optional Features
+
+| Package | Feature Flag | When Disabled |
+|---------|-------------|---------------|
+| Addressables | `addressables` | Addressables rules skipped |
+| NSubstitute | `testing` | Test hooks and asmdefs skipped |
+| Unity ECS DOTS | `ecs` | ECS folder and rules skipped |
+
+---
+
+## New Project Setup
 
 ```
 /setup-project
 ```
 
-veya manuel:
+or manually:
 
-1. `.codex/project/PROJECT.md` doldur
-2. `.codex/project/STRUCTURE.md` doldur
-3. `.codex/project/TOOLING.md` doldur
-4. `.codex/project/CODING_CONVENTIONS.md` doldur
-5. `.codex/project/RULES.md` doldur
-6. `/implement` ile geliştirmeye başla
+1. Fill `.codex/project/PROJECT.md`
+2. Fill `.codex/project/STRUCTURE.md`
+3. Fill `.codex/project/TOOLING.md`
+4. Fill `.codex/project/CODING_CONVENTIONS.md`
+5. Fill `.codex/project/RULES.md`
+6. Start development with `/implement`
