@@ -30,9 +30,9 @@ ships that folder pre-configured with:
 
 - **Guardrails** — Hook equivalents: BLOCK (git push, .unity text edit, UnityEvent, static singleton), WARN (async void, hot-path alloc, LINQ, null propagation), GATE (Director Gate, reviewer requirement)
 - **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 28+ more
-- **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/game-plan`, `/smart-commit-selected` and 55+ more
-- **Rules** — Architecture, naming, testing, ECS, serialization, Addressables, and bootstrap pattern standards
-- **Skills** — 62 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, and more
+- **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/game-plan`, `/build-knowledge-graph`, `/smart-commit-selected` and 55+ more
+- **Rules** — Architecture, naming, testing, ECS, serialization, Addressables, bootstrap, async, input, lifecycle, and prefab standards
+- **Skills** — 68 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, and more
 
 ---
 
@@ -110,13 +110,14 @@ These packages must be installed in the Unity project:
 │   ├── agents/          coder, tester, reviewer, committer
 │   ├── commands/        orchestrate, continue, dry-run, status, stop, validate
 │   └── protocols/       checkpoint, event-journal, mailbox, progress
+├── graph/               Optional Unity knowledge graph tools and validators
 ├── packs/
 │   └── unity-game/
-│       ├── agents/      32 Unity specialist agents
-│       ├── commands/    55 Unity slash commands
-│       ├── rules/       11 rule files
-│       ├── guides/      7 guides (including guardrails)
-│       └── skills/      62 skill files
+│       ├── agents/      34 Unity specialist agents
+│       ├── commands/    61 Unity slash commands
+│       ├── rules/       15 rule files
+│       ├── guides/      19 guides (including guardrails)
+│       └── skills/      68 skill files
 ├── project/             Per-project overlay — fill in each project
 ├── templates/           GDD, TDD, CODING_CONVENTIONS templates
 └── manifests/           Import and migration decisions
@@ -242,7 +243,7 @@ Review scope:
 
 ### Unity — Utilities
 
-`/catch-up` · `/learn` · `/discover` · `/search` · `/context-prime` · `/checkpoint` · `/migrate` · `/migrator` · `/graphics-setup` · `/audio-clip-setup` · `/instincts` · `/dump` · `/caveman` · `/five` · `/grill-me` · `/ralph` · `/mermaid` · `/update-rules`
+`/catch-up` · `/learn` · `/discover` · `/search` · `/context-prime` · `/checkpoint` · `/migrate` · `/migrator` · `/graphics-setup` · `/audio-clip-setup` · `/instincts` · `/dump` · `/caveman` · `/five` · `/grill-me` · `/ralph` · `/mermaid` · `/update-rules` · `/build-knowledge-graph` · `/knowledge-graph`
 
 ---
 
@@ -263,6 +264,10 @@ Review scope:
 | `ecs-dots.md` | Authoring/Baker, ISystem+IJobEntity, ECB, Hybrid linking |
 | `addressables.md` | No Resources.Load, async loading, handle lifecycle |
 | `bootstrap-pattern.md` | VContainer installer hierarchy — IInstaller, ModuleInstaller, AppInstaller, AppScope, GameScope |
+| `unity-async.md` | UniTask, cancellation, fire-and-forget, coroutine migration |
+| `unity-input.md` | New Input System hard rules and InputView pattern |
+| `unity-lifecycle.md` | Editor/runtime boundary, platform defines, DOTween cleanup |
+| `unity-prefabs.md` | Prefab ownership, variants, BaseCanvas, package prefab duplication |
 
 ### Guides (`.codex/packs/unity-game/guides/`)
 
@@ -275,6 +280,18 @@ Review scope:
 | `serialization-safety.md` | Safe serialization change guide |
 | `nsubstitute.md` | NSubstitute usage guide |
 | `vcontainer.md` | VContainer DI guide |
+| `architecture-summary.md` | Quick architecture and workflow overview |
+| `context-management.md` | Checkpoint/resume and state conventions |
+| `knowledge-graph.md` | Graph builder/query usage and extractor notes |
+| `quick-start.md` | New/existing project setup workflow |
+| `setup-checklist.md` | Manual setup checklist after `/setup-project` |
+| `agents-index.md` | Agent reference index |
+| `commands.md` | Command reference index |
+| `hooks-blocking.md` | Historical Claude blocking hook checklist as Codex guardrail reference |
+| `hooks-warning.md` | Historical Claude warning hook checklist as Codex guardrail reference |
+| `model-tiers.md` | Model routing guidance |
+| `orchestrate-rules.md` | Orchestration rule reference |
+| `skills-index.md` | Skill library index |
 
 ---
 
@@ -316,7 +333,11 @@ Skills live under `.codex/packs/unity-game/skills/` and are read-only reference 
 | `five` | Quick 5-minute codebase summary |
 | `grill-me` | Codebase interrogation mode |
 | `mermaid` | Mermaid diagram generation |
-| `planning-and-task-breakdown` | Task decomposition and acceptance criteria |
+| `bootstrap-pattern` | Project-specific VContainer bootstrap reference |
+| `input-system` | Project-specific InputView/input action reference |
+| `scene-hierarchy` | Scene container and placement reference |
+| `unity-git` | Unity-aware git hygiene and commit grouping |
+| `unity-ugui` | UGUI setup and conventions |
 
 ### Platform (`skills/platform/`)
 
@@ -337,6 +358,7 @@ Skills live under `.codex/packs/unity-game/skills/` and are read-only reference 
 | `cinemachine` | Virtual cameras, blends, impulse, follow targets |
 | `navmesh` | NavMeshAgent setup, dynamic obstacles, off-mesh links |
 | `physics` | Layer matrix, non-alloc queries, trigger vs collision |
+| `particle-vfx` | ParticleSystem/VFX authoring and pooling reference |
 | `shader-graph` | URP shader nodes, property exposure, keyword variants |
 | `ui-toolkit` | USS, UXML, data binding, runtime panel setup |
 | `urp-pipeline` | Renderer features, camera stacking, custom render passes, SRP Batcher, Forward+ |
