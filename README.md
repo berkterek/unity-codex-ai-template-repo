@@ -29,9 +29,9 @@ Codex CLI reads `AGENTS.md` and `.codex/` at the project root. This template
 ships that folder pre-configured with:
 
 - **Guardrails** — Hook equivalents: BLOCK (git push, .unity text edit, UnityEvent, static singleton), WARN (async void, hot-path alloc, LINQ, null propagation), GATE (Director Gate, reviewer requirement)
-- **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 25+ more
-- **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/review-code`, `/architect`, `/new-module`, `/smart-commit` and 48+ more
-- **Rules** — Architecture, naming, testing, ECS, serialization, and Addressables standards
+- **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 28+ more
+- **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/game-plan`, `/smart-commit-selected` and 55+ more
+- **Rules** — Architecture, naming, testing, ECS, serialization, Addressables, and bootstrap pattern standards
 - **Skills** — 62 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, and more
 
 ---
@@ -112,9 +112,9 @@ These packages must be installed in the Unity project:
 │   └── protocols/       checkpoint, event-journal, mailbox, progress
 ├── packs/
 │   └── unity-game/
-│       ├── agents/      29 Unity specialist agents
-│       ├── commands/    48 Unity slash commands
-│       ├── rules/       10 rule files
+│       ├── agents/      32 Unity specialist agents
+│       ├── commands/    55 Unity slash commands
+│       ├── rules/       11 rule files
 │       ├── guides/      7 guides (including guardrails)
 │       └── skills/      62 skill files
 ├── project/             Per-project overlay — fill in each project
@@ -208,6 +208,9 @@ Review scope:
 | `audio-clip-agent` | Batch AudioClip import settings |
 | `graphics-setup-agent` | URP / graphics settings setup |
 | `package-analyzer` | Package dependency analysis |
+| `lean-planner` | Compact 3-5 task plan — no code skeletons, no acceptance criteria |
+| `unity-particle-designer` | VFX particle effects — prefab, pool, VFX service wiring |
+| `unity-ui-toolkit-builder` | Editor-only UI Toolkit: EditorWindow, CustomEditor, UXML, USS |
 
 ---
 
@@ -223,7 +226,7 @@ Review scope:
 
 ### Unity — Implementation
 
-`/implement` · `/add-feature` · `/new-module` · `/fix` · `/fix-deep` · `/scene-setup` · `/create-prefab-scene` · `/unity-scene-update` · `/update-scene-hierarchy` · `/setup-project`
+`/implement` · `/implement-lite` · `/add-feature` · `/new-module` · `/fix` · `/fix-lite` · `/fix-deep` · `/fix-codex` · `/game-plan` · `/scene-setup` · `/create-prefab-scene` · `/unity-scene-update` · `/update-scene-hierarchy` · `/setup-project`
 
 ### Unity — Testing
 
@@ -235,7 +238,7 @@ Review scope:
 
 ### Unity — Git
 
-`/smart-commit` · `/create-changelog`
+`/smart-commit` · `/smart-commit-selected` · `/create-changelog` · `/update-claude-md`
 
 ### Unity — Utilities
 
@@ -259,6 +262,7 @@ Review scope:
 | `scene-hierarchy.md` | 6 required root containers, prefab domain, logic/visual separation |
 | `ecs-dots.md` | Authoring/Baker, ISystem+IJobEntity, ECB, Hybrid linking |
 | `addressables.md` | No Resources.Load, async loading, handle lifecycle |
+| `bootstrap-pattern.md` | VContainer installer hierarchy — IInstaller, ModuleInstaller, AppInstaller, AppScope, GameScope |
 
 ### Guides (`.codex/packs/unity-game/guides/`)
 

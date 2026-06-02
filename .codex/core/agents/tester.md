@@ -32,6 +32,114 @@ Read these when they exist:
 - Keep tests deterministic and isolated.
 - Avoid sleeps, real network calls, and unnecessary file system dependencies.
 - Use the repository's existing fake/mock style.
+- **One assertion per test**: Each test method verifies one specific behavior.
+- **Descriptive names**: `MethodName_Scenario_ExpectedResult`.
+
+## Test Type Decision Tree
+
+Before writing any test, determine the correct test type:
+
+| Class type | Test Type |
+|------------|-----------|
+| `LifetimeScope`, `ScriptableObject`, `IComponentData`, `Baker<T>` | **NoTest** |
+| Pure C# / no Unity lifecycle | **EditMode** |
+| MonoBehaviour, no scene wiring needed | **PlayMode-Programmatic** |
+| VContainer scope / physics / real prefabs | **PlayMode-Scene** |
+| ECS Systems | **PlayMode-ECS** |
+
+### EditMode Test Pattern (Pure C# — NUnit)
+
+```csharp
+[TestFixture]
+public class EnemySpawnerTests
+{
+    [Test]
+    public void TakeDamage_WhenHealthIsZero_RaisesOnDeathEvent()
+    {
+        // Arrange
+        var eventBus = Substitute.For<IEventBus>();
+        var sut = new EnemySpawner(eventBus);
+
+        // Act
+        sut.TakeDamage(999);
+
+        // Assert
+        eventBus.Received(1).Publish(Arg.Any<EnemyDiedEvent>());
+    }
+}
+```
+
+### PlayMode Test Pattern (IEnumerator required by Unity runner)
+
+```csharp
+[TestFixture]
+public class PlayerMovementTests
+{
+    [UnityTest]
+    public IEnumerator Player_WhenMoveInputApplied_MovesInCorrectDirection()
+    {
+        var go = new GameObject();
+        var view = go.AddComponent<PlayerView>();
+        yield return null;
+
+        view.SetMoveInput(Vector2.right);
+        yield return new WaitForSeconds(0.1f);
+
+        Assert.Greater(go.transform.position.x, 0f);
+    }
+}
+```
+
+## Test Categories
+
+### 1. Happy Path Tests
+- Test normal operation with valid inputs
+- Verify correct outputs and state changes
+
+### 2. Edge Case Tests
+- Boundary values (0, 1, max, min)
+- Empty collections, null inputs, overflow scenarios
+
+### 3. Error Path Tests
+- Invalid inputs → correct exceptions
+- Invalid state transitions → rejected
+- Resource exhaustion → graceful handling
+
+### 4. State Machine Tests
+- Every valid transition
+- Every invalid transition (verify rejection)
+- State entry/exit actions fire correctly
+
+### 5. Event/Integration Tests
+- Events fire with correct data
+- Event subscribers receive notifications
+- Unsubscribed handlers don't fire
+
+### 6. Input-Driven System Tests
+
+Systems that receive input are **input-agnostic by design** — they expose methods like `SetMoveInput(Vector2)`, `Jump()` and never reference `InputAction`. This makes them directly testable:
+
+```csharp
+[Test]
+public void SetMoveInput_WithRightVector_UpdatesVelocity()
+{
+    var model = new PlayerModel();
+    var sut = new PlayerMovementSystem(model);
+
+    sut.SetMoveInput(Vector2.right);
+    sut.Tick(1f);
+
+    Assert.That(model.Velocity.Value.x, Is.GreaterThan(0f));
+}
+```
+
+**Key principle**: If you find yourself needing to mock `InputAction` or simulate button presses in a unit test, the architecture is wrong. Flag this as a blocker.
+
+## Mocking Strategy
+
+- **When NSubstitute is available**: Use `Substitute.For<IInterface>()` — never mock concrete classes. Place mocks inline in test methods, not as class fields.
+- **When NSubstitute is NOT available**: Hand-roll simple fake implementations of interfaces. Place in `Tests/Fakes/FakeSystemName.cs`.
+- **Rule for both**: Only mock interfaces, never concrete classes.
 
 ## Test Planning
 
@@ -44,29 +152,20 @@ Before writing tests, identify:
 - Failure modes.
 - Dependencies that need fakes or mocks.
 
-## Test Structure
+## Test Data
 
-Follow the project's test naming and style. If no style exists, use:
+- Use factory methods for test data: `TestDataFactory.CreateDefaultConfig()`
+- No magic numbers — use named constants or descriptive variables
+- Test data should be minimal — only set what matters for the test
 
-```text
-ClassNameTests
-MethodName_WhenCondition_ExpectedBehavior
-```
+## Self-Review
 
-Use Arrange, Act, Assert structure where appropriate:
-
-```csharp
-// Arrange
-// Act
-// Assert
-```
-
-## Mocking And Fakes
-
-- Mock interfaces or explicit test seams, not concrete internals.
-- Prefer hand-written fakes when they are simpler than a mocking library.
-- Do not introduce a new mocking framework without project approval.
-- Keep shared test helpers small and local unless reuse is clear.
+After writing, verify:
+- Every public method has tests?
+- Edge cases covered?
+- Error paths tested?
+- All tests can run independently and in any order?
+- No test depends on another test's state?
 
 ## Verification
 

@@ -35,19 +35,26 @@ Then inspect:
 - Include deleted files intentionally when part of the change.
 - Keep generated metadata with its related asset/source when relevant.
 - Leave the working tree clean when the phase requires it.
+- DO NOT add AI attribution, generated-by lines, or assistant co-author trailers.
 
 ## Grouping Strategy
 
-Group by dependency and feature boundary:
+Group by dependency and feature boundary (highest priority first):
 
-1. Project or build configuration.
-2. Shared interfaces and contracts.
-3. Infrastructure or framework changes.
-4. Feature implementation.
-5. Tests.
-6. Documentation.
+1. **By system/feature boundary** — Files in the same system (interface, implementation, config, tests) go together.
+2. **By infrastructure vs logic vs tests** — If a system spans multiple concerns, split: infrastructure first, then logic, then tests.
+3. **By assembly/namespace** — Files in the same assembly definition or namespace belong together.
+4. **Never mix unrelated systems** — Even if written in the same phase, unrelated changes go in separate commits.
 
-Never mix unrelated systems just to reduce commit count.
+Commit ordering (dependency first):
+1. Assembly definitions and project configuration
+2. Shared interfaces and base types
+3. Infrastructure systems (event bus, pools, state machines)
+4. Core logic systems
+5. ScriptableObject configurations
+6. Tests
+7. MonoBehaviour adapters and scene setup
+8. Documentation updates
 
 ## Commit Message Format
 
@@ -59,18 +66,51 @@ Use the project's convention if it exists. If not, use:
 <body>
 ```
 
-Recommended types:
+Recommended types: `feat`, `fix`, `test`, `refactor`, `docs`, `config`, `infra`
 
-- `feat`
-- `fix`
-- `test`
-- `refactor`
-- `docs`
-- `config`
-- `infra`
+Examples:
+- `infra(event-bus): add type-safe event bus with subscribe/publish API`
+- `feat(wallet): implement virtual currency wallet with persistence support`
+- `test(wallet): add unit tests for WalletSystem edge cases`
 
-Do not include AI attribution, generated-by lines, or assistant co-author
-trailers unless the project explicitly requires them.
+Body guidelines:
+- Reference task IDs from the workflow when available
+- Mention key design decisions if non-obvious
+- Keep body to 2-4 lines max
+
+## Structured Decision Trailers
+
+After the commit body, add trailing metadata to capture decision context. Extract from reviewer feedback and task specs.
+
+**Trailer format** (one per line, after a blank line following the body):
+
+```
+Constraint: <what project constraint most shaped this implementation>
+Rejected: <alternative approach considered but not taken, and why>
+Confidence: high | medium | low
+Scope-risk: <which other systems could be affected by these changes>
+Not-tested: <specific scenarios or edge cases without test coverage>
+```
+
+**Rules for trailers:**
+- Include `Constraint` and `Confidence` on every commit
+- Include `Rejected` only when a meaningful alternative existed
+- Include `Scope-risk` only when changes touch shared interfaces or base types
+- Include `Not-tested` only when there are known gaps
+- Keep each trailer to one line, max 120 characters
+- Do NOT fabricate trailers — only include what the reviewer feedback and task actually indicate
+
+**Example:**
+```
+feat(wallet): implement virtual currency wallet with persistence support
+
+Implements P2.T4 — core wallet system with add/deduct/query operations.
+
+Constraint: zero-alloc hot paths — pre-allocated transaction buffer
+Rejected: event sourcing pattern — overkill for single-currency wallet
+Confidence: high
+Not-tested: concurrent access from multiple systems
+```
 
 ## Process
 
@@ -90,4 +130,3 @@ Return:
 - Files included per commit.
 - Final working tree status.
 - Any skipped files and why.
-

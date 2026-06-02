@@ -61,16 +61,16 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 
 | Agent | Role |
 |-------|------|
-| `coder.md` | General implementation |
-| `tester.md` | Test authoring |
+| `coder.md` | General implementation — code quality, performance, architecture, encapsulation standards |
+| `tester.md` | Test authoring — NUnit, test type decision tree, 6 test categories, AAA pattern |
 | `reviewer.md` | General review → use `unity-reviewer` for Unity projects |
-| `committer.md` | Commit and versioning |
+| `committer.md` | Commit and versioning — structured decision trailers, dependency-ordered groups |
 
 ### Unity Specialist Agents (`.codex/packs/unity-game/agents/`)
 
 | Agent | Role |
 |-------|------|
-| `unity-coder.md` | MonoBehaviour, provider, installer, scene wiring implementation |
+| `unity-coder.md` | MonoBehaviour, provider, installer, scene wiring — full Step 0 skill loading, detailed rules, MCP wiring |
 | `unity-coder-lite.md` | Small C# changes with high rule compliance |
 | `unity-fixer.md` | Bug fixing — root cause analysis + regression test |
 | `unity-fixer-lite.md` | Fast single-file fixes |
@@ -101,6 +101,9 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `audio-clip-agent.md` | Batch AudioClip import settings application |
 | `graphics-setup-agent.md` | URP / graphics settings setup |
 | `package-analyzer.md` | Package dependency analysis |
+| `lean-planner.md` | Compact 3-5 task plan — no code skeletons, no acceptance criteria |
+| `unity-particle-designer.md` | VFX particle effect design, prefab creation, pooled VFX service wiring |
+| `unity-ui-toolkit-builder.md` | Editor-only UI Toolkit: EditorWindow, CustomEditor, UXML, USS |
 
 ---
 
@@ -127,6 +130,7 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `/update-plan` | Update an existing plan |
 | `/plan-workflow` | Workflow design |
 | `/game-idea` | Game idea development |
+| `/game-plan` | Game completion planner — GDD + TDD → module plans → orchestrate-ready |
 | `/refine-gdd` | GDD refinement |
 | `/refine-tdd` | TDD refinement |
 | `/adr` | Write an Architecture Decision Record |
@@ -135,10 +139,14 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | Command | Role |
 |---------|------|
 | `/implement` | Feature implementation via TDD pipeline |
+| `/implement-lite` | Lightweight single-class implementation — no test writer, no reviewer |
 | `/add-feature` | Add a feature to an existing system |
 | `/new-module` | Scaffold a new module |
 | `/fix` | Bug fix pipeline |
+| `/fix-lite` | Fast single-file fix — no analyzer, no reviewer |
 | `/fix-deep` | Deep root-cause analysis and bug fix |
+| `/fix-codex` | Codex-driven fix — unbiased analysis for large or stuck bugs |
+| `/game-plan` | Game completion planner — GDD → module plans → orchestrate-ready |
 | `/scene-setup` | Scene setup |
 | `/create-prefab-scene` | Create prefab and scene |
 | `/unity-scene-update` | Scene update |
@@ -167,7 +175,9 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | Command | Role |
 |---------|------|
 | `/smart-commit` | Smart commit message and staging |
+| `/smart-commit-selected` | Plan commits, select groups, commit only selected |
 | `/create-changelog` | Generate changelog |
+| `/update-claude-md` | Sync AGENTS.md with actual .codex/ folder state |
 
 #### Utilities
 | Command | Role |
@@ -207,6 +217,7 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `scene-hierarchy.md` | 6 required root containers, prefab domain, logic/visual separation |
 | `ecs-dots.md` | Authoring/Baker, ISystem+IJobEntity, ECB, Hybrid linking |
 | `addressables.md` | No Resources.Load, async loading, handle lifecycle |
+| `bootstrap-pattern.md` | VContainer installer hierarchy — IInstaller, ModuleInstaller, AppInstaller, AppScope, GameScope |
 
 ---
 
