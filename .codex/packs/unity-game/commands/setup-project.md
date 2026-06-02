@@ -21,31 +21,31 @@ every project needs its own:
 Before asking any questions, run these Bash commands to detect current project state:
 
 ```bash
-[ -f ".codex/project-features.json" ] && echo "FEATURES_JSON=yes" || echo "FEATURES_JSON=no"
+[ -f ".codex/project/FEATURES.json" ] && echo "FEATURES_JSON=yes" || echo "FEATURES_JSON=no"
 [ -d "Assets/_GameFolders/Scripts/Games/Ecs" ] && echo "ECS_DIR=yes" || echo "ECS_DIR=no"
 [ -d "Assets/_GameFolders/Scripts/Tests" ] && echo "TESTS_DIR=yes" || echo "TESTS_DIR=no"
 grep -q "com.unity.addressables" Packages/manifest.json 2>/dev/null && echo "ADDRESSABLES_PKG=yes" || echo "ADDRESSABLES_PKG=no"
-[ -f ".codex/project-features.json" ] && cat .codex/project-features.json || echo "{}"
+[ -f ".codex/project/FEATURES.json" ] && cat .codex/project/FEATURES.json || echo "{}"
 ```
 
 #### Decision Tree
 
-**A — project-features.json does NOT exist**
+**A — FEATURES.json does NOT exist**
 → Fresh setup. Proceed to Step 1 normally.
 → Pre-fill answers from detected signals as defaults.
 
-**B — project-features.json EXISTS and matches detected state**
+**B — FEATURES.json EXISTS and matches detected state**
 → Print: "Project already configured. Features: addressables=[x], testing=[x], ecs=[x]"
 → Ask: "Re-run setup to regenerate files, or sync settings only?"
 → If sync: run Steps 5b + 5c only, then stop.
 → If regenerate: continue from Step 1.
 
-**C — project-features.json EXISTS but CONFLICTS with detected state**
+**C — FEATURES.json EXISTS but CONFLICTS with detected state**
 → Print a conflict table showing declared vs detected values.
-→ If fix: update project-features.json, run Steps 5b + 5c, stop.
+→ If fix: update FEATURES.json, run Steps 5b + 5c, stop.
 → If skip: continue to Step 1 for full re-setup.
 
-**D — project-features.json does NOT exist but partial setup detected**
+**D — FEATURES.json does NOT exist but partial setup detected**
 → Print detected state as suggested defaults, proceed to Step 1 with defaults.
 
 ---
@@ -106,12 +106,12 @@ Collect all answers before proceeding. Do not ask one by one.
 
 ---
 
-## Step 1c — Write project-features.json
+## Step 1c — Write FEATURES.json
 
-After collecting all answers, write `.codex/project-features.json`:
+After collecting all answers, write `.codex/project/FEATURES.json`:
 
 ```bash
-cat > .codex/project-features.json << 'EOF'
+cat > .codex/project/FEATURES.json << 'EOF'
 {
   "addressables": <true|false>,
   "testing": <true|false>,
@@ -654,7 +654,7 @@ After all answers are collected, prepend a features summary to `.codex/project/P
 python3 - << 'PYEOF'
 import json
 
-with open('.codex/project-features.json') as f:
+with open('.codex/project/FEATURES.json') as f:
     features = json.load(f)
 
 lines = ["## Project Features\n\n"]

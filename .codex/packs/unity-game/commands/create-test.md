@@ -36,15 +36,15 @@ Example: /create-test EnemyCombat "needs IEnemySpawner and IEventBus"
 
 ### 2a — Feature Gate
 
-Check `.codex/project/project-features.json` if it exists:
+Check `.codex/project/FEATURES.json` if it exists:
 
 ```bash
-[ -f ".codex/project/project-features.json" ] && cat .codex/project/project-features.json || echo "{}"
+[ -f ".codex/project/FEATURES.json" ] && cat .codex/project/FEATURES.json || echo "{}"
 ```
 
 If `testing` is `false` → stop:
 ```
-⚠ Testing is disabled for this project (project-features.json: testing=false).
+⚠ Testing is disabled for this project (FEATURES.json: testing=false).
   Run /setup-project and enable Testing to use this command.
 ```
 

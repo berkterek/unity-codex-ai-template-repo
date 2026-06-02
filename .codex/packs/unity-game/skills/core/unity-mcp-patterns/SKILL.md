@@ -1,7 +1,7 @@
 
 # Unity MCP Patterns
 
-The unity-mcp server gives Claude Code direct control over the Unity Editor. These patterns ensure you use it efficiently and safely.
+The unity-mcp server gives Codex direct control over the Unity Editor. These patterns ensure you use it efficiently and safely.
 
 ## Rule 1: batch_execute for Everything
 

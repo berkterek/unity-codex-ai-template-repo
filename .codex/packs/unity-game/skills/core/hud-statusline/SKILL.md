@@ -1,7 +1,7 @@
 
 # HUD / Statusline Integration
 
-Guidance for commands and agents to update Claude Code's statusline with real-time Unity workflow state.
+Guidance for commands and agents to render a compact Unity workflow status line.
 
 ## Statusline Format
 
@@ -19,7 +19,7 @@ Fields:
 
 ## Reading Session State
 
-Statusline data comes from the hook state directory at `/tmp/unity-claude-hooks/`:
+Statusline data can come from a session state directory such as `.codex/project/state/`:
 
 | File | Content | Updated By |
 |------|---------|-----------|
@@ -33,8 +33,8 @@ Statusline data comes from the hook state directory at `/tmp/unity-claude-hooks/
 
 ```bash
 EDIT_COUNT=0
-if [ -f "/tmp/unity-claude-hooks/session-edits.txt" ]; then
-    EDIT_COUNT=$(sort -u "/tmp/unity-claude-hooks/session-edits.txt" | wc -l | tr -d ' ')
+if [ -f ".codex/project/state/session-edits.txt" ]; then
+    EDIT_COUNT=$(sort -u ".codex/project/state/session-edits.txt" | wc -l | tr -d ' ')
 fi
 ```
 
@@ -42,8 +42,8 @@ fi
 
 ```bash
 DURATION_MINS=0
-if [ -f "/tmp/unity-claude-hooks/session-start-time" ]; then
-    START=$(cat "/tmp/unity-claude-hooks/session-start-time")
+if [ -f ".codex/project/state/session-start-time" ]; then
+    START=$(cat ".codex/project/state/session-start-time")
     NOW=$(date +%s)
     DURATION_MINS=$(( (NOW - START) / 60 ))
 fi
@@ -97,7 +97,7 @@ Read from `session-cost.jsonl`:
 
 ```bash
 CALL_COUNT=0
-if [ -f "/tmp/unity-claude-hooks/session-cost.jsonl" ]; then
-    CALL_COUNT=$(wc -l < "/tmp/unity-claude-hooks/session-cost.jsonl" | tr -d ' ')
+if [ -f ".codex/project/state/session-cost.jsonl" ]; then
+    CALL_COUNT=$(wc -l < ".codex/project/state/session-cost.jsonl" | tr -d ' ')
 fi
 ```

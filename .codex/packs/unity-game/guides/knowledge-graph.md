@@ -1,0 +1,66 @@
+# Knowledge Graph
+
+The template ships with a Graphify-inspired knowledge graph at `.codex/graph/graph.json` (schema v1.1.0).
+Opt-in via `.codex/project/FEATURES.json` (`"graph": true`). When enabled, it is the single source of truth
+for `/catch-up`, `/orchestrate` pre-scan, and `/context-prime`.
+
+**Pipeline:** detect → extract (C# / asmdef / MCP) → build → finalize-calls → analyze → report → export
+
+**Commands:**
+- `/build-knowledge-graph [--full|--incremental] [--skip-mcp] [--validate] [--validate-with-codex]`
+- `/knowledge-graph <summary|implementers|publishers|subscribers|registrations|scope-tree|prefab|violations|diff|callers|impact|path|god-nodes>`
+
+**Update modes:**
+- Manual → `/build-knowledge-graph`
+- Continuous local watch → `bash .codex/graph/graph-watch.sh`
+- Validation → `/build-knowledge-graph --validate`
+
+Codex has no automatic hook mechanism, so the graph is not rebuilt after every
+write unless you explicitly run the watch script.
+
+---
+
+## Extractor Reliability Notes
+
+Lessons from live testing — read before debugging graph output.
+
+### csharp-extractor.sh
+
+- **Multi-line class declarations** (`class Foo\n  : IBar`) are handled by a python3 parser that joins up to 6 lines. Single-line and multi-line declarations both produce correct `base_types[]` and `implements[]`.
+- **Fully qualified interface names** (`Game.Abstracts.IFoo`) are reduced to their last segment (`IFoo`) before being stored. Both short and qualified names produce correct `implements[]`.
+- **methods[] extraction** — every public/private/protected method is captured per class (name, signature, line, is_async, is_static, return_type). Confidence: `INFERRED` (regex mode).
+- **partial_calls[] extraction** — call sites are extracted per file and merged into `codebase.calls[]` by `graph-builder.sh`. BCL types (`Debug`, `Mathf`, `Vector3`…) and C# keywords are filtered out. Confidence: `INFERRED`.
+- **Stale MCP cache** — when `mcp-extract.json` is older than 60 minutes, `graph-builder.sh` retains prefabs and scenes from the existing `graph.json` instead of dropping them. Run `/build-knowledge-graph` with Unity Editor open to refresh MCP data.
+
+### graph-builder.sh call edge merge
+
+- **Full build (`--full`):** discards retained call edges, uses only freshly extracted `partial_calls[]`.
+- **Incremental with changed files:** retains edges from unchanged files, replaces edges for changed files only.
+- **Incremental with no changed files:** retains all existing call edges unchanged (no re-extraction needed).
+- After assembly, `graph-traversal.py --finalize-calls` deduplicates edges and promotes `EXTRACTED` over `INFERRED` for the same caller+callee+file+line.
+
+### graph-traversal.py
+
+New in v1.1.0. Pure Python 3 stdlib — no pip install needed.
+
+| Subcommand | What it does |
+|---|---|
+| `impact <Node> [--hops N]` | BFS forward (downstream) + reverse (upstream) from node, default 3 hops |
+| `callers <Class.Method>` | One-hop reverse lookup — direct callers only |
+| `path <A> <B>` | BFS shortest path on forward call graph; exits 1 if no path |
+| `god-nodes [--top N]` | Rank nodes by in+out degree; `is_god_node: true` when total > 20 |
+| `--finalize-calls` | Sort + dedupe + promote confidence in `calls[]`; atomically rewrites `graph.json` |
+
+### MCP Extraction (mcp-extractor.md)
+
+These MCP tool behaviors were discovered during live Editor testing — they differ from what the tool documentation implies:
+
+| Tool / Pattern | Actual behavior |
+|----------------|----------------|
+| `manage_scene get_hierarchy` with `target` param | **target is ignored** — always returns full root list. Use `execute_code` recursive delegate for deep traversal. |
+| `manage_components` | **No `get` action.** Only `add`, `remove`, `set_property` exist. Use `execute_code` + `SerializedObject` for reading. |
+| `manage_prefabs get_hierarchy` | Works correctly for root component list. Does **not** return child GO hierarchy — use `execute_code` + `AssetDatabase` recursive walk for children. |
+| `execute_code` compiler | **Roslyn not available** in most Unity projects. Always use `compiler: "codedom"` (C# 6 — no local functions, no string interpolation with complex expressions). |
+| `VContainer.Unity.ParentReference` | Is a **struct** — `!= null` won't compile in CodeDom. Use `.TypeName` (string) field; empty string = no parent. |
+
+Full working code snippets for all patterns: see `.codex/graph/extractors/mcp-extractor.md`.

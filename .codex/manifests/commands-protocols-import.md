@@ -147,7 +147,7 @@ The following commands were ported from the source and placed in
 | `review-code.md` | Manual code review against unity-game pack rules. |
 | `scene-setup.md` | Scene construction pipeline via unity-setup + unity-scene-builder. |
 | `search.md` | Evidence-gathering search: explores codebase and recommends next action. |
-| `setup-project.md` | Folder structure, .asmdefs, base classes, and project-features.json generator. |
+| `setup-project.md` | Folder structure, .asmdefs, base classes, and FEATURES.json generator. |
 | `silent-failure-hunter.md` | Silent error audit for C# files. |
 | `smart-commit.md` | Semantic git commit with conventional commit format. |
 | `unity-scene-update.md` | Updates an existing scene's hierarchy via MCP. |

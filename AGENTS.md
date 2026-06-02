@@ -13,6 +13,7 @@ rules, and guides are organized under `.codex/`.
 ├── packs/
 │   └── unity-game/   — Unity-specific agents, commands, rules, guides, skills
 ├── project/       — Per-project overlay files (fill in each project)
+├── graph/         — Optional Unity knowledge graph extractors and validators
 ├── manifests/     — Import decisions and migration notes
 └── templates/     — Starter templates
 ```
@@ -200,6 +201,8 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `/ralph` | Retrospective analysis |
 | `/mermaid` | Generate a Mermaid diagram |
 | `/update-rules` | Sync project rules index with actual .codex/ folder state |
+| `/build-knowledge-graph` | Build/refresh Unity knowledge graph |
+| `/knowledge-graph` | Query Unity knowledge graph |
 
 ---
 
@@ -218,6 +221,10 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `ecs-dots.md` | Authoring/Baker, ISystem+IJobEntity, ECB, Hybrid linking |
 | `addressables.md` | No Resources.Load, async loading, handle lifecycle |
 | `bootstrap-pattern.md` | VContainer installer hierarchy — IInstaller, ModuleInstaller, AppInstaller, AppScope, GameScope |
+| `unity-async.md` | UniTask, cancellation, fire-and-forget, coroutine migration |
+| `unity-input.md` | New Input System hard rules and InputView pattern |
+| `unity-lifecycle.md` | Editor/runtime boundary, platform defines, DOTween cleanup |
+| `unity-prefabs.md` | Prefab ownership, variants, BaseCanvas, package prefab duplication |
 
 ---
 
@@ -232,6 +239,11 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | `serialization-safety.md` | Safe serialization change guide |
 | `nsubstitute.md` | NSubstitute usage guide |
 | `vcontainer.md` | VContainer DI guide |
+| `architecture-summary.md` | Quick architecture and workflow overview |
+| `context-management.md` | Checkpoint/resume and state conventions |
+| `knowledge-graph.md` | Graph builder/query usage and extractor notes |
+| `quick-start.md` | New/existing project setup workflow |
+| `setup-checklist.md` | Manual setup checklist after `/setup-project` |
 
 ---
 
@@ -273,6 +285,11 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | `five` | Quick 5-minute codebase summary |
 | `grill-me` | Codebase interrogation mode |
 | `mermaid` | Mermaid diagram generation |
+| `bootstrap-pattern` | Project-specific VContainer bootstrap reference |
+| `input-system` | Project-specific InputView/input action reference |
+| `scene-hierarchy` | Scene container and placement reference |
+| `unity-git` | Unity-aware git hygiene and commit grouping |
+| `unity-ugui` | UGUI setup and conventions |
 
 ### Platform (`skills/platform/`)
 
@@ -293,6 +310,7 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | `cinemachine` | Virtual cameras, blends, impulse, follow targets |
 | `navmesh` | NavMeshAgent setup, dynamic obstacles, off-mesh links |
 | `physics` | Layer matrix, non-alloc queries, trigger vs collision |
+| `particle-vfx` | ParticleSystem/VFX authoring and pooling reference |
 | `shader-graph` | URP shader nodes, property exposure, keyword variants |
 | `ui-toolkit` | USS, UXML, data binding, runtime panel setup |
 | `urp-pipeline` | Renderer features, camera stacking, custom render passes, SRP Batcher, Forward+ |

@@ -1,7 +1,7 @@
 # Unity Guardrails
 
-Codex has no hook mechanism. This file is the **model-level equivalent** of all
-rules that Claude Code enforces automatically via hooks. Every agent and command
+Codex has no hook mechanism. This file is the **model-level equivalent** of the
+rules that Claude Code enforced automatically via hooks. Every agent and command
 must internalize this list.
 
 Rules have three levels:

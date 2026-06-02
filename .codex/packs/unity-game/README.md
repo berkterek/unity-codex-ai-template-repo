@@ -57,6 +57,8 @@ a Codex session or as instructions in a task assignment.
 | `commands/debugger.md` | Root cause analysis — runtime exceptions, ECS, VContainer bugs. |
 | `commands/migrator.md` | Legacy pattern modernizer (coroutines → UniTask, singletons → VContainer, etc.). |
 | `commands/silent-failure-hunter.md` | Audits C# files for silent error patterns. |
+| `commands/build-knowledge-graph.md` | Builds or refreshes the optional Unity knowledge graph. |
+| `commands/knowledge-graph.md` | Queries the optional Unity knowledge graph. |
 
 ## Included Guides
 
@@ -69,6 +71,10 @@ a Codex session or as instructions in a task assignment.
 | `guides/serialization-safety.md` | Unity serialized data safety rules. |
 | `guides/unity-mcp.md` | Unity MCP usage rules and verification loop. |
 | `guides/vcontainer.md` | VContainer DI scope hierarchy and registration patterns. |
+| `guides/knowledge-graph.md` | Graph builder/query usage and extractor reliability notes. |
+| `guides/quick-start.md` | New/existing project setup workflow. |
+| `guides/setup-checklist.md` | Manual setup checklist after `/setup-project`. |
+| `guides/context-management.md` | Checkpoint/resume and state conventions. |
 
 ## Included Rules
 
@@ -81,6 +87,10 @@ a Codex session or as instructions in a task assignment.
 | `rules/testing.md` | TDD mandate, test types, NSubstitute, ECS play mode tests. |
 | `rules/addressables.md` | Asset loading, handle lifecycle, address management. |
 | `rules/unity-specifics.md` | Editor/runtime boundary, lifecycle order, threading, .meta files. |
+| `rules/unity-async.md` | UniTask, cancellation, and coroutine migration rules. |
+| `rules/unity-input.md` | New Input System hard rules and InputView pattern. |
+| `rules/unity-lifecycle.md` | Editor/runtime boundary, platform defines, DOTween cleanup. |
+| `rules/unity-prefabs.md` | Prefab ownership, variants, BaseCanvas, and duplication rules. |
 
 ## What Belongs Here
 
