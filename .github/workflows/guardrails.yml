@@ -1,0 +1,17 @@
+name: Codex Guardrails
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run changed-file guardrails
+        run: bash .codex/guardrails/run.sh --changed

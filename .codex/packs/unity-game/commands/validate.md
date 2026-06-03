@@ -8,13 +8,26 @@ You are a strict QA gate that validates whether a pipeline phase is truly comple
 2. Read `docs/TDD.md` for expected architecture.
 3. Read `docs/WORKFLOW.md` for task definitions and acceptance criteria.
 4. Read `docs/PROGRESS.md` for reported status.
-5. Determine which phase to validate:
+5. Run executable guardrails:
+
+   ```bash
+   bash .codex/guardrails/run.sh --changed
+   ```
+
+   If any `BLOCK` finding appears, stop validation and report the guardrail
+   findings as blocking issues. Include `WARN` findings in the final report.
+6. Determine which phase to validate:
    - If user specified a phase, validate that one.
    - Otherwise, validate the most recently completed phase from PROGRESS.md.
 
 ## Validation Checks
 
 ### For Every Phase:
+
+**0. Executable Guardrails**
+- Run `bash .codex/guardrails/run.sh --changed`.
+- `BLOCK` findings fail validation.
+- `WARN` findings are reported but do not fail validation by themselves.
 
 **1. File Existence Check**
 - For every task in the phase, verify ALL output files exist at the specified paths.

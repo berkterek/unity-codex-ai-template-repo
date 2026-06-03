@@ -19,7 +19,7 @@
 - `/update-plan --lean <file> <change>` — analyzer → **lean-planner** (`claude-sonnet-4-6`) → reviewer → save. Output: updated 3-5 task table only. Implementer auto-spawn: **disabled**. Use when the change is small (adding/removing a task, adjusting a file path).
 - `/smart-commit` — analyze dirty working tree → group into logical commits → commit
 - `/smart-commit-selected` — analyze dirty working tree → plan commit groups → **show checklist (multiSelect)** → commit only selected groups
-- `/orchestrate` — **complexity score** → read WORKFLOW.md → check `parallel_group` annotations → per-task: **test-type-router** → [tester if not NoTest] → **coder** (pure C#) / **unity-coder-lite** (Simple Unity) / **unity-coder** (Medium/Complex Unity) → **unity-verifier** → **Codex** → unity-reviewer → [unity-developer if score ≥ 0.7] → committer; tasks with same `parallel_group` run simultaneously (complexity ≥ 0.4); phase gate runs **ralph → silent-failure-hunt → validate** automatically before asking to proceed; emits `VERIFICATION_PASSED` event on success
+- `/orchestrate` — **complexity score** → read WORKFLOW.md → check `parallel_group` annotations → per-task: **test-type-router** → [tester if not NoTest] → **coder** (pure C#) / **unity-coder-lite** (Simple Unity) / **unity-coder** (Medium/Complex Unity) → **unity-verifier** → **Codex** → unity-reviewer → [unity-developer if score ≥ 0.7] → committer; tasks with same `parallel_group` run simultaneously (complexity ≥ 0.4); phase gate runs **guardrails → ralph → silent-failure-hunter → validate** automatically before asking to proceed; emits `VERIFICATION_PASSED` event on success
 
 > Reviewer priority: Codex → unity-reviewer (falls back to unity-reviewer if Codex is unavailable).
 
@@ -56,14 +56,14 @@
 - `/unity-scene-update [scene]` — Full scene audit — reorganizes containers AND converts bare GameObjects to prefabs under `_GameFolders/Prefabs/<Domain>/`; skips `[Setup]` targets (LifetimeScope objects wired manually)
 - `/performance-audit` — Audit files for allocations and hot-path violations
 - `/debug-session` — Structured root cause analysis; routes to **unity-fixer** (complex) or **unity-fixer-lite** (scoped) after root cause; **learner** skill runs on completion
-- `/silent-failure-hunt` — Audit files for swallowed exceptions and silent error patterns
+- `/silent-failure-hunter` — Audit files for swallowed exceptions and silent error patterns
 - `/ralph` — Relentless verify-fix loop (max 10 outer iterations) — refuses to stop until compile and tests are green or stuck is detected
-- `/qa` — Full quality pipeline: **ralph** (compile + tests) → **silent-failure-hunt** → **validate** — run after any implementation, accepts `--phase N` and `--files <path>`
+- `/qa` — Full quality pipeline: **guardrails** → **ralph** (compile + tests) → **silent-failure-hunter** → **validate** — run after any implementation, accepts `--phase N` and `--files <path>`
 
 ### Session & Context
 - `/caveman` — Ultra-compressed communication mode (~75% fewer tokens). Drops filler, keeps technical accuracy. Exit with `/normal`.
 - `/checkpoint` — Save current conversation summary to `.codex/project/state/checkpoint.md`, then run `/clear` to free context; next session auto-reads the checkpoint and resumes
-- `/context-prime` — Brief Claude on project context at the start of a session
+- `/context-prime` — Brief Codex on project context at the start of a session
 - `/search <query>` — **complexity score** → Phase 1: **Explore** + **unity-scout** simultaneously (complexity ≥ 0.4) → write findings to `.codex/project/state/search-findings.md` → Phase 2: reviewer validates **completeness** (COMPLETE / INCOMPLETE / REJECT, max 5 iter) → Phase 3: present findings to user → Phase 4: **action router** recommends next command (`/fix`, `/fix-deep`, `/implement`, `/create-plan`, `/update-plan`, or no action) — never executes automatically
 - `/dump` — Save current session notes to `.codex/project/logs/` as markdown
 - `/five` — 5 Whys root cause analysis for a bug or architectural problem

@@ -30,7 +30,7 @@ graph TD
     end
 
     subgraph Quality["Phase 5 — Quality"]
-        QA["/qa\nralph → silent-failure-hunt → validate"]
+        QA["/qa\nguardrails → ralph → silent-failure-hunter → validate"]
         RL["/ralph\nVerify-fix loop"]
         VL["/validate\nPhase exit criteria"]
         RC["/review-code\nManual review"]
@@ -52,16 +52,17 @@ graph TD
 ```mermaid
 graph TD
     GATE["SCOPE_GATE\nhuman: go / stop"]
+    GUARD["guardrails\nExecutable BLOCK/WARN checks"]
     TW["tester\nWrite test first"]
     CODER["unity-coder / unity-coder-lite\nImplementation"]
     VER["unity-verifier\nCompile + Tests via MCP"]
     REV{"Reviewer\nClaude → unity-reviewer"}
-    SFH["silent-failure-hunt\nSwallowed exceptions audit"]
+    SFH["silent-failure-hunter\nSwallowed exceptions audit"]
     DEV["unity-developer\nComplex tasks score ≥ 0.7"]
     COMMIT_GATE["COMMIT_GATE\nhuman: go / stop"]
     CMT["committer\nSemantic git commit"]
 
-    GATE --> TW --> CODER --> VER
+    GATE --> GUARD --> TW --> CODER --> VER
     VER -->|VALIDATED| REV
     VER -->|FAILED| CODER
     REV -->|APPROVED| SFH

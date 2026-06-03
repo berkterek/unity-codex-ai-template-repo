@@ -4,6 +4,16 @@ Codex has no hook mechanism. This file is the **model-level equivalent** of the
 rules that Claude Code enforced automatically via hooks. Every agent and command
 must internalize this list.
 
+Executable enforcement for the highest-value checks lives at:
+
+```bash
+bash .codex/guardrails/run.sh --changed
+bash .codex/guardrails/run.sh --staged
+bash .codex/guardrails/run.sh --files Assets/Scripts/Foo.cs
+```
+
+`BLOCK` findings exit `1`. `WARN` findings exit `0` but must be reported.
+
 Rules have three levels:
 - **BLOCK** — never do this; automatic FAIL
 - **WARN** — flag it, report to reviewer, then continue
@@ -33,6 +43,20 @@ through `IEventBus + PauseService`.
 `static Instance`, `static _instance` — forbidden. VContainer is the only DI
 mechanism. Exception: `EventBusAccessor` (approved static bridge for ECS ↔ Mono
 communication).
+
+### Never put business logic in MonoBehaviour
+MonoBehaviour classes are limited to View or Provider roles. They may read
+input, update UI, trigger animation, or wrap Unity APIs, but they must not own
+business logic, scoring, state orchestration, event publishing, or service
+coordination. Move that work to injected services.
+
+### Never instantiate services from MonoBehaviour
+`new SomeService()` inside a MonoBehaviour is forbidden. Dependencies must be
+registered through VContainer and injected by interface.
+
+### Never depend on concrete services in constructors
+Service constructors must accept interfaces, not concrete service classes. This
+keeps modules replaceable, testable, and aligned with DIP.
 
 ### Never use UnityEditor namespace without #if UNITY_EDITOR
 `using UnityEditor` or any `UnityEditor.*` call in a runtime assembly is
@@ -80,6 +104,11 @@ at edit time.
 - Parameters, locals: `camelCase`
 - Interfaces: `I` prefix
 - IEvent structs: `Event` suffix (e.g. `LevelStartedEvent`)
+
+### SOLID/OOP violations
+- A class responsibility that needs `and` to describe should be split.
+- Long MonoBehaviours above ~100 lines usually indicate mixed View/Provider/service responsibilities.
+- Type-check `if`/`else if` chains for behavior should become polymorphism.
 
 ### Hot path expensive calls
 Inside `Update`, `FixedUpdate`, `LateUpdate`, `Tick`, `FixedTick`, `LateTick`:

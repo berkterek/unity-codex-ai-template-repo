@@ -14,7 +14,7 @@
 
 2. Read `.codex/packs/unity-game/agents/package-analyzer.md` to load the package-analyzer instructions. Then invoke a `general-purpose` subagent with those instructions as the system prompt, passing the parsed flags (`--only`, `--include-assets-plugins`, `--include-unity-builtins`) and the current working directory as context. Capture its JSON array output.
 
-   > **Important:** Do NOT use `subagent_type: "package-analyzer"` in the Agent tool — that type is not registered as a built-in FleetView agent. Instead use `subagent_type: "general-purpose"` and embed the package-analyzer instructions in the prompt.
+   > **Important:** Do NOT use `subagent_type: "package-analyzer"` in the Agent tool unless that agent type is registered in the current environment. Use `subagent_type: "general-purpose"` and embed the package-analyzer instructions in the prompt when no direct agent type is available.
 
    > **Deep scan for Assets-folder plugins:** When `--include-assets-plugins` is set (or when a package lives under `Assets/_AssetFolders/` or `Assets/Plugins/`), the package-analyzer MUST execute steps 3b (script sampling) and 3c (demo scene inspection). These packages have no README; scripts and scenes are the only source of truth.
 

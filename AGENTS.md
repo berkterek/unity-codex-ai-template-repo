@@ -13,6 +13,7 @@ rules, and guides are organized under `.codex/`.
 ├── packs/
 │   └── unity-game/   — Unity-specific agents, commands, rules, guides, skills
 ├── project/       — Per-project overlay files (fill in each project)
+├── guardrails/    — Executable Codex validators for BLOCK/WARN rules
 ├── graph/         — Optional Unity knowledge graph extractors and validators
 ├── manifests/     — Import decisions and migration notes
 └── templates/     — Starter templates
@@ -35,14 +36,32 @@ Every agent and command reads these before starting:
 
 Codex has no hook mechanism. `.codex/packs/unity-game/guides/guardrails.md`
 fills that gap. **All agents and commands must internalize this file.**
+Executable enforcement lives in `.codex/guardrails/run.sh`.
 
 Three levels:
 
 | Level | Examples |
 |-------|---------|
-| **BLOCK** | `git push`, `.unity`/`.prefab` text edit, `UnityEvent`, `Time.timeScale`, static singleton, `UnityEditor` without guard |
-| **WARN** | `async void`, `GetComponent` in Awake, legacy Input API, hot-path LINQ/alloc, null propagation on Unity objects |
+| **BLOCK** | `git push`, `.unity`/`.prefab` text edit, `UnityEvent`, `Time.timeScale`, static singleton, MonoBehaviour business logic, `UnityEditor` without guard |
+| **WARN** | `async void`, `GetComponent` in Awake, legacy Input API, SOLID/OOP drift, hot-path LINQ/alloc, null propagation on Unity objects |
 | **GATE** | Pipeline cannot start without Director Gate; `unity-reviewer` required before commit |
+
+Run executable guardrails at workflow gates:
+
+```bash
+bash .codex/guardrails/run.sh --changed
+bash .codex/guardrails/run.sh --staged
+bash .codex/guardrails/run.sh --files Assets/Scripts/Foo.cs
+```
+
+`BLOCK` findings exit `1` and must be fixed before `/validate`, `/qa`, or
+`/smart-commit` proceeds. `WARN` findings exit `0` but must be reported.
+
+For local git enforcement, enable the bundled hook once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
 
 ---
 
@@ -211,6 +230,7 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 | File | Covers |
 |------|--------|
 | `architecture.md` | VContainer DI, IEventBus, Provider, InputView, AppScope |
+| `solid-oop.md` | MonoBehaviour role boundaries, SRP, OCP, DIP |
 | `csharp-unity.md` | Naming, namespace, null check, UniTask, encapsulation |
 | `performance.md` | Zero-alloc hot path, caching, pooling, draw calls, UI canvas |
 | `testing.md` | Test type decision (EditMode/PlayMode/ECS/NoTest), NSubstitute, AAA |
@@ -267,6 +287,7 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | `commit-trailers` | Conventional commit trailers — co-author, ticket links, sign-off |
 | `event-systems` | IEventBus patterns — pub/sub, struct events, subscribe/unsubscribe lifecycle |
 | `event-bus` | Project-specific IEventBus implementation — location, namespace, code examples |
+| `solid-oop` | MonoBehaviour View/Provider boundaries, SRP one-sentence test, OCP, DIP |
 | `logging` | Project-specific DLog pattern — logging implementation, location, and usage |
 | `save-load` | Project-specific SaveLoadSystem pattern — location, namespace, and usage |
 | `tdd-nsubstitute` | Project-specific TDD pattern — assembly structure, test templates, mock rules |
@@ -358,7 +379,7 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | Package | Feature Flag | When Disabled |
 |---------|-------------|---------------|
 | Addressables | `addressables` | Addressables rules skipped |
-| NSubstitute | `testing` | Test hooks and asmdefs skipped |
+| NSubstitute | `testing` | Test rules and asmdefs skipped |
 | Unity ECS DOTS | `ecs` | ECS folder and rules skipped |
 
 ---

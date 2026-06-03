@@ -1,13 +1,13 @@
-# Agents (`.codex/agents/`)
+# Agents (`.codex/packs/unity-game/agents/`)
 
-> `.codex/agents/*.md` files are prompt overlays for built-in FleetView agent types — they do not define new `subagent_type` values.
+> `.codex/packs/unity-game/agents/*.md` files are reusable role templates for Codex workflows.
 > Use the **Invoke** column below as the exact `subagent_type` value when spawning an agent.
 > Every agent's `subagent_type` matches its filename (e.g. `unity-coder.md` → `subagent_type: unity-coder`).
 
 | Agent | Invoke (`subagent_type`) | Role |
 |-------|--------------------------|------|
 | `coder` | `coder` | **Pure C# only — no Unity API.** Used for `_Framework/`, `Games/Abstracts/`, and pure C# targets in `Games/Concretes/` in complexity-scored pipelines (`/orchestrate`, `/migrate`). |
-| `tester` | `tester` | NUnit + NSubstitute test writer — AAA pattern, interface-only mocks. Spawned as an isolated `claude` subagent (clean context window) in `/implement`, `/fix`, `/orchestrate`, `/migrate` — prevents implementation context from leaking into test decisions. |
+| `tester` | `tester` | NUnit + NSubstitute test writer — AAA pattern, interface-only mocks. Spawned with isolated context in `/implement`, `/fix`, `/orchestrate`, `/migrate` to prevent implementation context from leaking into test decisions. |
 | `reviewer` | `reviewer` | General code review |
 | `unity-developer` | `unity-developer` | Unity 6 specialist — second reviewer for complex tasks (score ≥ 0.7); checks hot paths, draw calls, ECS safety, Addressables lifecycle + prefab structure (10-point checklist) |
 | `unity-setup` | `unity-setup` | Unity Editor setup via MCP — scenes, prefabs (root=logic / Body=visual, domain folders, Prefab Variants), ScriptableObjects |

@@ -140,7 +140,7 @@ The following commands were ported from the source and placed in
 | `new-module.md` | 5-file module generator (VContainer, IEventBus pattern). |
 | `performance-audit.md` | Hot path audit — flags allocations and expensive calls in Update loops. |
 | `plan-workflow.md` | Generates phased WORKFLOW.md from GDD + TDD. |
-| `qa.md` | Quality gate: ralph → silent-failure-hunt → validate in sequence. |
+| `qa.md` | Quality gate: guardrails → ralph → silent-failure-hunter → validate in sequence. |
 | `ralph.md` | Verify-fix loop — compile + tests until green or max iterations. |
 | `refine-gdd.md` | GDD iteration with cascade warnings. |
 | `refine-tdd.md` | TDD iteration with impact assessment. |
@@ -170,4 +170,3 @@ Conversion changes applied:
 | `build-game.md` | Too project-specific; belongs in `project/TOOLING.md`. |
 | `init-project.md` | Covered by `core/README.md` first-time setup instructions. |
 | `benchmark.md` | Too platform-specific; not in source repo. |
-

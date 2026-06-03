@@ -81,6 +81,7 @@ a Codex session or as instructions in a task assignment.
 | Rule | Purpose |
 |------|---------|
 | `rules/architecture.md` | Dependency direction, VContainer, IEventBus, module structure. |
+| `rules/solid-oop.md` | MonoBehaviour View/Provider boundaries, SRP, OCP, and DIP. |
 | `rules/csharp-unity.md` | Naming, async, encapsulation, null checks, control flow. |
 | `rules/performance.md` | Zero-allocation hot paths, caching, batching, draw calls. |
 | `rules/ecs-dots.md` | ECS authoring, component naming, system order, structural changes. |

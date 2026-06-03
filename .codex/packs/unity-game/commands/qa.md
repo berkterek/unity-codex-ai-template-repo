@@ -3,7 +3,7 @@
 > Apply `.codex/packs/unity-game/guides/guardrails.md` rules throughout.
 
 
-Runs a three-stage quality check on the current codebase state: compile + test green → silent failure audit → phase validation. Use after any implementation work to confirm the project is clean before proceeding.
+Runs a four-stage quality check on the current codebase state: executable guardrails → compile + test green → silent failure audit → phase validation. Use after any implementation work to confirm the project is clean before proceeding.
 
 ## Usage
 
@@ -39,8 +39,24 @@ Plugins: superpowers:verification-before-completion [✓/✗]
 ## Pipeline
 
 ```
-[Stage 1] Ralph → [Stage 2] Silent Failure Hunt → [Stage 3] Validate → [Report]
+[Stage 0] Guardrails → [Stage 1] Ralph → [Stage 2] Silent Failure Hunt → [Stage 3] Validate → [Report]
 ```
+
+---
+
+## Stage 0 — Executable Guardrails
+
+Run:
+
+```bash
+bash .codex/guardrails/run.sh --changed
+```
+
+- `PASS` → no `BLOCK` findings; proceed to Stage 1.
+- `FAIL` → stop and print all `BLOCK` findings. Do not proceed until fixed.
+- `WARN` findings → include in the QA report and proceed.
+
+Print: `✓ Stage 0 — Guardrails: no blocks.` or `✗ Stage 0 — Guardrails: [N] blocks.`
 
 ---
 

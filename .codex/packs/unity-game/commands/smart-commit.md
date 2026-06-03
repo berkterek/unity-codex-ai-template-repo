@@ -35,6 +35,25 @@ If the working tree is clean → stop and print:
 Nothing to commit. Working tree is clean.
 ```
 
+## Step 1.5 — Guardrail Gate
+
+Before staging or committing, run:
+
+```bash
+bash .codex/guardrails/run.sh --changed
+```
+
+If any `BLOCK` finding appears, stop and report the findings. Do not commit.
+Include `WARN` findings in the commit planning summary.
+
+After staging each logical commit group, run:
+
+```bash
+bash .codex/guardrails/run.sh --staged
+```
+
+If staged guardrails fail, unstage that group, report the issue, and stop.
+
 ---
 
 ## Step 2 — Commit

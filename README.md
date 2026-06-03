@@ -13,6 +13,7 @@ slash commands instantly.
 - [Required Stack](#required-stack)
 - [Folder Layout](#folder-layout)
 - [Guardrails — Hook Equivalents](#guardrails--hook-equivalents)
+- [Executable Guardrails](#executable-guardrails)
 - [Reviewer — Claude](#reviewer--claude)
 - [Agent List](#agent-list)
 - [Command List](#command-list)
@@ -28,11 +29,11 @@ slash commands instantly.
 Codex CLI reads `AGENTS.md` and `.codex/` at the project root. This template
 ships that folder pre-configured with:
 
-- **Guardrails** — Hook equivalents: BLOCK (git push, .unity text edit, UnityEvent, static singleton), WARN (async void, hot-path alloc, LINQ, null propagation), GATE (Director Gate, reviewer requirement)
+- **Guardrails** — Hook equivalents: BLOCK (git push, .unity text edit, UnityEvent, static singleton, MonoBehaviour business logic), WARN (async void, SOLID/OOP drift, hot-path alloc, LINQ, null propagation), GATE (Director Gate, reviewer requirement)
 - **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 28+ more
 - **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/game-plan`, `/build-knowledge-graph`, `/smart-commit-selected` and 55+ more
-- **Rules** — Architecture, naming, testing, ECS, serialization, Addressables, bootstrap, async, input, lifecycle, and prefab standards
-- **Skills** — 68 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, and more
+- **Rules** — Architecture, SOLID/OOP, naming, testing, ECS, serialization, Addressables, bootstrap, async, input, lifecycle, and prefab standards
+- **Skills** — 69 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
 
 ---
 
@@ -110,14 +111,15 @@ These packages must be installed in the Unity project:
 │   ├── agents/          coder, tester, reviewer, committer
 │   ├── commands/        orchestrate, continue, dry-run, status, stop, validate
 │   └── protocols/       checkpoint, event-journal, mailbox, progress
+├── guardrails/          Executable BLOCK/WARN validators for Codex
 ├── graph/               Optional Unity knowledge graph tools and validators
 ├── packs/
 │   └── unity-game/
 │       ├── agents/      34 Unity specialist agents
 │       ├── commands/    61 Unity slash commands
-│       ├── rules/       15 rule files
+│       ├── rules/       16 rule files
 │       ├── guides/      19 guides (including guardrails)
-│       └── skills/      68 skill files
+│       └── skills/      69 skill files
 ├── project/             Per-project overlay — fill in each project
 ├── templates/           GDD, TDD, CODING_CONVENTIONS templates
 └── manifests/           Import and migration decisions
@@ -139,18 +141,54 @@ fills that gap. Every agent and command reads this file at startup.
 | Use `UnityEvent` | Use `IEventBus` instead |
 | Directly assign `Time.timeScale` | Use `IEventBus + PauseService` |
 | Static singleton (`static Instance`) | VContainer is the only DI mechanism |
+| Business logic in MonoBehaviour | MonoBehaviour is limited to View/Provider roles |
+| `new SomeService()` in MonoBehaviour | Dependencies must come from VContainer injection |
+| Concrete service constructor dependencies | Depend on interfaces for DIP and testability |
 | `UnityEditor` namespace without `#if UNITY_EDITOR` | Player build crashes |
 | Weaken config files | Fix the code, not the config |
 
 ### WARN — Flag and Continue
 
-`async void`, `GetComponent` in Awake, legacy Input API, hot-path LINQ/allocation,
-`?.`/`??` on Unity objects, namespace format violation, naming convention violation,
-`SerializeField` rename without `FormerlySerializedAs`, missing test file.
+`async void`, `GetComponent` in Awake, legacy Input API, SOLID/OOP drift, long
+MonoBehaviours, hot-path LINQ/allocation, `?.`/`??` on Unity objects, namespace
+format violation, naming convention violation, `SerializeField` rename without
+`FormerlySerializedAs`, missing test file.
 
 ### GATE — Verify Before Proceeding
 
 Pipeline cannot start without Director Gate. `unity-reviewer` is required before every commit.
+
+---
+
+## Executable Guardrails
+
+Codex cannot run Claude-style hooks on every edit, so this template provides a
+real shell gate:
+
+```bash
+bash .codex/guardrails/run.sh --changed
+bash .codex/guardrails/run.sh --staged
+bash .codex/guardrails/run.sh --files Assets/Scripts/Foo.cs
+```
+
+Output uses `BLOCK` and `WARN` lines. Any `BLOCK` exits `1`; warnings exit `0`
+but must be reported. `/validate`, `/qa`, and `/smart-commit` are documented to
+run this before proceeding.
+
+Test the guardrails with:
+
+```bash
+bash .codex/guardrails/test/verify-guardrails.sh
+```
+
+Enable the local pre-commit safety net with:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The repository also includes `.github/workflows/guardrails.yml` so PR/push
+checks run the same guardrail runner.
 
 ---
 
@@ -254,6 +292,7 @@ Review scope:
 | File | Covers |
 |------|--------|
 | `architecture.md` | VContainer DI, IEventBus, Provider, InputView, AppScope |
+| `solid-oop.md` | MonoBehaviour View/Provider boundaries, SRP, OCP, DIP |
 | `csharp-unity.md` | Naming, namespace, null check, UniTask, encapsulation |
 | `performance.md` | Zero-alloc hot path, caching, pooling, draw calls, UI canvas |
 | `testing.md` | EditMode/PlayMode/ECS/NoTest decision tree, NSubstitute, AAA |
@@ -315,6 +354,7 @@ Skills live under `.codex/packs/unity-game/skills/` and are read-only reference 
 | `commit-trailers` | Conventional commit trailers — co-author, ticket links, sign-off |
 | `event-systems` | IEventBus patterns — pub/sub, struct events, subscribe/unsubscribe lifecycle |
 | `event-bus` | Project-specific IEventBus implementation — location, namespace, code examples |
+| `solid-oop` | MonoBehaviour View/Provider boundaries, SRP one-sentence test, OCP, DIP |
 | `logging` | Project-specific DLog pattern — logging implementation, location, and usage |
 | `save-load` | Project-specific SaveLoadSystem pattern — location, namespace, and usage |
 | `tdd-nsubstitute` | Project-specific TDD pattern — assembly structure, test templates, mock rules |
@@ -426,6 +466,8 @@ Unity Scene
 ```
 
 - **No singletons** — VContainer `Lifetime.Singleton`
+- **No MonoBehaviour business logic** — MonoBehaviour is View/Provider only
+- **No concrete service dependencies** — Constructors depend on interfaces
 - **No coroutines** — `async UniTask`
 - **No legacy input** — New Input System, InputView pattern
 - **No UnityEngine in service layer** — Provider pattern

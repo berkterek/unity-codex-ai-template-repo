@@ -10,6 +10,7 @@ agent orchestration from project-specific rules and technology packs.
 | `core/agents/` | Project-agnostic agent role templates. |
 | `core/commands/` | Project-agnostic workflow commands. |
 | `core/protocols/` | Shared progress, event, mailbox, and checkpoint formats. |
+| `guardrails/` | Executable BLOCK/WARN validators for Codex workflow gates. |
 | `project/` | Per-repository overlay files. Fill these for each project. |
 | `templates/` | Copyable templates for project overlays. |
 | `packs/` | Optional technology/domain packs such as Unity. |
@@ -96,6 +97,26 @@ Use .codex/core/commands/status.md and report the current workflow state.
 ```text
 Use .codex/core/commands/continue.md and resume from .codex/project/EVENTS.jsonl
 and .codex/runtime checkpoints.
+```
+
+## Executable Guardrails
+
+Codex does not have Claude-style edit hooks. Run the template validators at
+workflow gates:
+
+```bash
+bash .codex/guardrails/run.sh --changed
+bash .codex/guardrails/run.sh --staged
+bash .codex/guardrails/run.sh --files Assets/Scripts/Foo.cs
+```
+
+`BLOCK` findings exit `1`; `WARN` findings exit `0` and must be included in
+the report.
+
+Enable the optional local git hook once per clone:
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 ## What Goes Where

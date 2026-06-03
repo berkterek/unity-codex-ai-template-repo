@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -u
+
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)"
+cd "$ROOT" || exit 2
+
+if [ ! -f ".codex/guardrails/run.sh" ]; then
+  printf 'Guardrails skipped: .codex/guardrails/run.sh not found.\n'
+  exit 0
+fi
+
+printf 'Running Codex guardrails on staged files...\n'
+bash .codex/guardrails/run.sh --staged
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  printf '\nCommit blocked by Codex guardrails. Fix BLOCK findings and retry.\n'
+fi
+
+exit "$status"

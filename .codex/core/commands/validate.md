@@ -18,6 +18,17 @@ recent completed or active phase.
 
 ## Checks
 
+### Executable Guardrails
+
+If `.codex/guardrails/run.sh` exists, run:
+
+```bash
+bash .codex/guardrails/run.sh --changed
+```
+
+- `BLOCK` findings fail validation.
+- `WARN` findings are reported but do not fail validation by themselves.
+
 ### File Checks
 
 - Every expected output exists.
