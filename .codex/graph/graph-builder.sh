@@ -162,6 +162,8 @@ mtime = os.path.getmtime('$MCP_CACHE')
 print(int((time.time() - mtime) / 60))
 " 2>/dev/null || echo 9999)
   fi
+  # --full forces fresh extraction — ignore cache age
+  [[ "$MODE" == "full" ]] && MCP_AGE=9999
   if [[ $MCP_AGE -lt 60 ]]; then
     MCP_SCENES=$(jq '.scenes // []' "$MCP_CACHE")
     MCP_PREFABS=$(jq '.prefabs // []' "$MCP_CACHE")
@@ -341,6 +343,76 @@ if [[ "$MCP_SCOPE_PARENTS" != "[]" && "$MCP_SCOPE_PARENTS" != "null" ]]; then
     )' 2>/dev/null || echo "$SCOPES")
 fi
 
+# ── Path Drift Detector — validate retained prefab paths against disk ────────
+STALE_PATH_WARNINGS="[]"
+if [[ "$MCP_PREFABS" != "[]" && "$MCP_PREFABS" != "null" ]]; then
+  STALE_PATH_WARNINGS=$(MCP_PREFABS_JSON="$MCP_PREFABS" UNITY_FOLDER="$UNITY_FOLDER" GRAPH_QUIET="$QUIET" python3 <<'PYEOF'
+import json, os, sys
+prefabs = json.loads(os.environ['MCP_PREFABS_JSON'])
+unity_folder = os.environ.get('UNITY_FOLDER', '.')
+quiet = os.environ.get('GRAPH_QUIET') == '1'
+warnings = []
+for p in prefabs:
+    path = p.get("path", "")
+    # Paths from MCP start with "Assets/..." — prepend unity_folder if not "."
+    disk_path = path if unity_folder == "." else os.path.join(unity_folder, path)
+    if path and not os.path.exists(disk_path):
+        warnings.append({
+            "code": "STALE_PREFAB_PATH",
+            "message": "Prefab path no longer exists on disk: " + path,
+            "entity": p.get("name", "?")
+        })
+if warnings and not quiet:
+    print("graph-builder: STALE_PREFAB_PATH — " + str(len(warnings)) + " stale prefab(s) detected. Run /build-knowledge-graph with MCP to refresh.", file=sys.stderr)
+print(json.dumps(warnings))
+PYEOF
+  )
+fi
+
+# ── Missing Script Detector — warn on null components in scenes/prefabs ──────
+MISSING_SCRIPT_WARNINGS="[]"
+MISSING_INPUT=$(jq -n --argjson scenes "$MCP_SCENES" --argjson prefabs "$MCP_PREFABS" \
+  '{scenes: $scenes, prefabs: $prefabs}' 2>/dev/null || echo '{"scenes":[],"prefabs":[]}')
+[[ -z "$MISSING_INPUT" ]] && MISSING_INPUT='{"scenes":[],"prefabs":[]}'
+
+MISSING_SCRIPT_WARNINGS=$(MISSING_INPUT_JSON="$MISSING_INPUT" GRAPH_QUIET="$QUIET" python3 <<'PYEOF'
+import json, os, sys
+
+data = json.loads(os.environ['MISSING_INPUT_JSON'])
+quiet = os.environ.get('GRAPH_QUIET') == '1'
+warnings = []
+
+def check_go(go, scene_name, path=""):
+    full_path = (path + "/" + go["name"]) if path else go["name"]
+    if go.get("has_missing_scripts"):
+        warnings.append({
+            "code": "MISSING_SCRIPT",
+            "message": "Null component (missing/deleted script) on: " + full_path + " in scene: " + scene_name,
+            "entity": go["name"],
+            "scene": scene_name
+        })
+    for child in go.get("children", []):
+        check_go(child, scene_name, full_path)
+
+for scene in data.get("scenes", []):
+    scene_name = scene.get("name", "?")
+    for go in scene.get("gameObjects", scene.get("gameobjects", [])):
+        check_go(go, scene_name)
+
+for prefab in data.get("prefabs", []):
+    if prefab.get("has_missing_scripts"):
+        warnings.append({
+            "code": "MISSING_SCRIPT",
+            "message": "Null component (missing/deleted script) on prefab: " + prefab.get("path", prefab.get("name", "?")),
+            "entity": prefab.get("name", "?")
+        })
+
+if warnings and not quiet:
+    print("graph-builder: MISSING_SCRIPT — " + str(len(warnings)) + " missing script(s) detected.", file=sys.stderr)
+print(json.dumps(warnings))
+PYEOF
+)
+
 # ── Assemble final graph ──────────────────────────────────────────────────────
 NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 END_EPOCH=$(python3 -c "import time; print(int(time.time() * 1000))")
@@ -371,6 +443,8 @@ FINAL_GRAPH=$(jq -n \
   --argjson prefabs "$MCP_PREFABS" \
   --argjson mcp_meta "$MCP_META" \
   --argjson calls "$ALL_CALLS" \
+  --argjson stale_warnings "$STALE_PATH_WARNINGS" \
+  --argjson missing_warnings "$MISSING_SCRIPT_WARNINGS" \
   --argjson scanned "$SCANNED" \
   --argjson hits "$CACHE_HITS" \
   --argjson ms "$BUILD_MS" \
@@ -394,7 +468,7 @@ FINAL_GRAPH=$(jq -n \
       mcp_extraction: $mcp_meta,
       calls:      $calls
     },
-    validation: { errors: [], warnings: [] },
+    validation: { errors: [], warnings: ($stale_warnings + $missing_warnings) },
     stats: { scanned_files: $scanned, cache_hits: $hits, build_ms: $ms }
   }')
 

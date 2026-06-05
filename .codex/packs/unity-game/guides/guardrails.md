@@ -31,6 +31,10 @@ These files contain YAML-serialized binary references. Text edits break
 references silently. For scene, prefab, and asset changes use **MCP tools only**:
 `manage_scene`, `manage_gameobject`, `manage_components`, `manage_build`.
 
+### Never create bare runtime GameObjects
+`new GameObject(...)` is forbidden in runtime C#. Every runtime object must come
+from a prefab-backed path such as pooled prefab instances or Addressables.
+
 ### Never use UnityEvent
 `UnityEvent`, `UnityEvent<T>`, `[SerializeField] UnityEvent` — forbidden in
 runtime C#. Use `IEventBus`.
@@ -69,8 +73,18 @@ compile.
 `Read` + `Grep` to map the impact area first.
 
 ### Never weaken config files to work around code problems
-`.asmdef`, `settings.json`, `.inputactions`, `ProjectSettings/` — fix the code,
-not the config.
+`.asmdef`, `.inputactions`, `ProjectSettings/`, `Packages/manifest.json`, and
+`Packages/packages-lock.json` — fix the code, not the config. Test assembly
+`.asmdef` files are the narrow exception.
+
+### Never put Unity object inheritance in service/domain folders
+Files under `_Framework/`, `Games/Abstracts`, `Games/Concretes`,
+`Game/Abstracts`, and `Game/Concretes` must not inherit `MonoBehaviour` or
+`ScriptableObject`. Move Unity API access to Provider/View classes.
+
+### ECS/IEvent enums must use byte backing
+Enums inside ECS components or `IEvent` structs must have a `byte` base type:
+`enum State : byte`.
 
 ---
 
@@ -120,8 +134,9 @@ Inside `Update`, `FixedUpdate`, `LateUpdate`, `Tick`, `FixedTick`, `LateTick`:
 ### LINQ in hot paths
 Do not use LINQ inside `Update` / `FixedUpdate` / `LateUpdate` — it allocates.
 
-### Runtime Instantiate
-`GameObject.Instantiate` at runtime is forbidden. Use an object pool.
+### Runtime Destroy
+`Destroy(...)` outside Pool, Manager, or Spawner files should be flagged. If an
+object is pool-managed, call the pool return path instead.
 
 ### Null propagation on Unity objects
 Do not use `?.` or `??` on `MonoBehaviour`, `Component`, or `ScriptableObject`.
@@ -135,10 +150,6 @@ will call methods on a destroyed object — the most common subtle Unity bug.
 ### ECS structural changes inside a query loop
 `EntityManager.AddComponent`, `RemoveComponent`, `DestroyEntity`, `Instantiate`
 are forbidden inside a query loop. Use `EntityCommandBuffer`.
-
-### ECS enum missing byte base
-Enums inside ECS components or `IEvent` structs must have a `byte` base type:
-`enum State : byte`.
 
 ### UniTask missing CancellationToken
 `async UniTask` methods must accept a `CancellationToken` parameter. Exempt:

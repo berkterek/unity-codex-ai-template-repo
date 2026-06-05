@@ -206,6 +206,63 @@ GameObject:
   m_Name: Bad' \
   "unity-serialized-text-edit"
 
+assert_block \
+  "Runtime new GameObject is blocked" \
+  "Assets/Scripts/BadNewGameObject.cs" \
+  'using UnityEngine;
+public sealed class BadNewGameObject
+{
+    public GameObject Create()
+    {
+        return new GameObject("Bad");
+    }
+}' \
+  "new-gameobject"
+
+assert_block \
+  "ECS enum without byte base is blocked" \
+  "Assets/Scripts/Game/Ecs/BadEcsEnum.cs" \
+  'using Unity.Entities;
+public struct BadEcsEnumComponent : IComponentData
+{
+    public State Value;
+    public enum State
+    {
+        Idle,
+        Moving
+    }
+}' \
+  "enum-byte-base"
+
+assert_block \
+  "ProjectSettings asset edit is blocked" \
+  "ProjectSettings/ProjectSettings.asset" \
+  '%YAML 1.1
+PlayerSettings:
+  companyName: Bad' \
+  "project-settings"
+
+assert_block \
+  "Runtime inputactions edit is blocked" \
+  "Assets/Input/PlayerControls.inputactions" \
+  '{"name":"PlayerControls"}' \
+  "config-protection"
+
+assert_block \
+  "Non-test asmdef edit is blocked" \
+  "Assets/Scripts/Game.Game.asmdef" \
+  '{"name":"Game.Game"}' \
+  "config-protection"
+
+assert_block \
+  "MonoBehaviour inheritance in service folder is blocked" \
+  "Assets/_GameFolders/Scripts/Games/Concretes/Audio/AudioService.cs" \
+  'using UnityEngine;
+public sealed class AudioService : MonoBehaviour
+{
+}' \
+  "service-unity-inheritance"
+
 assert_warn \
   "Hot-path GetComponent warning" \
   "Assets/Scripts/WarnGetComponent.cs" \
@@ -233,6 +290,70 @@ public sealed class WarnLinq : MonoBehaviour
     }
 }' \
   "hot-path-linq"
+
+assert_warn \
+  "Destroy outside pool manager warning" \
+  "Assets/Scripts/BadDestroy.cs" \
+  'using UnityEngine;
+public sealed class BadDestroy : MonoBehaviour
+{
+    public void Remove(GameObject target)
+    {
+        Destroy(target);
+    }
+}' \
+  "runtime-destroy"
+
+assert_warn \
+  "async void warning outside lifecycle" \
+  "Assets/Scripts/WarnAsyncVoid.cs" \
+  'public sealed class WarnAsyncVoid
+{
+    public async void Load()
+    {
+    }
+}' \
+  "async-void"
+
+assert_warn \
+  "UniTask without CancellationToken warning" \
+  "Assets/Scripts/WarnUniTask.cs" \
+  'using Cysharp.Threading.Tasks;
+public sealed class WarnUniTask
+{
+    public async UniTask LoadAsync()
+    {
+    }
+}' \
+  "unitask-cancellation"
+
+assert_warn \
+  "Unity null propagation warning" \
+  "Assets/Scripts/WarnNullPropagation.cs" \
+  'using UnityEngine;
+public sealed class WarnNullPropagation : MonoBehaviour
+{
+    [SerializeField] private Transform _target;
+    public void Ping()
+    {
+        _target?.gameObject.SetActive(true);
+    }
+}' \
+  "unity-null-propagation"
+
+assert_warn \
+  "GetComponent in Awake warning" \
+  "Assets/Scripts/WarnAwakeGetComponent.cs" \
+  'using UnityEngine;
+public sealed class WarnAwakeGetComponent : MonoBehaviour
+{
+    private Rigidbody _body;
+    private void Awake()
+    {
+        _body = GetComponent<Rigidbody>();
+    }
+}' \
+  "awake-getcomponent"
 
 assert_clean \
   "Clean service passes" \

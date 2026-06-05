@@ -30,7 +30,11 @@ Lessons from live testing — read before debugging graph output.
 - **Fully qualified interface names** (`Game.Abstracts.IFoo`) are reduced to their last segment (`IFoo`) before being stored. Both short and qualified names produce correct `implements[]`.
 - **methods[] extraction** — every public/private/protected method is captured per class (name, signature, line, is_async, is_static, return_type). Confidence: `INFERRED` (regex mode).
 - **partial_calls[] extraction** — call sites are extracted per file and merged into `codebase.calls[]` by `graph-builder.sh`. BCL types (`Debug`, `Mathf`, `Vector3`…) and C# keywords are filtered out. Confidence: `INFERRED`.
-- **Stale MCP cache** — when `mcp-extract.json` is older than 60 minutes, `graph-builder.sh` retains prefabs and scenes from the existing `graph.json` instead of dropping them. Run `/build-knowledge-graph` with Unity Editor open to refresh MCP data.
+- **Stale MCP cache** — when `mcp-extract.json` is older than 60 minutes, `graph-builder.sh` retains prefabs and scenes from the existing `graph.json` instead of dropping them. Run `/build-knowledge-graph` with Unity Editor open to refresh MCP data. `--full` always invalidates the MCP cache regardless of age; retained prefabs are cross-checked against disk and stale paths emit `STALE_PREFAB_PATH` warnings in `validation.warnings[]`.
+- **Missing scripts** — null component entries during MCP extraction set `has_missing_scripts: true` on the GameObject or prefab. `graph-builder.sh` collects these into `MISSING_SCRIPT` warnings in `validation.warnings[]`. Surface them with `/knowledge-graph violations`.
+- **Python JSON passing** — both `STALE_PREFAB_PATH` and `MISSING_SCRIPT` warning blocks pass data via environment variables (`MCP_PREFABS_JSON`, `MISSING_INPUT_JSON`) plus `json.loads(os.environ[...])`, not `echo | python3 -`. Bash heredocs override stdin, so the pipe pattern silently delivers empty input to Python.
+- **Subfolder layout (`UNITY_FOLDER`)** — stale path detection passes `UNITY_FOLDER` to Python and prepends it to `Assets/...` paths before `os.path.exists()`. Without this, every prefab appears stale when the Unity project lives in a subfolder.
+- **`gameObjects` key casing** — missing-script detection reads `scene.get("gameObjects", scene.get("gameobjects", []))` to handle both camelCase MCP cache output and older lowercase extractions.
 
 ### graph-builder.sh call edge merge
 

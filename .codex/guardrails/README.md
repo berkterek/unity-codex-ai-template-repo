@@ -33,19 +33,28 @@ bash .codex/guardrails/run.sh --files Assets/Scripts/Foo.cs
 ### BLOCK
 
 - Direct text edits to `.unity`, `.prefab`, `.asset`
+- Direct edits to `ProjectSettings/*.asset`, `Packages/manifest.json`, `Packages/packages-lock.json`, non-test `.asmdef`, and `.inputactions`
 - `UnityEvent` / `UnityEngine.Events`
 - Direct `Time.timeScale =`
 - Static singleton patterns (`Instance`, `_instance`)
 - Legacy Input API (`Input.GetKey`, `Input.GetAxis`, `Input.GetButton`, `Input.mousePosition`)
 - Runtime `UnityEditor` usage without `#if UNITY_EDITOR`
 - `new SomeService()` inside MonoBehaviour
+- `new GameObject(...)` in runtime C#
+- `MonoBehaviour` / `ScriptableObject` inheritance in service/domain folders
 - Concrete service constructor dependencies
+- ECS/IEvent enums without `: byte`
 
 ### WARN
 
 - `[SerializeField]` rename without `[FormerlySerializedAs]` in changed/staged diffs
 - `GetComponent`, `Camera.main`, find calls, tag equality, message calls in hot paths
 - LINQ in hot paths
+- `Destroy(...)` outside Pool/Manager/Spawner files
+- `async void` outside Unity lifecycle methods
+- `async UniTask` method signatures without `CancellationToken`
+- `?.` or `is null` on likely Unity objects
+- `GetComponent` / `GetComponentInChildren` in `Awake`
 
 ## Test
 

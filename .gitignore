@@ -1,0 +1,15 @@
+.DS_Store
+config.ini
+
+# Codex generated graph output and caches.
+.codex/graph/graph.json
+.codex/graph/graph.json.bak
+.codex/graph/*.tmp
+.codex/graph/cache/*
+!.codex/graph/cache/.gitkeep
+.codex/graph/.last-build
+
+# Codex runtime state.
+.codex/project/state/
+.codex/project/logs/
+.codex/runtime/
