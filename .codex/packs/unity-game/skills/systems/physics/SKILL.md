@@ -1,3 +1,7 @@
+---
+name: physics
+description: "Use when working with Physics System in this Unity Codex template."
+---
 
 # Physics System
 

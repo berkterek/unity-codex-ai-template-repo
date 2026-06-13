@@ -1,3 +1,7 @@
+---
+name: audio-mixer
+description: "Use when working with AudioMixer System in this Unity Codex template."
+---
 
 # AudioMixer System
 

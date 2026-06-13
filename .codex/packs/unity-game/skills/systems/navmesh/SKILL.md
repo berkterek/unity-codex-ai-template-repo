@@ -1,3 +1,7 @@
+---
+name: navmesh
+description: "Use when working with NavMesh Navigation in this Unity Codex template."
+---
 
 # NavMesh Navigation
 

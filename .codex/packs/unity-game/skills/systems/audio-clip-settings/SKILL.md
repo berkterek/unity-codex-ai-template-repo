@@ -1,3 +1,7 @@
+---
+name: audio-clip-settings
+description: "Use when working with AudioClip Import Settings — Performance Guide in this Unity Codex template."
+---
 
 # AudioClip Import Settings — Performance Guide
 

@@ -1,3 +1,7 @@
+---
+name: odin-inspector
+description: "Use when working with Odin Inspector & Serializer in this Unity Codex template."
+---
 
 # Odin Inspector & Serializer
 

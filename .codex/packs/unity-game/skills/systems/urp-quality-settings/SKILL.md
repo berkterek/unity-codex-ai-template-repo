@@ -1,3 +1,7 @@
+---
+name: urp-quality-settings
+description: "Use when working with URP Quality Settings System in this Unity Codex template."
+---
 
 # URP Quality Settings System
 

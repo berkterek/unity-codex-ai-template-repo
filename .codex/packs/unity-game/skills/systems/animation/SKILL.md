@@ -1,3 +1,7 @@
+---
+name: animation
+description: "Use when working with Animation System in this Unity Codex template."
+---
 
 # Animation System
 

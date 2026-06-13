@@ -1,3 +1,7 @@
+---
+name: unity-instincts
+description: "Use when working with Unity Instinct Learning System in this Unity Codex template."
+---
 
 # Unity Instinct Learning System
 
@@ -17,7 +21,7 @@ The instinct system captures these project-specific patterns automatically. Univ
 
 ```
 .codex/packs/unity-game/state/instincts/
-├── observations.jsonl         # raw PostToolUse events
+├── observations.jsonl         # raw tool-use observations
 ├── project/<project-hash>/    # project-scoped instincts
 │   └── <instinct-id>.json
 └── global/                    # promoted instincts
@@ -47,10 +51,10 @@ Each instinct:
 ```
 Tool use (every Edit/Write/Read/Bash/Grep/...)
         │
-        ▼   instinct-capture.sh  (PostToolUse, ~10ms)
+        ▼   instinct-capture.sh  (manual/session observation capture, ~10ms)
 observations.jsonl
         │
-        ▼   instinct-distill.sh  (Stop hook, heuristic, ~100ms)
+        ▼   instinct-distill.sh  (session-end heuristic, ~100ms)
 project/<hash>/*.json  (confidence bumped by 0.1 per evidence, capped 0.9)
         │
         ▼   /unity-instincts evolve       (manual)
@@ -68,7 +72,7 @@ global/*.json
 
 **H3 — Hook-specific recurrence.** A hook (warn-serialization, warn-filename, warn-platform-defines, quality-gate, gateguard) that fires >=3 times in one session becomes a project-level instinct.
 
-All three are cheap string/count operations in the Stop hook — no LLM, no background agent.
+All three are cheap string/count operations at session end — no LLM, no background agent.
 
 ## Confidence ladder
 

@@ -1,3 +1,7 @@
+---
+name: unity-mcp-patterns
+description: "Use when working with Unity MCP Patterns in this Unity Codex template."
+---
 
 # Unity MCP Patterns
 
@@ -109,9 +113,9 @@ If an MCP operation fails:
 | Write C# scripts | Either | Preferred for complex scripts |
 | Configure components | Yes | Never |
 | Modify ProjectSettings | Yes | Never |
-| Edit .shader/.hlsl files | No (Write tool) | Yes |
-| Edit .uxml/.uss files | No (Write tool) | Yes |
-| Edit .asmdef files | No (Write tool) | Yes |
+| Edit .shader/.hlsl files | No (text edit) | Yes |
+| Edit .uxml/.uss files | No (text edit) | Yes |
+| Edit .asmdef files | No (text edit) | Yes |
 
 ## Rule 8: Multi-Instance
 

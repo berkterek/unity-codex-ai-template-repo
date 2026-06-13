@@ -1,3 +1,7 @@
+---
+name: unitask
+description: "Use when working with UniTask — Zero-Allocation Async/Await for Unity in this Unity Codex template."
+---
 
 # UniTask — Zero-Allocation Async/Await for Unity
 

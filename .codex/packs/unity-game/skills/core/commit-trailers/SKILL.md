@@ -1,3 +1,7 @@
+---
+name: commit-trailers
+description: "Use when working with Structured Commit Trailers in this Unity Codex template."
+---
 
 # Structured Commit Trailers
 

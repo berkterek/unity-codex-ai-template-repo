@@ -1,3 +1,7 @@
+---
+name: mobile
+description: "Use when working with Mobile Optimization in this Unity Codex template."
+---
 
 # Mobile Optimization
 

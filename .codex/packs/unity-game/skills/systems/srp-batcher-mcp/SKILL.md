@@ -1,3 +1,7 @@
+---
+name: srp-batcher-mcp
+description: "Use when working with URP Optimization via Unity MCP in this Unity Codex template."
+---
 
 # URP Optimization via Unity MCP
 

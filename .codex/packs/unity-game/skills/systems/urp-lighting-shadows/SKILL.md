@@ -1,3 +1,7 @@
+---
+name: urp-lighting-shadows
+description: "Use when working with URP Lighting & Shadows in this Unity Codex template."
+---
 
 # URP Lighting & Shadows
 

@@ -1,3 +1,7 @@
+---
+name: textmeshpro
+description: "Use when working with TextMeshPro — Advanced Text Rendering for Unity in this Unity Codex template."
+---
 
 # TextMeshPro — Advanced Text Rendering for Unity
 

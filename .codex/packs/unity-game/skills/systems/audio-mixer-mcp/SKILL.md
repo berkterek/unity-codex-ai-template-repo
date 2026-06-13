@@ -1,3 +1,7 @@
+---
+name: audio-mixer-mcp
+description: "Use when working with AudioMixer Configuration via Unity MCP in this Unity Codex template."
+---
 
 # AudioMixer Configuration via Unity MCP
 

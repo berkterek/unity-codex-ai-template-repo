@@ -1,3 +1,7 @@
+---
+name: object-pooling
+description: "Use when working with Object Pooling in this Unity Codex template."
+---
 
 # Object Pooling
 

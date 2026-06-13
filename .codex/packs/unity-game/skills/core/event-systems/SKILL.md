@@ -1,3 +1,7 @@
+---
+name: event-systems
+description: "Use when working with Event Systems in this Unity Codex template."
+---
 
 # Event Systems
 

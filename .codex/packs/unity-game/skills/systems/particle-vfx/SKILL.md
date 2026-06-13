@@ -1,7 +1,6 @@
 ---
 name: particle-vfx
-description: "Unity particle effect authoring — ParticleSystem module configuration (Emission, Shape, Renderer, Trails, Collision, Sub Emitters), URP particle shader selection, material placement under Arts/Materials/VFX/, prefab structure under _GameFolders/Prefabs/VFX/, scene hierarchy placement under [VFX] container, pooling pattern, and VContainer/UniTask/IEventBus integration. Use this skill whenever building, configuring, or wiring up any particle effect, VFX system, explosion, trail, smoke, fire, hit effect, or spawn effect in Unity."
-globs: ["**/*VFX*.cs", "**/*Effect*.cs", "**/*Particle*.cs", "**/*Explosion*.cs", "**/*Trail*.cs", "**/*Prefabs/VFX/**"]
+description: "Use when working with Unity Particle VFX in this Unity Codex template."
 ---
 
 # Unity Particle VFX

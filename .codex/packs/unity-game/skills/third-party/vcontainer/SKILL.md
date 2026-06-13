@@ -1,7 +1,14 @@
+---
+name: vcontainer
+description: "Use when working with VContainer — Dependency Injection for Unity in this Unity Codex template."
+---
 
 # VContainer — Dependency Injection for Unity
 
 VContainer is a lightweight, fast DI framework for Unity by hadashiA. It provides constructor injection for plain C# classes, method injection for MonoBehaviours, hierarchical scoping, and lifecycle management without the complexity of Zenject.
+
+For the project-specific AppScope/AppInstaller setup guide, read
+`references/setup-usage.md` when wiring real scenes or installers.
 
 ## Why Dependency Injection in Unity
 

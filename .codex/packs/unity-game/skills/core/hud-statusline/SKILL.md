@@ -1,3 +1,7 @@
+---
+name: hud-statusline
+description: "Use when working with HUD / Statusline Integration in this Unity Codex template."
+---
 
 # HUD / Statusline Integration
 
@@ -14,7 +18,7 @@ The recommended statusline format for Unity workflows:
 Fields:
 - **Phase** — current workflow phase: Clarify, Plan, Execute, Verify, Done
 - **Agent** — currently active sub-agent (or "main" if no agent is running)
-- **Modified** — count of unique files edited this session (from session-edits.txt)
+- **Modified** — count of unique files edited this session when edit tracking is available
 - **Duration** — elapsed session time in minutes
 
 ## Reading Session State
@@ -23,8 +27,8 @@ Statusline data can come from a session state directory such as `.codex/project/
 
 | File | Content | Updated By |
 |------|---------|-----------|
-| `session-edits.txt` | One file path per line (may have duplicates) | `track-edits.sh` |
-| `gateguard-reads.txt` | One file path per line | `track-reads.sh` |
+| explicit git diff/status | Changed files in the working tree | Codex shell commands |
+| session notes | Files read or edited in the current turn | Agent-maintained context |
 | `session-state.json` | Branch, phase, workflow context | `session-save.sh` |
 | `session-start-time` | Unix timestamp | `session-restore.sh` |
 | `session-cost.jsonl` | One JSON object per tool call | `cost-tracker.sh` |
@@ -33,8 +37,8 @@ Statusline data can come from a session state directory such as `.codex/project/
 
 ```bash
 EDIT_COUNT=0
-if [ -f ".codex/project/state/session-edits.txt" ]; then
-    EDIT_COUNT=$(sort -u ".codex/project/state/session-edits.txt" | wc -l | tr -d ' ')
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    EDIT_COUNT=$(git status --short | wc -l | tr -d ' ')
 fi
 ```
 
@@ -66,7 +70,7 @@ Done              → statusline: [Phase: Done] [Modified: N files] [Xm]
 ### Agents
 
 When a command spawns a sub-agent, the statusline should reflect which agent is active. The agent field updates when:
-- A new Agent tool call is made
+- A new native Codex subagent call is made
 - The agent completes and returns control to the command
 
 ### Ralph Mode

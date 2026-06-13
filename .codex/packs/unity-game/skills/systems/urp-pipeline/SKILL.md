@@ -1,3 +1,7 @@
+---
+name: urp-pipeline
+description: "Use when working with Universal Render Pipeline (URP) in this Unity Codex template."
+---
 
 # Universal Render Pipeline (URP)
 

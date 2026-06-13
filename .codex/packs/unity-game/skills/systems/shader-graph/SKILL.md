@@ -1,3 +1,7 @@
+---
+name: shader-graph
+description: "Use when working with ShaderGraph in this Unity Codex template."
+---
 
 # ShaderGraph
 

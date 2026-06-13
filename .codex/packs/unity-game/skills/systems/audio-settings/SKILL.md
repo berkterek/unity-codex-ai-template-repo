@@ -1,3 +1,7 @@
+---
+name: audio-settings
+description: "Use when working with Audio Settings System in this Unity Codex template."
+---
 
 # Audio Settings System
 

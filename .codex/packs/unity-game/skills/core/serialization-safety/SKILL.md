@@ -1,3 +1,7 @@
+---
+name: serialization-safety
+description: "Use when working with Serialization Safety in this Unity Codex template."
+---
 
 # Serialization Safety
 

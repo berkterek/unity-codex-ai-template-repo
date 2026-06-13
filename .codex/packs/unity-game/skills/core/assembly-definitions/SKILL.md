@@ -1,3 +1,7 @@
+---
+name: assembly-definitions
+description: "Use when working with Assembly Definitions in this Unity Codex template."
+---
 
 # Assembly Definitions
 

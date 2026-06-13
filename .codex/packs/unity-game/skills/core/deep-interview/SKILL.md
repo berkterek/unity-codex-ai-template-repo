@@ -1,3 +1,7 @@
+---
+name: deep-interview
+description: "Use when working with Deep Interview — Ambiguity Gating in this Unity Codex template."
+---
 
 # Deep Interview — Ambiguity Gating
 

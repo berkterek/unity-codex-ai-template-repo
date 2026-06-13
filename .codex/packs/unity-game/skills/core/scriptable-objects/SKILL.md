@@ -1,3 +1,7 @@
+---
+name: scriptable-objects
+description: "Use when working with ScriptableObject Architecture in this Unity Codex template."
+---
 
 # ScriptableObject Architecture
 

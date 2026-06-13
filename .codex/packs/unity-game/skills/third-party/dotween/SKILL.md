@@ -1,3 +1,7 @@
+---
+name: dotween
+description: "Use when working with DOTween Animation Library in this Unity Codex template."
+---
 
 # DOTween Animation Library
 

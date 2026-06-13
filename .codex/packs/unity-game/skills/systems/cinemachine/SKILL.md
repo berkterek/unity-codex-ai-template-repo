@@ -1,3 +1,7 @@
+---
+name: cinemachine
+description: "Use when working with Cinemachine in this Unity Codex template."
+---
 
 # Cinemachine
 

@@ -1,3 +1,7 @@
+---
+name: addressables
+description: "Use when working with Unity Addressables in this Unity Codex template."
+---
 
 # Unity Addressables
 

@@ -1,3 +1,7 @@
+---
+name: ui-toolkit
+description: "Use when working with UI Toolkit in this Unity Codex template."
+---
 
 # UI Toolkit
 

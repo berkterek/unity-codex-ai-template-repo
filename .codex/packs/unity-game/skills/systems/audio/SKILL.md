@@ -1,3 +1,7 @@
+---
+name: audio
+description: "Use when working with Audio System in this Unity Codex template."
+---
 
 # Audio System
 

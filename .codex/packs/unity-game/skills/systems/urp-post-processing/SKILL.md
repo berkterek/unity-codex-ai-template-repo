@@ -1,3 +1,7 @@
+---
+name: urp-post-processing
+description: "Use when working with URP Post-Processing in this Unity Codex template."
+---
 
 # URP Post-Processing
 

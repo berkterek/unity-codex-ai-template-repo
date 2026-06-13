@@ -1,3 +1,7 @@
+---
+name: learner
+description: "Use when working with Learner — Knowledge Extraction in this Unity Codex template."
+---
 
 # Learner — Knowledge Extraction
 
