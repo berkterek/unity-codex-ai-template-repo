@@ -38,7 +38,7 @@ For each prefab, infer a **Category** from path/name heuristics (`UI`, `VFX`, `E
 ```bash
 find <package_path> -type f -name '*.cs' | head -50
 ```
-From the results, select and **read** (using the Read tool, not Bash):
+From the results, select and read the source files directly, not just shell summaries:
 - The primary manager/facade class: prioritize files named `*Manager.cs`, `*System.cs`, `*Controller.cs`, or the largest `.cs` file in the root Scripts folder.
 - Extension-point base classes: files named `*Base.cs`, `Abstract*.cs`, or starting with `I` (interfaces).
 - Up to 2 files from any `Samples/`, `Examples/`, or `Demo/` subfolder.
@@ -77,7 +77,7 @@ Classify each finding:
 
 | Severity | Patterns | Reason |
 |----------|----------|--------|
-| **MUST-FIX** | Any singleton pattern (`static.*Instance`, `_instance`/`_singleton` field, `Current`/`Shared`/`Main`/`Default` static property, `GetInstance()`, `static readonly new`, `DontDestroyOnLoad`), `Input.GetKey/Axis/Button` | Blocking hooks fire when Claude writes wrapper code that touches these |
+| **MUST-FIX** | Any singleton pattern (`static.*Instance`, `_instance`/`_singleton` field, `Current`/`Shared`/`Main`/`Default` static property, `GetInstance()`, `static readonly new`, `DontDestroyOnLoad`), `Input.GetKey/Axis/Button` | Guardrails fail when generated wrapper code touches these |
 | **SHOULD-FIX** | `StartCoroutine`, `Resources.Load`, `FindObjectOfType`, `new GameObject()`, `async void` | Warning hooks or explicit architecture rules |
 | **CONSIDER** | `GetComponent` in Awake | Inspector assignment preferred; only an issue if component is not dynamic |
 
@@ -207,7 +207,7 @@ Then `## References`.
 
 **Location:** `<ClassName>.cs:<line>`
 **Hook:** `check-vcontainer-singleton`
-**Why it blocks:** Any code Claude writes that calls `<ClassName>.Instance` (or `.Current`/`.Shared`/`.GetInstance()`) will be rejected by the blocking hook.
+**Why it blocks:** Any generated code that calls `<ClassName>.Instance` (or `.Current`/`.Shared`/`.GetInstance()`) will be rejected by guardrails.
 
 **Fix — Adapter pattern:**
 

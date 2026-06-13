@@ -282,9 +282,8 @@ Re-run validator after fixes. After 2 failed passes → ask: `skip` or `stop`.
 ## Step 5 — Reviewer (skip in `solo` mode)
 
 Reviewer priority — try in order:
-1. Spawn Agent with `subagent_type: "claude-code"` — if plugin available
-2. Spawn Agent with `subagent_type: "codex:codex-rescue"` — if claude-code unavailable
-3. Fallback: **unity-reviewer**
+1. Spawn native Codex subagent `unity-reviewer` when subagents are available and authorized.
+2. If subagents are unavailable or not authorized, review locally using the same criteria and report the gap.
 
 ```
 Review this bug fix.
@@ -408,7 +407,7 @@ Print:
 Bug: [description]
 Root cause: [one sentence]
 Commit: [hash] — [message]
-Reviewer: [Codex | Claude] — APPROVED
+Reviewer: [local | unity-reviewer] — APPROVED
 Verifier: VERIFIED
 ```
 

@@ -5,7 +5,9 @@
 
 Run a relentless verification loop that refuses to stop until the project is clean: **$ARGUMENTS**
 
-Named after oh-my-claudecode's persistent execution mode. Where `/unity-workflow` runs the verifier once (up to 3 internal iterations), ralph runs it repeatedly until there are zero remaining issues — or until hitting the safety limit.
+Named after a persistent execution pattern. Where `/unity-workflow` runs the
+verifier once (up to 3 internal iterations), ralph runs it repeatedly until
+there are zero remaining issues — or until hitting the safety limit.
 
 ## Configuration
 
@@ -34,7 +36,7 @@ iteration += 1
 echo "Ralph iteration {iteration}/{max}: Starting verification pass..."
 ```
 
-1. **Invoke `unity-verifier` agent** via the Agent tool with:
+1. **Invoke `unity-verifier` agent** as a native Codex subagent with:
    - The focus scope (if provided)
    - Context from the previous iteration's remaining issues
    - Instruction to report a structured summary at the end

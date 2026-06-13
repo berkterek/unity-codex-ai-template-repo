@@ -36,7 +36,7 @@ mkdir -p .codex/state && echo '{"gate":"SCOPE_GATE","pipeline":"create-prefab-sc
 
 ## Step 0b — MCP Preflight
 
-Read and apply `.codex/packs/unity-game/skills/core/mcp-preflight.md`.
+Read and apply `.codex/packs/unity-game/skills/core/mcp-preflight/SKILL.md`.
 
 - **State 1** (connected) → continue
 - **State 2** (disconnected) → stop; scene inspection and prefab creation require MCP. Print: "Open Unity Editor, activate the MCP plugin, and run `/create-prefab-scene` again."

@@ -437,8 +437,8 @@ Validator loop: same as `/fix` — max 2 fix passes before stopping and asking u
 ## Step 6 — Reviewer
 
 Reviewer priority — try in order, fall back if unavailable:
-1. Spawn Agent with `subagent_type: "codex:codex-rescue"`
-2. Spawn Agent with `subagent_type: "unity-reviewer"` (fallback if Codex unavailable)
+1. Spawn native Codex subagent `unity-reviewer` when subagents are available and authorized.
+2. If subagents are unavailable or not authorized, review locally using the same criteria and report the gap.
 
 ```
 Review this evidence-proven bug fix.
@@ -550,7 +550,7 @@ Bug: [description]
 Root cause: [one sentence]
 Evidence: [the log line(s) that proved it]
 Commit: [hash] — [message]
-Reviewer: [Codex | Claude] — APPROVED
+Reviewer: [local | unity-reviewer] — APPROVED
 ```
 
 ---

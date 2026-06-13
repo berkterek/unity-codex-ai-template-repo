@@ -1,6 +1,6 @@
 ## Blocking Guardrail Reference
 
-Codex does not run these as shell hooks. This table preserves the Claude hook
+Codex does not run these as shell hooks. This table preserves the historical hook
 suite as a checklist for `guardrails.md`, `/validate`, and reviewer passes.
 
 | Hook | Blocks |
@@ -19,6 +19,6 @@ suite as a checklist for `guardrails.md`, `/validate`, and reviewer passes.
 | `check-no-runtime-instantiate.sh` | `new GameObject(...)` in runtime C# |
 | `guard-critical-files.sh` | Edits to `AppScope`, `InputView`, `*Installer`, `IEventBus`, `.asmdef` without investigation — **exception: files under `TestScopes/`, `EditModeTest/`, or `PlayModeTest/` paths** |
 | `check-config-protection.sh` | Modifications to `.asmdef`, `Codex configuration`, `.inputactions`, `manifest.json` — **exception: test assemblies (`EditModeTest`, `PlayModeTest`)** |
-| `gateguard.sh` (PreToolUse) | Edit/Write on any C# file that has not been read in the current session |
-| `guard-gate-cleared.sh` (PreToolUse) | Agent spawn blocked if `.codex/project/state/gate-cleared` is missing — Director Gate must be shown and `go` received before spawning any coder/fixer/committer agent |
+| `gateguard.sh` (historical pre-edit check) | Edit/Write on any C# file that has not been read in the current session |
+| `guard-gate-cleared.sh` (historical pre-agent check) | Agent spawn blocked if `.codex/project/state/gate-cleared` is missing — Director Gate must be shown and `go` received before spawning any coder/fixer/committer agent |
 | `guard-reviewer-order.sh` | Codex installed and no `.codex/project/state/codex-reviewed` marker → blocks `unity-reviewer` agent spawn; Codex review required first. |

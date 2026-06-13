@@ -10,7 +10,7 @@ For an existing project with legacy code, see **Adding to an Existing Project** 
 
 Copy `.codex/` into the project root. Codex has no hook mechanism, so treat
 `.codex/packs/unity-game/guides/guardrails.md` as the model-level equivalent of
-the Claude hook suite. These are the highest-risk checks to apply first:
+the legacy hook suite. These are the highest-risk checks to apply first:
 
 | Check | What it catches | Migration path |
 |------|---------------|----------------|
@@ -41,7 +41,7 @@ NSubstitute is **not** distributed via the Package Manager — `/setup-project` 
 
 ### Guardrails are not running automatically
 
-This is expected. Codex does not run Claude hooks. The guardrail files are
+This is expected. Codex does not run automatic edit hooks. The guardrail files are
 read-required policy documents, and verification happens through `/validate`,
 MCP console checks, tests, graph validation, and reviewer passes.
 

@@ -33,7 +33,7 @@ manage_packages action:"list" → current package versions
 | `GUILayout` / `OnGUI` | UI Toolkit / UGUI | Always |
 
 **Step 4: Execute**
-- Update API calls via Edit tool
+- Update API calls via patch edits
 - Update package versions via `manage_packages`
 - Check console for errors after each change
 

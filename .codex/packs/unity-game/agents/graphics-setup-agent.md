@@ -16,7 +16,7 @@ Before touching any asset, read:
 
 ## Step 0 — MCP Preflight
 
-Read and apply `.codex/packs/unity-game/skills/core/mcp-preflight.md`.
+Read and apply `.codex/packs/unity-game/skills/core/mcp-preflight/SKILL.md`.
 
 - **State 1** (connected) → continue
 - **State 2** (disconnected) → report BLOCKED: "MCP disconnected — cannot create URP assets. Open Unity Editor, activate MCP plugin, and retry."

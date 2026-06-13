@@ -1,7 +1,7 @@
 # Unity Guardrails
 
 Codex has no hook mechanism. This file is the **model-level equivalent** of the
-rules that Claude Code enforced automatically via hooks. Every agent and command
+rules that older hook-based workflows enforced automatically. Every agent and command
 must internalize this list.
 
 Executable enforcement for the highest-value checks lives at:
@@ -185,8 +185,9 @@ Director Gate has been shown and the user has typed `go`. The pipeline does not
 start without the gate.
 
 ### Reviewer order
-The reviewer in this project is **Claude** (`unity-reviewer`). Call
-`unity-reviewer` to review code. Review is required before every commit.
+The reviewer in this project is `unity-reviewer`. Call `unity-reviewer` to
+review code when subagents are authorized; otherwise perform and report local
+review. Review is required before every commit.
 
 ### Gate cleared state
 Check `.codex/project/PROGRESS.md` or task notes to verify that the current

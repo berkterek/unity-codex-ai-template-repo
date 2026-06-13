@@ -12,9 +12,9 @@
 
 1. Resolve the project root from the current working directory. Fail fast with `ERR_NO_PROJECT_ROOT` if `Packages/manifest.json` is missing.
 
-2. Read `.codex/packs/unity-game/agents/package-analyzer.md` to load the package-analyzer instructions. Then invoke a `general-purpose` subagent with those instructions as the system prompt, passing the parsed flags (`--only`, `--include-assets-plugins`, `--include-unity-builtins`) and the current working directory as context. Capture its JSON array output.
+2. Read `.codex/packs/unity-game/agents/package-analyzer.md` to load the package-analyzer instructions. Then spawn the native Codex subagent `package-analyzer`, passing the parsed flags (`--only`, `--include-assets-plugins`, `--include-unity-builtins`) and the current working directory as context. Capture its JSON array output.
 
-   > **Important:** Do NOT use `subagent_type: "package-analyzer"` in the Agent tool unless that agent type is registered in the current environment. Use `subagent_type: "general-purpose"` and embed the package-analyzer instructions in the prompt when no direct agent type is available.
+   > **Important:** If native subagents are unavailable or not authorized, perform the package analysis locally with the same instructions and report that no subagent was spawned.
 
    > **Deep scan for Assets-folder plugins:** When `--include-assets-plugins` is set (or when a package lives under `Assets/_AssetFolders/` or `Assets/Plugins/`), the package-analyzer MUST execute steps 3b (script sampling) and 3c (demo scene inspection). These packages have no README; scripts and scenes are the only source of truth.
 
@@ -59,7 +59,7 @@
 6. If `--write`, iterate the JSON array per package:
    - Reject any element whose `output_dir` or any `suggested_dest` in `prefabs` escapes its expected root — surface `ERR_PATH_TRAVERSAL` and skip that package.
    - For each package, check if `output_dir` already exists:
-     - If **new package** (`output_dir` does not exist): create the directory and write all `files[]` using the Write tool. Print: `Created <output_dir> with <N> files: <filenames>`.
+     - If **new package** (`output_dir` does not exist): create the directory and write all `files[]` with normal Codex file-editing. Print: `Created <output_dir> with <N> files: <filenames>`.
      - If **existing package** (`output_dir` exists): for each file in `files[]`, check if the file exists:
        - New file → write directly.
        - Existing file → show a 10-line diff and prompt `overwrite | skip | edit`. This prompt fires **per file**, not per package.
@@ -79,7 +79,7 @@
 
 ## Output Contract
 
-- Every write goes through the standard Write tool so gateguard / read-before-edit hooks apply. No shell redirects.
+- Every write goes through normal Codex file-editing so read-before-edit discipline applies. No shell redirects.
 - `--write` does NOT create, copy, or move any `.prefab` file. It only writes skill `.md` files.
 - Dry-run (default) produces no file writes of any kind.
 - All skill files are written under `.codex/packs/unity-game/skills/third-party/<pkg>/` — never under `skills/plugins/`.
@@ -92,7 +92,7 @@
 | `ERR_NO_PROJECT_ROOT` | `Packages/manifest.json` not found in current directory |
 | `ERR_MANIFEST_PARSE` | `Packages/manifest.json` is not valid JSON |
 | `ERR_SUBAGENT_OUTPUT` | `package-analyzer` returns malformed or non-JSON output |
-| `ERR_WRITE_DENIED` | Write tool returns a permission error |
+| `ERR_WRITE_DENIED` | Codex file-editing returns a permission error |
 | `ERR_PATH_TRAVERSAL` | `output_dir` or prefab `suggested_dest` contains `..` segments — rejected before any write |
 
 > Apply `.codex/packs/unity-game/guides/guardrails.md` rules throughout.

@@ -127,7 +127,7 @@ Every non-container GO must be a prefab instance — never bare GameObjects.
 - Never use `new GameObject()` in runtime code
 - Never use LINQ in gameplay Update paths
 - Never use `?.` on Unity objects
-- Never edit `.unity`, `.prefab`, or `.meta` files directly with Write/Edit tools
+- Never edit `.unity`, `.prefab`, or `.meta` files directly with text-edit tools
 - Never use `UnityEngine.UI.Text` — always use TextMeshPro
 
 ## Output

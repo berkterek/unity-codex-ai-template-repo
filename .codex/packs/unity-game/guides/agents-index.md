@@ -1,10 +1,10 @@
 # Agents (`.codex/packs/unity-game/agents/`)
 
 > `.codex/packs/unity-game/agents/*.md` files are reusable role templates for Codex workflows.
-> Use the **Invoke** column below as the exact `subagent_type` value when spawning an agent.
-> Every agent's `subagent_type` matches its filename (e.g. `unity-coder.md` → `subagent_type: unity-coder`).
+> Use the **Invoke** column below as the native Codex agent type when spawning an agent.
+> Every agent type matches its filename (e.g. `unity-coder.md` → `unity-coder`).
 
-| Agent | Invoke (`subagent_type`) | Role |
+| Agent | Invoke | Role |
 |-------|--------------------------|------|
 | `coder` | `coder` | **Pure C# only — no Unity API.** Used for `_Framework/`, `Games/Abstracts/`, and pure C# targets in `Games/Concretes/` in complexity-scored pipelines (`/orchestrate`, `/migrate`). |
 | `tester` | `tester` | NUnit + NSubstitute test writer — AAA pattern, interface-only mocks. Spawned with isolated context in `/implement`, `/fix`, `/orchestrate`, `/migrate` to prevent implementation context from leaking into test decisions. |

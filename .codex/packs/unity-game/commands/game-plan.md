@@ -55,7 +55,8 @@ Verify:
 
 ## Step 3 — Master Planner
 
-Spawn a **Plan** subagent (model: opus) to create `docs/0_MasterPlan.md`:
+Spawn a **lean-planner** or planner-capable Codex subagent with high reasoning
+effort to create `docs/0_MasterPlan.md`:
 
 ```markdown
 # 0 — Master Plan: [Game Title]
@@ -86,7 +87,7 @@ Spawn a **Plan** subagent (model: opus) to create `docs/0_MasterPlan.md`:
 
 ## Step 4 — Module Planners (Parallel)
 
-For each module, spawn a **Plan** subagent (model: opus) simultaneously. Each module plan must include:
+For each module, spawn a planner-capable Codex subagent simultaneously. Each module plan must include:
 
 - Context (what it delivers, current state)
 - Goals checklist
@@ -110,7 +111,7 @@ For each module, spawn a **Plan** subagent (model: opus) simultaneously. Each mo
 
 ## Step 5 — Reviewer
 
-Spawn reviewer (prefer `codex:codex-rescue`, fallback to `unity-reviewer`):
+Spawn reviewer (prefer native Codex subagent `unity-reviewer`; fall back to local review when subagents are unavailable):
 
 Check:
 1. All modules covered?

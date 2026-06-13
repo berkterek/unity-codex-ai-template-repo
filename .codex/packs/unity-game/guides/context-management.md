@@ -49,6 +49,6 @@ Use `solo` for exploratory spikes, `lean` for low-risk changes, `full` for produ
 
 ## Verification Notes
 
-Codex does not maintain Claude hook logs. Use command output, Unity console
+Codex does not maintain automatic hook logs. Use command output, Unity console
 checks, test results, graph validation, and `.codex/project/PROGRESS.md` for
 workflow evidence.

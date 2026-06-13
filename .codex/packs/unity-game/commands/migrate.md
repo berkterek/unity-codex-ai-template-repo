@@ -52,7 +52,7 @@ Before spawning any agents, score the migration complexity on a 0.0–1.0 scale:
 |-------|-------|---------|-----------------|
 | 0.0–0.3 | **Simple** | Single file, mechanical substitution (e.g. one coroutine) | migrator/unity-migrator → reviewer → committer |
 | 0.4–0.6 | **Medium** | Multiple files, interface changes, or VContainer rewiring | test guard → migrator/unity-migrator → reviewer → committer |
-| 0.7–1.0 | **Complex** | Cross-module migration, ECS involvement, or Addressables | test guard → migrator/unity-migrator → codex:codex-rescue reviewer → unity-developer → committer |
+| 0.7–1.0 | **Complex** | Cross-module migration, ECS involvement, or Addressables | test guard → migrator/unity-migrator → unity-reviewer → unity-developer → committer |
 
 **Migrator agent routing — decide before spawning:**
 
@@ -103,7 +103,7 @@ If the migration scope touches more than 5 files (scoring signal "+0.3 Touches m
 
 > **Skip this step if complexity score is Simple (0.0–0.3) and review mode is not `full`.**
 
-Spawn Agent with `subagent_type: "claude"` with this prompt:
+Spawn native Codex subagent `migrator` with this prompt:
 
 ```
 Read .codex/packs/unity-game/agents/tester.md for your role and testing philosophy.
@@ -133,7 +133,7 @@ If BLOCKED → stop and show the user.
 
 ## Step 2 — Migrator
 
-Spawn Agent with `subagent_type: "unity-migrator"` with this prompt:
+Spawn native Codex subagent `unity-migrator` with this prompt:
 
 ```
 You are a Unity code migration specialist. Migrate legacy patterns in this project.
@@ -178,8 +178,8 @@ If BLOCKED → stop and show the user.
 ## Step 3 — Reviewer
 
 Reviewer priority — try in order, fall back if unavailable:
-1. Spawn Agent with `subagent_type: "codex:codex-rescue"`
-2. Spawn Agent with `subagent_type: "unity-reviewer"` (fallback if Codex unavailable)
+1. Spawn native Codex subagent `unity-reviewer` when subagents are available and authorized.
+2. If subagents are unavailable or not authorized, review locally using the same criteria and report the gap.
 
 Reviewer prompt:
 ```
@@ -226,7 +226,7 @@ Repeat until APPROVED or stopped (max 3 passes):
    Report: DONE or BLOCKED with reason.
    ```
 
-2. After migrator fixes → re-run the reviewer using the same priority order (codex:codex-rescue → unity-reviewer) with the updated files.
+2. After migrator fixes → re-run the reviewer using the same priority order with the updated files.
 
 3. If APPROVED → proceed to Step 3.
 
@@ -300,7 +300,7 @@ Print:
 Migration: [description]
 Files changed: [count]
 Commit: [hash] — [message]
-Reviewer: [Codex | Claude] — APPROVED
+Reviewer: [local | unity-reviewer] — APPROVED
 ```
 
 $ARGUMENTS

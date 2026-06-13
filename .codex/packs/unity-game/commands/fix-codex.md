@@ -1,6 +1,6 @@
 # Fix Codex — Codex-Driven Fix Pipeline
 
-Pipeline: Codex Analysis → Human Gate → Codex Implementation → Claude Review → Committer
+Pipeline: Codex Analysis → Human Gate → Codex Implementation → Codex Review → Committer
 
 ## Usage
 
@@ -19,13 +19,16 @@ If no argument is given, ask: "Describe the bug. Include any error messages, sta
 | `/fix-deep` | Logic bug, intermittent issue, root cause unclear |
 | `/fix-codex` | Legacy/large codebase (2000+ line files), stuck after `/fix` or `/fix-deep`, or 30+ minutes in a loop |
 
-> **Why fix-codex is different:** Claude Code forms a hypothesis during analysis and confirms it in subsequent reads. Codex follows the code literally without prior bias.
+> **Why fix-codex is different:** The analysis pass is intentionally isolated
+> from implementation so the fix follows evidence instead of an early
+> hypothesis.
 
 ## Step 1 — Codex Analysis Pass
 
-Claude must do **zero pre-analysis** — no file reads, no hypothesis formation.
+The implementation pass must do **zero pre-analysis** before the dedicated
+analysis pass completes — no file reads, no hypothesis formation.
 
-Invoke the `codex:codex-rescue` skill with this prompt:
+Run the analysis locally or spawn a fresh native Codex subagent with this prompt:
 
 ```
 TASK: Analysis only — do NOT fix yet.
@@ -59,7 +62,7 @@ Proceed? (go / redirect)
 
 ## Step 3 — Codex Implementation
 
-Invoke the `codex:codex-rescue` skill:
+Run the implementation locally or spawn a fresh native Codex subagent:
 
 ```
 TASK: Implement the fix based on your previous analysis.
@@ -78,7 +81,7 @@ PROJECT RULES (non-negotiable):
 - Unity null check: == null, not is null or ?.
 ```
 
-## Step 4 — Claude Review
+## Step 4 — Codex Review
 
 Review the changed files:
 1. **CORRECT LOCATION?** Fix at root cause, not symptom
@@ -102,6 +105,6 @@ Root cause: <one sentence>
 ```
 ROOT CAUSE: <file:line — what was wrong>
 FIX: <what changed and why>
-CLAUDE REVIEW: APPROVED
+CODEX REVIEW: APPROVED
 COMMIT: <hash> — <message>
 ```

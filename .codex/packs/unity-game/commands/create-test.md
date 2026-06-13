@@ -60,7 +60,7 @@ Read one existing test file (if any) to confirm namespace and pattern in use.
 
 ### 2c — Test Type Router
 
-Read `.codex/packs/unity-game/skills/core/test-type-router.md` and apply the decision matrix to `[FEATURE]` + `[HINT]`.
+Read `.codex/packs/unity-game/skills/core/test-type-router/SKILL.md` and apply the decision matrix to `[FEATURE]` + `[HINT]`.
 
 Emit the decision block:
 ```
@@ -76,7 +76,7 @@ Route:
 - `NoTest`                  → stop, explain why
 
 **PlayMode-Scene only — MCP check before Step 3-C:**
-Read and apply `.codex/packs/unity-game/skills/core/mcp-preflight.md`.
+Read and apply `.codex/packs/unity-game/skills/core/mcp-preflight/SKILL.md`.
 - State 1 (connected) → continue to 3-C normally
 - State 2 (disconnected) → offer code-only mode: write C# files (Steps 3-C through 3-C-d), skip MCP scene creation (Step 4), print manual scene steps in report
 - State 3 (not installed) → code-only mode; same as disconnected
@@ -354,7 +354,7 @@ namespace [Namespace].PlayModeTest
 
 > Skip to Step 3-D if router returned PlayMode-Programmatic.
 
-1. Call `unity_get_project_info` or `unity_compile` — wait for compilation to finish
+1. Call `manage_editor(action="telemetry_ping")` and `refresh_unity` — wait for compilation to finish
 2. If compilation errors → stop, print errors, ask user to fix before continuing
 3. If success → create scene: `unity_create_scene` at `Assets/_Scenes/TestScenes/[Feature]Test`
 4. Create `TestBootstrap` GameObject in scene

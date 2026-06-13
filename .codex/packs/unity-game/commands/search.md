@@ -148,8 +148,8 @@ Capture as `$ROOT_CAUSE`, `$EVIDENCE`, `$PROPOSED_ANSWER`, `$CONFIDENCE`.
 **Iteration counter starts at 1. Max 5 iterations.**
 
 Reviewer priority — try in order, fall back if unavailable:
-1. `subagent_type: "codex:codex-rescue"`
-2. `subagent_type: "unity-reviewer"` (fallback if Codex unavailable)
+1. Spawn native Codex subagent `unity-reviewer` when subagents are available and authorized.
+2. If subagents are unavailable or not authorized, perform the completeness review locally and report the gap.
 
 Spawn the reviewer with this prompt:
 

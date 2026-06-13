@@ -14,28 +14,28 @@ manual validation, graph checks, and reviewer passes.
 | `check-async-void.sh` | `async void` outside Unity lifecycle methods (swallows exceptions) |
 | `check-unitask-cancellation.sh` | `async UniTask` methods without `CancellationToken` parameter |
 | `check-null-propagation.sh` | `?.` or `is null` on Unity objects (bypasses destroyed-object detection) |
-| `track-read.sh` (PostToolUse Read) | Records every `Read` tool call into `gateguard-reads.txt` so `gateguard.sh`'s Stage 1 (`unity_was_read()`) check passes on the next Edit/Write. Without this hook, `gateguard-reads.txt` is never populated and every edit is blocked even after the file is read. |
-| `track-codex-review.sh` (PostToolUse) | Historical Claude hook for reviewer-order enforcement; in Codex, follow the reviewer gate in `guardrails.md` manually |
-| `instinct-capture.sh` (PostToolUse) | Captures tool-use observations for later distillation into instincts |
-| `cost-tracker.sh` (PostToolUse) | Logs every tool call with timestamp for cost auditing |
+| `track-read.sh` (historical read tracker) | Recorded every read for read-before-edit enforcement; in Codex, read the target file before editing and rely on explicit guardrail checks. |
+| `track-codex-review.sh` (historical review tracker) | Enforced reviewer order; in Codex, follow the reviewer gate in `guardrails.md` manually |
+| `instinct-capture.sh` (historical observation tracker) | Captured tool-use observations for later distillation into instincts |
+| `cost-tracker.sh` (historical cost tracker) | Logged every tool call with timestamp for cost auditing |
 | `instinct-distill.sh` (Stop) | Distills captured observations into confidence-scored instincts |
 | `session-restore.sh` (SessionStart) | Restores session state from `.codex/project/state/` on session start |
 | `session-save.sh` (Stop) | Saves current session state to `.codex/project/state/` on stop |
-| `stop-verify.sh` (Stop) | Drains the edit accumulator (`session-edits.txt`) at session end and runs batch verifiers — shell syntax check for `.sh`, JSON validity for `.json`, one `dotnet build` for all accumulated `.cs` files. Must be listed **after** `session-save.sh` in the Stop array. Implements the ECC pattern: catches subagent writes whose PostToolUse hooks never fired in the main session. |
-| `graph-auto-update.sh` (PostToolUse Write\|Edit) | Historical Claude hook. In Codex, run `/build-knowledge-graph` manually or use `bash .codex/graph/graph-watch.sh`. |
-| UserPromptSubmit inline hook | Injects skill-check reminder into every user prompt — enforces `using-superpowers` skill invocation before any action |
-| `enforce-skill-for-keywords.sh` (UserPromptSubmit) | Detects third-party package keywords in the user's prompt (cinemachine, vcam, dotween, primetween, dreamteck, feel, odin, textmeshpro…). If the relevant skill has not been invoked yet this session, injects a blocking `additionalContext` message demanding `Skill` tool invocation before any code, advice, or MCP operation. Pairs with `track-skill-invocations.sh`. |
-| `track-skill-invocations.sh` (PostToolUse Skill) | Records every `Skill` tool invocation to `${UNITY_HOOK_STATE_DIR}/skills-invoked.txt` — one skill name per line. Required by `enforce-skill-for-keywords.sh` to know which skills were already loaded so the enforcement message does not fire again for the same skill. |
+| `stop-verify.sh` (historical stop verifier) | Drained the edit accumulator and ran batch verifiers. In Codex, run verification commands explicitly before reporting completion. |
+| `graph-auto-update.sh` (historical graph updater) | In Codex, run `/build-knowledge-graph` manually or use `bash .codex/graph/graph-watch.sh`. |
+| Prompt skill reminder | Reminded agents to load relevant skills. In Codex, follow skill trigger rules explicitly. |
+| `enforce-skill-for-keywords.sh` (historical keyword checker) | Detected third-party package keywords and required the matching skill. In Codex, load the relevant skill from the session skill list. |
+| `track-skill-invocations.sh` (historical skill tracker) | Recorded skill invocations for keyword enforcement. In Codex, report loaded skills directly when relevant. |
 
 ## verify-after-write.sh
 
 | Property | Value |
 |----------|-------|
-| Hook type | PostToolUse |
+| Historical trigger | after tool use |
 | Matcher | `Write\|Edit` |
 | File filter | `.cs` files only — filtering done **in-script** (hook matchers do not support file extension filtering) |
 | Exit semantics | Always exit 0 — warning mode, never blocks pipeline |
 | Compile backend | `dotnet build -v q` (MCP tools are not callable from bash hook scripts) |
 | `--no-restore` | Omitted — false negatives from missing restore are worse than slower builds |
 | No-sln fallback | Prints skip message to stderr, exits 0 |
-| Loop risk | None — hook calls no Write/Edit tools |
+| Loop risk | None — historical hook calls no text-edit tools |

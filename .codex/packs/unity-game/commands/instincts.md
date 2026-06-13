@@ -5,7 +5,7 @@
 
 Manage atomic Unity-specific learnings: **$ARGUMENTS**
 
-Instincts are atomic learned behaviors captured by `instinct-capture.sh` (PostToolUse) and distilled by `instinct-distill.sh` (Stop). Each instinct has: a trigger, an action, a confidence score (0.3–0.9), an evidence count, and a scope (project or global).
+Instincts are atomic learned behaviors captured from session observations and distilled at session end. Each instinct has: a trigger, an action, a confidence score (0.3–0.9), an evidence count, and a scope (project or global).
 
 Storage:
 - Project instincts: `.codex/state/instincts/project/<project-hash>/*.json`

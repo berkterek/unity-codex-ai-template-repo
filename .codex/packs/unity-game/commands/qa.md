@@ -113,7 +113,8 @@ Determine which phase to validate:
 
 If no WORKFLOW.md or PROGRESS.md exists → skip this stage and note: `Stage 3 skipped — no WORKFLOW.md found.`
 
-Spawn a **general-purpose** subagent with this prompt:
+Spawn a native Codex subagent suitable for read-only verification, or perform
+the verification locally if subagents are unavailable, with this prompt:
 
 ```
 You are a strict QA gate. Validate phase [N] — [Phase Name].

@@ -17,7 +17,7 @@ You build Play Mode test scenes. You do not write production code — only test 
 
 1. Read `.codex/project/PROJECT.md` — get project name and namespace
 2. Read `.codex/packs/unity-game/rules/testing.md` — PlayMode scene testing rules
-3. Read `.codex/packs/unity-game/skills/core/playmode-scene-testing.md` — full pattern reference
+3. Read `.codex/packs/unity-game/skills/core/playmode-scene-testing/SKILL.md` — full pattern reference
 4. Find the project's PlayModeTest assembly: `find . -name "*PlayModeTest*.asmdef"`
 5. Find existing TestScopes (if any): `find . -path "*/TestScopes/*.cs" | head -5`
 
@@ -137,7 +137,7 @@ namespace [Namespace].Tests
 
 ## Step 3 — Create Scene via MCP
 
-1. Check editor state: `unity_get_project_info` — wait until ready
+1. Check editor state: `manage_editor(action="telemetry_ping")` — wait until ready
 2. Create the scene: `unity_create_scene` with path `_Scenes/TestScenes/[Feature]Test`
 3. Create `TestBootstrap` GameObject in the scene
 4. Add the `[Feature]TestScope` component to TestBootstrap

@@ -22,15 +22,16 @@ Read these when they exist:
 
 ## Reviewer Selection
 
-Check available plugins before spawning a reviewer:
+Use the native Codex reviewer wrapper when subagents are available and the user
+has authorized subagent use:
 
 | Priority | Condition | Action |
 |----------|-----------|--------|
-| 1 | `claude-code` plugin is available | Spawn Agent with `subagent_type: "claude-code"` |
-| 2 | `claude-code` unavailable, `codex:codex-rescue` available | Spawn Agent with `subagent_type: "codex:codex-rescue"` |
-| 3 | Neither available | Use **unity-reviewer** agent directly |
+| 1 | `unity-reviewer` is available in `.codex/agents/` | Spawn native Codex subagent `unity-reviewer` |
+| 2 | Subagents are unavailable or not authorized | Perform the review locally using this checklist |
 
-All three use the review checklist below.
+Both paths use the review checklist below. If local review is used because a
+subagent cannot be spawned, report that verification gap explicitly.
 
 ## Review Scope
 

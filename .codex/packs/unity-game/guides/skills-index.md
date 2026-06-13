@@ -37,7 +37,7 @@ Infrastructure skills that govern how Codex agents reason and act across tasks:
 | `mcp-preflight` | 3-state MCP availability check — connected / disconnected / not installed |
 | `test-type-router` | Determines test type (EditMode / PlayMode-Programmatic / PlayMode-ECS / PlayMode-Scene / NoTest) from a class name, file path, or task description. Used by /implement, /orchestrate, /fix, /fix-deep, /generate-tests, /create-test, and /create-plan before any test writing begins. When result is NoTest (LifetimeScope, ScriptableObject, Baker, IComponentData, config-only changes), tester agent is skipped entirely |
 | `unity-ugui` | Runtime UGUI implementation — View scripts, Canvas/MCP setup, HUD, Popup/Dialog, Scroll View pool, safe area |
-| `fix-codex` | Full Codex-driven fix pipeline — Codex analyzes fresh (no prior hypotheses), implements, then Claude reviews (correct location? root cause understood? complete? architecture?); committer on APPROVED |
+| `fix-codex` | Full Codex-driven fix pipeline — Codex analyzes fresh (no prior hypotheses), implements, then reviewer checks correct location, root cause, completeness, and architecture; committer on APPROVED |
 | `caveman` | Ultra-compressed communication mode (~75% fewer tokens) — `/caveman` to enter, `/normal` to exit |
 | `context-prime` | Brief Codex on project context at session start — reads key files and summarizes current state |
 | `create-changelog` | Create or update CHANGELOG.md with recent git changes |
