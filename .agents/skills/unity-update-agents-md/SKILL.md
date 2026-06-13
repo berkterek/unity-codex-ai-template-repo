@@ -1,15 +1,13 @@
 ---
-name: unity-update-claude-md
-description: "Use when the user asks for the legacy repository unity command update-claude-md or /update-claude-md. Prefer unity-update-agents-md for new workflows."
+name: unity-update-agents-md
+description: "Use when the user asks to run the repository unity command update-agents-md, /update-agents-md, or the Update AGENTS.md — Project Config Sync workflow."
 ---
 
-# Update Claude MD — Legacy Alias
+# Update AGENTS.md — Project Config Sync
 
-This skill is a compatibility wrapper for the legacy repository command file:
+This skill is a Codex-native wrapper for the repository command file:
 
-`.codex/packs/unity-game/commands/update-claude-md.md`
-
-For new workflows, use `$unity-update-agents-md`.
+`.codex/packs/unity-game/commands/update-agents-md.md`
 
 ## Workflow
 
