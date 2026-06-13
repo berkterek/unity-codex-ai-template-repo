@@ -14,7 +14,7 @@ slash commands instantly.
 - [Folder Layout](#folder-layout)
 - [Guardrails — Hook Equivalents](#guardrails--hook-equivalents)
 - [Executable Guardrails](#executable-guardrails)
-- [Reviewer — Claude](#reviewer--claude)
+- [Reviewer](#reviewer)
 - [Agent List](#agent-list)
 - [Command List](#command-list)
 - [Rules and Guides](#rules-and-guides)
@@ -33,7 +33,7 @@ ships that folder pre-configured with:
 - **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 28+ more
 - **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/game-plan`, `/build-knowledge-graph`, `/smart-commit-selected` and 55+ more
 - **Rules** — Architecture, SOLID/OOP, naming, testing, ECS, serialization, Addressables, bootstrap, async, input, lifecycle, and prefab standards
-- **Skills** — 69 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
+- **Skills** — 68 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
 
 ---
 
@@ -116,10 +116,10 @@ These packages must be installed in the Unity project:
 ├── packs/
 │   └── unity-game/
 │       ├── agents/      34 Unity specialist agents
-│       ├── commands/    61 Unity slash commands
+│       ├── commands/    62 Unity slash commands
 │       ├── rules/       16 rule files
 │       ├── guides/      19 guides (including guardrails)
-│       └── skills/      69 skill files
+│       └── skills/      68 skill files
 ├── project/             Per-project overlay — fill in each project
 ├── templates/           GDD, TDD, CODING_CONVENTIONS templates
 └── manifests/           Import and migration decisions
@@ -129,7 +129,7 @@ These packages must be installed in the Unity project:
 
 ## Guardrails — Hook Equivalents
 
-Codex has no Claude Code hook mechanism. `.codex/packs/unity-game/guides/guardrails.md`
+Codex has no automatic edit-hook mechanism. `.codex/packs/unity-game/guides/guardrails.md`
 fills that gap. Every agent and command reads this file at startup.
 
 ### BLOCK — Never Do
@@ -162,7 +162,7 @@ Pipeline cannot start without Director Gate. `unity-reviewer` is required before
 
 ## Executable Guardrails
 
-Codex cannot run Claude-style hooks on every edit, so this template provides a
+Codex cannot run edit hooks on every edit, so this template provides a
 real shell gate:
 
 ```bash
@@ -192,9 +192,9 @@ checks run the same guardrail runner.
 
 ---
 
-## Reviewer — Claude
+## Reviewer
 
-Code review in this template is performed by **Claude** (`unity-reviewer` agent).
+Code review in this template is performed by the `unity-reviewer` agent.
 
 Review scope:
 - Unity compilation verification (MCP: `refresh_unity` + `read_console`)
@@ -220,7 +220,7 @@ Review scope:
 | `unity-coder-lite` | Small C# changes |
 | `unity-fixer` | Bug — root cause + regression test + fix |
 | `unity-fixer-lite` | Fast single-file fix |
-| `unity-reviewer` | **Full Claude-based reviewer** |
+| `unity-reviewer` | **Full Unity reviewer** |
 | `tester` | EditMode / PlayMode test authoring — NUnit, hand-rolled fakes, AAA pattern |
 | `committer` | Smart phase commits — groups by system boundary, dependency-ordered |
 | `unity-test-runner` | Test execution and reporting |
@@ -277,7 +277,7 @@ Review scope:
 
 ### Unity — Git
 
-`/smart-commit` · `/smart-commit-selected` · `/create-changelog` · `/update-claude-md`
+`/smart-commit` · `/smart-commit-selected` · `/create-changelog` · `/update-agents-md`
 
 ### Unity — Utilities
 
@@ -326,8 +326,8 @@ Review scope:
 | `setup-checklist.md` | Manual setup checklist after `/setup-project` |
 | `agents-index.md` | Agent reference index |
 | `commands.md` | Command reference index |
-| `hooks-blocking.md` | Historical Claude blocking hook checklist as Codex guardrail reference |
-| `hooks-warning.md` | Historical Claude warning hook checklist as Codex guardrail reference |
+| `hooks-blocking.md` | Historical blocking hook checklist preserved as Codex guardrail reference |
+| `hooks-warning.md` | Historical warning hook checklist preserved as Codex guardrail reference |
 | `model-tiers.md` | Model routing guidance |
 | `orchestrate-rules.md` | Orchestration rule reference |
 | `skills-index.md` | Skill library index |

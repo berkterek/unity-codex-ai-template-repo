@@ -69,7 +69,7 @@ git config core.hooksPath .githooks
 
 ## Reviewer
 
-The reviewer in this project is **Claude** (`unity-reviewer` agent).
+The reviewer in this project is the `unity-reviewer` agent.
 
 - Full checklist: compilation verification (MCP), runtime validation (Play mode), architecture, performance, encapsulation, input system, unused code detection
 - Review is **required** before every commit
@@ -126,7 +126,7 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 | `unity-coder-lite.md` | Small C# changes with high rule compliance |
 | `unity-fixer.md` | Bug fixing — root cause analysis + regression test |
 | `unity-fixer-lite.md` | Fast single-file fixes |
-| `unity-reviewer.md` | **Full Claude-based reviewer** — compile + runtime verification |
+| `unity-reviewer.md` | **Full Unity reviewer** — compile + runtime verification |
 | `tester.md` | EditMode / PlayMode test authoring — NUnit, hand-rolled fakes, AAA pattern |
 | `committer.md` | Smart phase commits — groups by system boundary, dependency-ordered |
 | `unity-test-runner.md` | Test execution and result reporting |
@@ -217,7 +217,7 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 #### Review & Quality
 | Command | Role |
 |---------|------|
-| `/review-code` | Code review (Claude reviewer) |
+| `/review-code` | Code review (unity-reviewer) |
 | `/clean-slop` | Remove low-quality / unnecessary code |
 | `/performance-audit` | Performance audit |
 | `/check-portability` | Platform portability check |
@@ -229,7 +229,8 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 | `/smart-commit` | Smart commit message and staging |
 | `/smart-commit-selected` | Plan commits, select groups, commit only selected |
 | `/create-changelog` | Generate changelog |
-| `/update-claude-md` | Sync AGENTS.md with actual .codex/ folder state |
+| `/update-agents-md` | Sync AGENTS.md with actual .codex/ folder state |
+| `/update-claude-md` | Legacy alias for `/update-agents-md` |
 
 #### Utilities
 | Command | Role |

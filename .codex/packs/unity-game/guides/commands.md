@@ -8,15 +8,15 @@
   - Use for: logic bugs, "sometimes happens" issues, wrong values at runtime, NullRef with unclear source
   - Use `/fix` when: stack trace clearly points to root cause
 - `/fix-lite <bug>` — **Lightweight single-file fix**: pin file + line from stack trace → read only that file → **unity-fixer-lite** → compile check → committer. No reviewer, no test writer, no scout. `/fix` auto-routes here when complexity score < 0.2.
-- `/fix-codex [--files f1,f2] <bug>` — **Full Codex pipeline**: Codex Analysis (fresh eyes, no prior hypotheses) → **Human Gate** → Codex Implementation → **Claude Review** (correct location? root cause understood? complete? architecture?) → loop back to Codex if NEEDS REVISION (max 2x) → committer
+- `/fix-codex [--files f1,f2] <bug>` — **Full Codex pipeline**: Codex Analysis (fresh eyes, no prior hypotheses) → **Human Gate** → Codex Implementation → **Codex Review** (correct location? root cause understood? complete? architecture?) → loop back to implementation if NEEDS REVISION (max 2x) → committer
   - Use when: legacy/large codebase (2000+ line files), stuck after `/fix` or `/fix-deep`, or 30+ minutes in a loop
-  - Claude does zero analysis — Codex reads the code directly, implements, then Claude reviews
+  - The review pass does zero analysis before implementation — Codex reads the code directly, implements, then a reviewer checks the result
 - `/scene-setup <description>` — **complexity score** → **unity-coder-lite** (Simple) / **unity-coder** (Medium/Complex) + unity-setup → **unity-verifier** → **Codex** → unity-reviewer → [unity-developer if score ≥ 0.7] → committer
 - `/migrate <pattern> in <scope>` — **complexity score** → **test-type-router** → [tester if not NoTest and complexity ≥ Medium] → **migrator** / **unity-migrator** → reviewer → [unity-developer if score ≥ 0.7] → committer
-- `/create-plan <file> <what>` — researcher → **complexity-aware planner** (opus, assigns `parallel_group` to independent tasks) → reviewer → save → optional implementer (parallel spawn for grouped tasks if complexity ≥ 0.4)
-- `/create-plan --lean <file> <topic>` — **Lean mode:** researcher → **lean-planner** (`claude-sonnet-4-6`) → reviewer → save. Output: 3-5 task table (name, files, one-line note). No code skeletons, no acceptance criteria, no parallel_group annotations. Implementer auto-spawn: **disabled** regardless of complexity score. To upgrade: re-run without `--lean`.
-- `/update-plan <file> <change>` — analyzer → planner (opus, updates `parallel_group` annotations) → reviewer → save → optional implementer (parallel spawn for grouped tasks if complexity ≥ 0.4)
-- `/update-plan --lean <file> <change>` — analyzer → **lean-planner** (`claude-sonnet-4-6`) → reviewer → save. Output: updated 3-5 task table only. Implementer auto-spawn: **disabled**. Use when the change is small (adding/removing a task, adjusting a file path).
+- `/create-plan <file> <what>` — researcher → **complexity-aware planner** (high reasoning effort, assigns `parallel_group` to independent tasks) → reviewer → save → optional implementer (parallel spawn for grouped tasks if complexity ≥ 0.4)
+- `/create-plan --lean <file> <topic>` — **Lean mode:** researcher → **lean-planner** (medium reasoning effort) → reviewer → save. Output: 3-5 task table (name, files, one-line note). No code skeletons, no acceptance criteria, no parallel_group annotations. Implementer auto-spawn: **disabled** regardless of complexity score. To upgrade: re-run without `--lean`.
+- `/update-plan <file> <change>` — analyzer → planner (high reasoning effort, updates `parallel_group` annotations) → reviewer → save → optional implementer (parallel spawn for grouped tasks if complexity ≥ 0.4)
+- `/update-plan --lean <file> <change>` — analyzer → **lean-planner** (medium reasoning effort) → reviewer → save. Output: updated 3-5 task table only. Implementer auto-spawn: **disabled**. Use when the change is small (adding/removing a task, adjusting a file path).
 - `/smart-commit` — analyze dirty working tree → group into logical commits → commit
 - `/smart-commit-selected` — analyze dirty working tree → plan commit groups → **show checklist (multiSelect)** → commit only selected groups
 - `/orchestrate` — **complexity score** → read WORKFLOW.md → check `parallel_group` annotations → per-task: **test-type-router** → [tester if not NoTest] → **coder** (pure C#) / **unity-coder-lite** (Simple Unity) / **unity-coder** (Medium/Complex Unity) → **unity-verifier** → **Codex** → unity-reviewer → [unity-developer if score ≥ 0.7] → committer; tasks with same `parallel_group` run simultaneously (complexity ≥ 0.4); phase gate runs **guardrails → ralph → silent-failure-hunter → validate** automatically before asking to proceed; emits `VERIFICATION_PASSED` event on success
@@ -81,4 +81,5 @@
 ### Documentation
 - `/catch-up` — Generate a human-readable codebase guide (`docs/CATCH_UP.md`)
 - `/adr <decision>` — Record an Architecture Decision (e.g. `/adr why VContainer over Zenject`); writes to `docs/decisions/NNN-topic.md`
-- `/update-claude-md [--section rules|commands|agents]` — Legacy command name; syncs AGENTS.md tables with actual `.codex/` project state. Shows diff, waits for confirmation before writing.
+- `/update-agents-md [--section rules|commands|agents]` — Syncs AGENTS.md tables with actual `.codex/` project state. Shows diff, waits for confirmation before writing.
+- `/update-claude-md [--section rules|commands|agents]` — Legacy alias for `/update-agents-md`.
