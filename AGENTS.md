@@ -17,6 +17,8 @@ rules, and guides are organized under `.codex/`.
 ├── graph/         — Optional Unity knowledge graph extractors and validators
 ├── manifests/     — Import decisions and migration notes
 └── templates/     — Starter templates
+.agents/
+└── skills/        — Repo-scoped Codex skills wrapping command workflows
 ```
 
 ---
@@ -72,6 +74,36 @@ The reviewer in this project is **Claude** (`unity-reviewer` agent).
 - Full checklist: compilation verification (MCP), runtime validation (Play mode), architecture, performance, encapsulation, input system, unused code detection
 - Review is **required** before every commit
 - Agent file: `.codex/packs/unity-game/agents/unity-reviewer.md`
+
+---
+
+## Native Codex Subagents
+
+Native Codex custom agent wrappers live in `.codex/agents/*.toml`.
+
+- The canonical long-form role instructions remain in `.codex/packs/unity-game/agents/*.md`.
+- Each `.toml` wrapper points its subagent to the matching Markdown role file.
+- Update the Markdown role file first when changing behavior; update the wrapper only for agent identity, sandbox mode, startup reads, or model/tool defaults.
+- Restart Codex after adding or changing `.codex/agents/*.toml` so the agent catalog reloads.
+- Usage guide: `.codex/packs/unity-game/guides/subagents.md`.
+
+Subagents are not spawned automatically. Ask explicitly for subagents or
+parallel agents, and keep parallel write tasks on disjoint file sets.
+
+---
+
+## Codex Command Skills
+
+Repo-scoped Codex command skills live in `.agents/skills/`.
+
+- Core commands use `core-*` skill names, such as `$core-orchestrate`.
+- Unity commands use `unity-*` skill names, such as `$unity-implement`.
+- The canonical command instructions remain in `.codex/core/commands/*.md` and `.codex/packs/unity-game/commands/*.md`.
+- Each skill wrapper reads and executes its matching canonical command file.
+- Usage guide: `.codex/packs/unity-game/guides/commands-as-skills.md`.
+
+When adding, removing, or renaming command files, update the matching skill
+wrapper so Codex can discover the workflow through `$skill` invocation.
 
 ---
 

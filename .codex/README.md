@@ -10,6 +10,7 @@ agent orchestration from project-specific rules and technology packs.
 | `core/agents/` | Project-agnostic agent role templates. |
 | `core/commands/` | Project-agnostic workflow commands. |
 | `core/protocols/` | Shared progress, event, mailbox, and checkpoint formats. |
+| `agents/` | Native Codex custom subagent wrappers for selected workflow roles. |
 | `guardrails/` | Executable BLOCK/WARN validators for Codex workflow gates. |
 | `project/` | Per-repository overlay files. Fill these for each project. |
 | `templates/` | Copyable templates for project overlays. |
@@ -91,6 +92,15 @@ Use .codex/core/commands/orchestrate.md and execute Phase 1 from
 ```
 
 ```text
+$unity-implement Add the feature described in docs/WORKFLOW.md Task 1.
+```
+
+```text
+Spawn a unity-scout subagent to analyze the affected files, then spawn a
+unity-coder subagent for a disjoint implementation task.
+```
+
+```text
 Use .codex/core/commands/status.md and report the current workflow state.
 ```
 
@@ -165,3 +175,12 @@ It includes Unity MCP workflow, New Input System guidance, serialization safety,
 Unity guardrails, and Unity setup-agent behavior. Larger gameplay, genre,
 platform, engine-system, or third-party package references should remain
 optional per project.
+
+Native Codex subagent wrappers for the most common Unity roles live in
+`.codex/agents/`. See
+`.codex/packs/unity-game/guides/subagents.md` for usage examples and operating
+rules.
+
+Repo-scoped command skills live in `.agents/skills/`. They wrap the command
+files under `.codex/core/commands/` and `.codex/packs/unity-game/commands/`.
+See `.codex/packs/unity-game/guides/commands-as-skills.md`.
