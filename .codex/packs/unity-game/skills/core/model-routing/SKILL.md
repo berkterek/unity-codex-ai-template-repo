@@ -5,7 +5,19 @@ description: "Use when working with Model Routing Heuristics in this Unity Codex
 
 # Model Routing Heuristics
 
-When delegating work to agents, use these signals to select the right model tier. These are heuristics, not hard rules — the user can always override with `--quick` or `--thorough`.
+When delegating work to agents, use these signals to select the right model tier. These are heuristics, not hard rules — the user can always override with `--quick`, `--lite`, `--heavy`, or `--thorough`.
+
+## Preferred Codex Model Mapping
+
+| Tier | Preferred Model | Primary Use |
+|------|-----------------|-------------|
+| **light** | GPT-5.3 | Scout/linter scans, short summaries, file discovery, low-risk lookup |
+| **normal** | GPT-5.4 | Most implementation, tests, review, validation, setup, migrations |
+| **heavy** | GPT-5.5 | Plan-writing agents and planning commands only |
+
+Use GPT-5.5 only for planner-style work by default. Use GPT-5.4 for the normal
+execution pipeline, including critique, review, debugging, and implementation.
+Use GPT-5.3 only when the task is narrow, low-risk, and mostly read-only.
 
 ## Complexity Signals
 
@@ -20,6 +32,7 @@ When delegating work to agents, use these signals to select the right model tier
 ## Routing Decision Matrix
 
 ### Low-Effort Tier — Fast, Cheap, Read-Only
+**Preferred model:** GPT-5.3
 **Agents:** `unity-scout`, `unity-linter`
 **Use when:**
 - Quick codebase exploration before a larger task
@@ -30,6 +43,7 @@ When delegating work to agents, use these signals to select the right model tier
 **Never use for:** Writing code, modifying files, complex reasoning
 
 ### Medium-Effort Tier — Balanced Speed/Quality
+**Preferred model:** GPT-5.4
 **Agents:** `unity-coder-lite`, `unity-fixer-lite`, `unity-reviewer`, `unity-test-runner`, `unity-build-runner`, `unity-migrator`, `unity-security-reviewer`, `unity-git-master`
 **Use when:**
 - Single-file changes with clear requirements
@@ -40,7 +54,8 @@ When delegating work to agents, use these signals to select the right model tier
 - Structured tasks with documented procedures (migrations, LFS setup)
 
 ### High-Effort Tier — Deep Reasoning
-**Agents:** `unity-coder`, `unity-fixer`, `unity-verifier`, `unity-optimizer`, `unity-prototyper`, `unity-shader-dev`, `unity-scene-builder`, `unity-ui-builder`, `unity-network-dev`, `unity-critic`
+**Preferred model:** GPT-5.5 for planners only; GPT-5.4 for critics, deep reviewers, debugging, and implementation
+**Agents:** `lean-planner`, planner, `unity-critic`, `unity-developer`, `debugger`, `unity-coder`, `unity-fixer`, `unity-verifier`, `unity-optimizer`, `unity-prototyper`, `unity-shader-dev`, `unity-scene-builder`, `unity-ui-builder`, `unity-network-dev`
 **Use when:**
 - Multi-system feature implementation
 - Bug investigation requiring deep analysis
@@ -58,24 +73,24 @@ During the Plan phase, evaluate the requirements against the complexity signals 
 2. Check for complexity keywords in the task description
 3. Identify risk factors (serialization, networking, platform-specific)
 4. Choose the agent tier accordingly:
-   - Simple requirements → route to `unity-coder-lite` with low or medium reasoning effort
-   - Moderate requirements → route to `unity-coder` with medium reasoning effort
-   - Complex multi-system → route to multiple agents via `/unity-team`
+   - Simple requirements → route to `unity-coder-lite` on GPT-5.4, or GPT-5.3 with `--lite`
+   - Moderate requirements → route to `unity-coder` on GPT-5.4
+   - Complex multi-system → route to planner on GPT-5.5, then all implementation/review workers on GPT-5.4
 
 ### /unity-team — Agent Selection
 When building a team, consider mixing tiers for efficiency:
-- Use `unity-scout` with low reasoning effort for the initial project scan
-- Use medium-effort agents for structured tasks (tests, review)
-- Reserve high reasoning effort for creative or reasoning-heavy work
+- Use `unity-scout` on GPT-5.3 for the initial project scan
+- Use GPT-5.4 agents for structured tasks (implementation, tests, review)
+- Reserve GPT-5.5 for plan-writing only; use GPT-5.4 for critique, architecture review, and final high-risk judgment
 - The `--quick` flag lowers reasoning effort where available
 
 ### Cost Awareness
 | Tier | Relative Cost | Relative Speed |
 |------|--------------|----------------|
-| Low effort | 1x | Fastest |
-| Medium effort | 5x | Fast |
-| High effort | 25x | Slower |
+| Low effort / GPT-5.3 | 1x | Fastest |
+| Medium effort / GPT-5.4 | 5x | Fast |
+| Plan-writing / GPT-5.5 | 25x | Slower |
 
-For iterative work (verify-fix loops), prefer medium effort for early passes
-and high effort for the final judgment pass. This can reduce costs on
-multi-iteration workflows.
+For iterative work (verify-fix loops), prefer GPT-5.3 only for safe scout/lite
+passes and GPT-5.4 for implementation, verification, and final judgment.
+Reserve GPT-5.5 for plan creation or plan revision.

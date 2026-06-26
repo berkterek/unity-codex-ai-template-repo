@@ -23,6 +23,12 @@
 
 > Reviewer priority: Codex → unity-reviewer (falls back to unity-reviewer if Codex is unavailable).
 
+> Model routing: plan-writing agents and planning commands use **GPT-5.5**.
+> All non-lite implementation, review, verification, setup, test, critique, and
+> debug work uses **GPT-5.4**. Lite/scout/linter/short-summary work uses
+> **GPT-5.3**. `--lite` or `--quick` downgrades safe, scoped work to GPT-5.3;
+> `--heavy` returns implementation/fix/orchestration workers to GPT-5.4.
+
 ### Project Setup
 - `/setup-project` — **Step 0:** detect existing state, compare against `.codex/project/FEATURES.json` (if any), offer sync-only mode on conflict. **Step 1:** ask feature questions (Addressables / Testing / ECS) + package gates. Generates folder structure, .asmdef files, base framework classes, and manual checklist. Writes `.codex/project/FEATURES.json` and updates project overlay docs when needed.
 - `/create-prefab-scene` — **Legacy migration:** scan existing scenes for bare GameObjects, build a prefab inventory, create proper prefabs via MCP, review, commit. Use for scenes built before the prefab rules were in place.
