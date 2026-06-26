@@ -19,7 +19,7 @@ event, installer, scope, asmdef, scene, and prefab in the project.
 
 ## Step 0 — Plugin Preflight
 
-Check `.codex/graph/graph-builder.sh` exists.
+Check `.codex/graph/graph-builder.py` or `.codex/graph/graph-builder.sh` exists.
 
 If missing:
 ```
@@ -51,7 +51,7 @@ Stop here.
 
 ---
 
-## Step 2 — Shell Extraction
+## Step 2 — Source Extraction
 
 If `--mcp-only` is NOT set:
 
@@ -60,6 +60,10 @@ If `--mcp-only` is NOT set:
    cp .codex/graph/graph.json .codex/graph/graph.json.bak 2>/dev/null || true
    ```
 2. Run the builder:
+   ```bash
+   python3 .codex/graph/graph-builder.py [--full|--incremental] [--skip-mcp] [--quiet]
+   ```
+   If `graph-builder.py` is unavailable, fall back to:
    ```bash
    bash .codex/graph/graph-builder.sh [--full|--incremental] [--skip-mcp] [--quiet]
    ```
@@ -76,6 +80,10 @@ If `--skip-mcp` is NOT set:
 3. Execute the MCP extraction process per the extractor skill.
 4. The extractor writes output to `.codex/graph/cache/mcp-extract.json`.
 5. Re-run the builder to merge MCP data:
+   ```bash
+   python3 .codex/graph/graph-builder.py --incremental
+   ```
+   If `graph-builder.py` is unavailable, fall back to:
    ```bash
    bash .codex/graph/graph-builder.sh --incremental
    ```
