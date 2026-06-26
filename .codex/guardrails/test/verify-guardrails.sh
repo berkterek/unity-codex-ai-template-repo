@@ -219,6 +219,42 @@ public sealed class BadNewGameObject
 }' \
   "new-gameobject"
 
+assert_clean \
+  "Editor new GameObject is allowed" \
+  "Assets/Scripts/Editor/EditorTool.cs" \
+  'using UnityEngine;
+public sealed class EditorTool
+{
+    public GameObject CreatePreview()
+    {
+        return new GameObject("Preview");
+    }
+}'
+
+assert_clean \
+  "Editors folder new GameObject is allowed" \
+  "Assets/_Framework/Editors/EditorTool.cs" \
+  'using UnityEngine;
+public sealed class EditorTool
+{
+    public GameObject CreatePreview()
+    {
+        return new GameObject("Preview");
+    }
+}'
+
+assert_clean \
+  "Plugin legacy input is allowed" \
+  "Assets/Plugins/ThirdPartyInput.cs" \
+  'using UnityEngine;
+public sealed class ThirdPartyInput
+{
+    public bool JumpPressed()
+    {
+        return Input.GetKey(KeyCode.Space);
+    }
+}'
+
 assert_block \
   "ECS enum without byte base is blocked" \
   "Assets/Scripts/Game/Ecs/BadEcsEnum.cs" \
@@ -233,6 +269,39 @@ public struct BadEcsEnumComponent : IComponentData
     }
 }' \
   "enum-byte-base"
+
+assert_block \
+  "Multi-interface IEvent enum without byte base is blocked" \
+  "Assets/Scripts/Game/Events/BadEventEnum.cs" \
+  'using System;
+public interface IEvent {}
+public struct BadEvent : IDisposable, IEvent
+{
+    public Direction Value;
+    public void Dispose() {}
+}
+public enum Direction
+{
+    Up,
+    Down
+}' \
+  "enum-byte-base"
+
+assert_clean \
+  "IEventBus field with plain enum is allowed" \
+  "Assets/Scripts/Game/ChestFlowController.cs" \
+  'public interface IEventBus {}
+public sealed class ChestFlowController
+{
+    private readonly IEventBus _eventBus;
+    private ChestFlowState _state;
+
+    private enum ChestFlowState
+    {
+        Closed,
+        Open
+    }
+}'
 
 assert_block \
   "ProjectSettings asset edit is blocked" \
@@ -262,6 +331,22 @@ public sealed class AudioService : MonoBehaviour
 {
 }' \
   "service-unity-inheritance"
+
+assert_clean \
+  "Installer in service folder may inherit MonoBehaviour" \
+  "Assets/_GameFolders/Scripts/Games/Concretes/Installers/AudioInstaller.cs" \
+  'using UnityEngine;
+public sealed class AudioInstaller : MonoBehaviour
+{
+}'
+
+assert_clean \
+  "Scope in service folder may inherit MonoBehaviour" \
+  "Assets/_GameFolders/Scripts/Games/Concretes/Scopes/GameScope.cs" \
+  'using UnityEngine;
+public sealed class GameScope : MonoBehaviour
+{
+}'
 
 assert_warn \
   "Hot-path GetComponent warning" \

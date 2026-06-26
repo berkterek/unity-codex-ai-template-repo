@@ -1,6 +1,6 @@
 ---
 name: mcp-preflight
-description: "Use when working with MCP Preflight Check in this Unity Codex template."
+description: "MCP availability + active-instance check for Unity Codex workflows. Run before MCP-backed commands and before any MCP write."
 ---
 
 # MCP Preflight Check
@@ -15,12 +15,26 @@ Call `manage_editor` with `action: "telemetry_ping"`.
 
 ---
 
-## 3 States
+## States
 
 ### State 1 — MCP Connected ✅
 **Signal:** `manage_editor(action="telemetry_ping")` returns a valid response.
 
-**Action:** Proceed with full pipeline. All MCP agents can be spawned normally.
+**Action:** Proceed with full pipeline, but first clear State 1.5 below. MCP tools can be used normally only after the active Unity instance is verified.
+
+---
+
+### State 1.5 — Connected, but Wrong / Ambiguous Instance ⚠️
+**Signal:** More than one Unity Editor may be open, or the active MCP instance may not belong to this repository. A default MCP instance can target the wrong Unity project; scene, prefab, asset, and `execute_code` operations can then succeed against the wrong project without an obvious error.
+
+**Action (mandatory before the first MCP write or `execute_code`):**
+1. List connected Unity instances through the MCP instance resource/tool available in this session.
+2. Select the instance whose project path is under the current repository root.
+3. Pin it with `set_active_instance`.
+4. Verify the active project by reading `Application.dataPath` through `execute_code` or equivalent project info.
+5. Continue only if `Application.dataPath` resolves inside this repo.
+
+If verification fails, abort MCP writes and re-pin the correct instance. Closing every other Unity Editor is an acceptable simplification, but still verify the active `dataPath` before writing.
 
 ---
 
@@ -102,7 +116,8 @@ At the start of each relevant command step, add:
 ```
 ### Step N — MCP Preflight
 Read and apply `.codex/packs/unity-game/skills/core/mcp-preflight/SKILL.md`.
-- State 1 → continue with full pipeline
+- State 1 → verify active Unity instance, then continue with full pipeline
+- State 1.5 → pin the repo-local Unity instance and verify `Application.dataPath` before any MCP write
 - State 2 → stop, offer code-only alternative, wait for user
 - State 3 → switch to code-only mode silently, continue
 ```

@@ -51,7 +51,15 @@ is_test_path() {
 }
 
 is_editor_path() {
-  printf '%s\n' "$1" | grep -qE '/Editor/'
+  printf '%s\n' "$1" | grep -qE '/Editors?/'
+}
+
+is_third_party_path() {
+  printf '%s\n' "$1" | grep -qE '/(Plugins|ThirdParty|PackageCache)/|_AssetFolders/'
+}
+
+is_non_runtime_path() {
+  is_test_path "$1" || is_editor_path "$1" || is_third_party_path "$1"
 }
 
 is_service_domain_path() {
@@ -104,6 +112,8 @@ grep_rule() {
 check_unity_editor_runtime() {
   local file="$1"
   local line
+
+  is_editor_path "$file" && return
 
   if ! grep -qE 'using[[:space:]]+UnityEditor|UnityEditor\.' "$file" 2>/dev/null; then
     return
@@ -173,8 +183,17 @@ check_monobehaviour_new_service() {
 check_service_unity_inheritance() {
   local file="$1"
   local line
+  local base
 
   is_service_domain_path "$file" || return
+  is_non_runtime_path "$file" && return
+
+  base="$(basename "$file")"
+  case "$base" in
+    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs)
+      return
+      ;;
+  esac
 
   while IFS=: read -r line _; do
     [ -n "$line" ] || continue
@@ -207,8 +226,7 @@ check_runtime_gameobject_lifecycle() {
   local file="$1"
   local line
 
-  is_test_path "$file" && return
-  is_editor_path "$file" && return
+  is_non_runtime_path "$file" && return
 
   while IFS=: read -r line _; do
     [ -n "$line" ] || continue
@@ -303,7 +321,10 @@ check_ecs_enum_byte_base() {
   local line
   local content
 
-  if ! printf '%s\n' "$file" | grep -qE '/Ecs/' && ! grep -qE '(IEvent|IComponentData)' "$file" 2>/dev/null; then
+  is_non_runtime_path "$file" && return
+
+  if ! printf '%s\n' "$file" | grep -qE '/Ecs/' \
+    && ! grep -qE 'struct[[:space:]]+[A-Za-z_][A-Za-z0-9_]*[[:space:]]*:[^{]*(^|[^A-Za-z0-9_])(IEvent|IComponentData)([^A-Za-z0-9_]|$)' "$file" 2>/dev/null; then
     return
   fi
 
@@ -397,7 +418,9 @@ check_cs_file() {
   grep_rule "$file" 'UnityEvent(<|\b)|UnityEngine\.Events' "unity-event" "UnityEvent is forbidden; use IEventBus."
   grep_rule "$file" 'Time\.timeScale[[:space:]]*=' "time-scale" "Do not assign Time.timeScale directly; use PauseService via IEventBus."
   grep_rule "$file" 'static[[:space:]]+[^;{=]*(Instance|_instance)\b' "singleton" "Static singleton pattern is forbidden; use VContainer."
-  grep_rule "$file" 'Input\.(GetKey|GetAxis|GetButton|mousePosition)' "legacy-input" "Legacy Input API is forbidden; use the New Input System."
+  if ! is_non_runtime_path "$file"; then
+    grep_rule "$file" 'Input\.(GetKey|GetAxis|GetButton|mousePosition)' "legacy-input" "Legacy Input API is forbidden; use the New Input System."
+  fi
   check_unity_editor_runtime "$file"
   check_monobehaviour_new_service "$file"
   check_service_unity_inheritance "$file"

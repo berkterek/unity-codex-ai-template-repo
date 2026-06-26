@@ -9,9 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Run guardrail verifier
+        run: bash .codex/guardrails/test/verify-guardrails.sh
+
+      - name: Run guardrail integration verifier
+        run: bash .codex/guardrails/test/verify-integration.sh
 
       - name: Run changed-file guardrails
         run: bash .codex/guardrails/run.sh --changed

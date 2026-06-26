@@ -63,6 +63,15 @@ bash .codex/guardrails/test/verify-guardrails.sh
 bash .codex/guardrails/test/verify-integration.sh
 ```
 
+The verifier includes positive controls for real violations and negative
+controls for known false-positive cases:
+
+- `IEventBus` plus a plain enum must not trigger the ECS/IEvent byte-base rule.
+- `Plugins/`, `ThirdParty/`, `PackageCache/`, `_AssetFolders/`, `Editor/`,
+  `Editors/`, and test paths are excluded from runtime-only checks.
+- `*Installer.cs`, `*Scope.cs`, `*Provider.cs`, `*View.cs`, `*Controller.cs`,
+  and `*Root.cs` may use Unity inheritance inside otherwise pure domain paths.
+
 ## Git Integration
 
 Enable the local pre-commit hook once per clone:
@@ -72,4 +81,4 @@ git config core.hooksPath .githooks
 ```
 
 The GitHub Actions workflow at `.github/workflows/guardrails.yml` runs the same
-runner on push and pull request.
+runner and both verifier scripts on push and pull request.
