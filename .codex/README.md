@@ -12,6 +12,7 @@ agent orchestration from project-specific rules and technology packs.
 | `core/protocols/` | Shared progress, event, mailbox, and checkpoint formats. |
 | `agents/` | Native Codex custom subagent wrappers for selected workflow roles. |
 | `guardrails/` | Executable BLOCK/WARN validators for Codex workflow gates. |
+| `graph/` | Optional Unity knowledge graph builder, extractor notes, traversal, and validators. |
 | `project/` | Per-repository overlay files. Fill these for each project. |
 | `templates/` | Copyable templates for project overlays. |
 | `packs/` | Optional technology/domain packs such as Unity. |
@@ -128,6 +129,36 @@ Enable the optional local git hook once per clone:
 ```bash
 git config core.hooksPath .githooks
 ```
+
+## Model Routing
+
+Default routing is documented in `packs/unity-game/guides/model-tiers.md` and
+`packs/unity-game/skills/core/model-routing/SKILL.md`:
+
+| Work Type | Model |
+|-----------|-------|
+| Plan-writing agents and planning commands | GPT-5.5 |
+| All non-lite implementation, review, verification, setup, test, critique, and debug work | GPT-5.4 |
+| Lite agents, scout, linter, short summaries, and low-risk lookup | GPT-5.3 |
+
+`--lite` and `--quick` choose GPT-5.3 for safe, scoped work. `--heavy` returns
+implementation/fix/orchestration workers to GPT-5.4 when they would otherwise
+use a lite path.
+
+## Knowledge Graph
+
+The optional Unity knowledge graph lives in `graph/` and is controlled by
+`project/FEATURES.json` (`"graph": true`).
+
+Primary command:
+
+```bash
+/build-knowledge-graph --full
+```
+
+The build command prefers `graph/graph-builder.py`, a pure-Python stdlib
+builder, and falls back to `graph/graph-builder.sh` when needed. Unity Editor
+MCP extraction can merge scene and prefab data into the graph cache.
 
 ## What Goes Where
 

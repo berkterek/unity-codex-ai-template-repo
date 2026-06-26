@@ -90,6 +90,14 @@ Native Codex custom agent wrappers live in `.codex/agents/*.toml`.
 Subagents are not spawned automatically. Ask explicitly for subagents or
 parallel agents, and keep parallel write tasks on disjoint file sets.
 
+Default model routing:
+
+- Plan-writing agents and planning commands only: **GPT-5.5**
+- All non-lite agents and normal command work: **GPT-5.4**
+- Lite agents, scout, linter, short summaries, low-risk lookup: **GPT-5.3**
+- `--heavy` upgrades implementation/fix/orchestration workers to GPT-5.4 when they would otherwise use a lite path.
+- `--lite` or `--quick` downgrades safe, scoped work to GPT-5.3.
+
 ---
 
 ## Codex Command Skills
@@ -371,6 +379,7 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | `urp-quality-settings` | URP quality tiers, runtime asset swap, auto-detect, adaptive performance |
 | `urp-lighting-shadows` | Directional/point/spot lights, shadow cascades, light layers, reflection probes |
 | `urp-post-processing` | Bloom, DOF, Motion Blur, SSAO, Tonemapping, Color Grading, Vignette |
+| `urp-volume` | URP Volume creation/configuration via MCP `manage_graphics` |
 | `audio-mixer-mcp` | AudioMixer exposed parameters, AudioSource routing via MCP |
 | `srp-batcher-mcp` | SRP Batcher enable/verify, UI Raycast Target audit via MCP |
 
@@ -379,8 +388,10 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | Skill | Covers |
 |-------|--------|
 | `dotween` | Tween creation, sequences, callbacks, memory management |
+| `netcode` | Netcode for GameObjects 2.x lifecycle, RPCs, NetworkVariable, spawning |
 | `nsubstitute` | NSubstitute mock setup, argument matchers, received verification |
 | `odin-inspector` | Custom attributes, validators, group drawers |
+| `probuilder` | ProBuilder in-editor mesh modeling, API, prefab integration |
 | `textmeshpro` | Font assets, rich text, SDF materials, localization |
 | `unitask` | Async patterns, cancellation, `Forget()`, UniTaskVoid |
 | `vcontainer` | Scope hierarchy, registration patterns, `IInitializable`/`IDisposable` lifecycle |

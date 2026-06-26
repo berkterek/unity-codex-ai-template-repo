@@ -14,8 +14,10 @@ slash commands instantly.
 - [Folder Layout](#folder-layout)
 - [Guardrails — Hook Equivalents](#guardrails--hook-equivalents)
 - [Executable Guardrails](#executable-guardrails)
+- [Knowledge Graph](#knowledge-graph)
 - [Reviewer](#reviewer)
 - [Agent List](#agent-list)
+- [Model Routing](#model-routing)
 - [Command List](#command-list)
 - [Rules and Guides](#rules-and-guides)
 - [Skills](#skills)
@@ -33,7 +35,7 @@ ships that folder pre-configured with:
 - **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 28+ more
 - **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/game-plan`, `/build-knowledge-graph`, `/smart-commit-selected` and 55+ more
 - **Rules** — Architecture, SOLID/OOP, naming, testing, ECS, serialization, Addressables, bootstrap, async, input, lifecycle, and prefab standards
-- **Skills** — 68 skill files: audio, URP, Cinemachine, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
+- **Skills** — 71 skill files: audio, URP, Cinemachine, Netcode, ProBuilder, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
 
 ---
 
@@ -118,8 +120,8 @@ These packages must be installed in the Unity project:
 │       ├── agents/      34 Unity specialist agents
 │       ├── commands/    62 Unity slash commands
 │       ├── rules/       16 rule files
-│       ├── guides/      19 guides (including guardrails)
-│       └── skills/      68 skill files
+│       ├── guides/      21 guides (including guardrails)
+│       └── skills/      71 skill files
 ├── project/             Per-project overlay — fill in each project
 ├── templates/           GDD, TDD, CODING_CONVENTIONS templates
 └── manifests/           Import and migration decisions
@@ -192,6 +194,22 @@ checks run the same guardrail runner.
 
 ---
 
+## Knowledge Graph
+
+The optional Unity knowledge graph lives under `.codex/graph/` and is enabled
+per project through `.codex/project/FEATURES.json`.
+
+```bash
+/build-knowledge-graph --full
+/knowledge-graph summary
+```
+
+The builder prefers the pure-Python `.codex/graph/graph-builder.py` path and
+falls back to `.codex/graph/graph-builder.sh` when needed. MCP extraction can
+merge scene and prefab data into the graph when the Unity Editor is open.
+
+---
+
 ## Reviewer
 
 Code review in this template is performed by the `unity-reviewer` agent.
@@ -250,6 +268,22 @@ Review scope:
 | `lean-planner` | Compact 3-5 task plan — no code skeletons, no acceptance criteria |
 | `unity-particle-designer` | VFX particle effects — prefab, pool, VFX service wiring |
 | `unity-ui-toolkit-builder` | Editor-only UI Toolkit: EditorWindow, CustomEditor, UXML, USS |
+
+---
+
+## Model Routing
+
+Default Codex model selection is intentionally simple:
+
+| Work Type | Model |
+|-----------|-------|
+| Plan-writing agents and planning commands | **GPT-5.5** |
+| All non-lite implementation, review, verification, setup, test, critique, and debug work | **GPT-5.4** |
+| Lite agents, scout, linter, short summaries, and low-risk lookup | **GPT-5.3** |
+
+`--lite` and `--quick` choose GPT-5.3 for safe, scoped work. `--heavy`
+returns implementation/fix/orchestration workers to GPT-5.4 when they would
+otherwise use a lite path. GPT-5.5 is reserved for producing or revising plans.
 
 ---
 
@@ -326,11 +360,13 @@ Review scope:
 | `setup-checklist.md` | Manual setup checklist after `/setup-project` |
 | `agents-index.md` | Agent reference index |
 | `commands.md` | Command reference index |
+| `commands-as-skills.md` | Repo-scoped command skill wrapper guide |
 | `hooks-blocking.md` | Historical blocking hook checklist preserved as Codex guardrail reference |
 | `hooks-warning.md` | Historical warning hook checklist preserved as Codex guardrail reference |
 | `model-tiers.md` | Model routing guidance |
 | `orchestrate-rules.md` | Orchestration rule reference |
 | `skills-index.md` | Skill library index |
+| `subagents.md` | Native Codex subagent wrapper usage guide |
 
 ---
 
@@ -405,6 +441,7 @@ Skills live under `.codex/packs/unity-game/skills/` and are read-only reference 
 | `urp-quality-settings` | URP quality tiers, runtime asset swap, auto-detect, adaptive performance |
 | `urp-lighting-shadows` | Directional/point/spot lights, shadow cascades, light layers, reflection probes |
 | `urp-post-processing` | Bloom, DOF, Motion Blur, SSAO, Tonemapping, Color Grading, Vignette |
+| `urp-volume` | URP Volume creation/configuration via MCP `manage_graphics` |
 | `audio-mixer-mcp` | AudioMixer exposed parameters, AudioSource routing via MCP |
 | `srp-batcher-mcp` | SRP Batcher enable/verify, UI Raycast Target audit via MCP |
 
@@ -413,8 +450,10 @@ Skills live under `.codex/packs/unity-game/skills/` and are read-only reference 
 | Skill | Covers |
 |-------|--------|
 | `dotween` | Tween creation, sequences, callbacks, memory management |
+| `netcode` | Netcode for GameObjects 2.x lifecycle, RPCs, NetworkVariable, spawning |
 | `nsubstitute` | NSubstitute mock setup, argument matchers, received verification |
 | `odin-inspector` | Custom attributes, validators, group drawers |
+| `probuilder` | ProBuilder in-editor mesh modeling, API, prefab integration |
 | `textmeshpro` | Font assets, rich text, SDF materials, localization |
 | `unitask` | Async patterns, cancellation, `Forget()`, UniTaskVoid |
 | `vcontainer` | Scope hierarchy, registration patterns, `IInitializable`/`IDisposable` lifecycle |
