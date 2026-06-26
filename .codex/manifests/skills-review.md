@@ -24,6 +24,18 @@ Reason:
 | `core/input-system` | `.codex/packs/unity-game/guides/input-system.md` | New Input System is the default input policy for new Unity projects. |
 | `core/serialization-safety` | `.codex/packs/unity-game/guides/serialization-safety.md` | Prevents Unity data loss and should be a default safety rule. |
 
+## Added From Claude Template Gap Review
+
+| Source Skill | Target | Reason |
+|--------------|--------|--------|
+| `systems/urp-volume` | `.codex/packs/unity-game/skills/systems/urp-volume/` | Portable MCP usage guard for URP Volume and post-processing setup. |
+| `third-party/netcode` | `.codex/packs/unity-game/skills/third-party/netcode/` | Portable NGO 2.x lifecycle/RPC/spawn reference with split sub-docs. |
+| `third-party/probuilder` | `.codex/packs/unity-game/skills/third-party/probuilder/` | Portable ProBuilder authoring and prefab integration guidance. |
+
+Skipped Claude-only hook/profile/state docs because Codex has no equivalent hook
+runtime; the applicable safety rules already live in `guides/guardrails.md` and
+`.codex/guardrails/run.sh`.
+
 ## Added From External Workflow Kit Review
 
 | Source Idea | Target | Reason |

@@ -70,6 +70,7 @@ Infrastructure skills that govern how Codex agents reason and act across tasks:
 | `urp-quality-settings` | URP quality tiers (Low/Medium/High/Ultra), runtime asset swap, auto-detect, adaptive performance |
 | `urp-lighting-shadows` | Directional/point/spot lights, shadow cascades, bias tuning, light layers, light cookies, reflection probes |
 | `urp-post-processing` | Bloom, DOF, Motion Blur, SSAO, Tonemapping, Color Grading, Vignette — setup, values, runtime control |
+| `urp-volume` | URP Volume setup via MCP — global/local volumes, VolumeProfile assets, and post-processing effect overrides |
 | `audio-mixer-mcp` | AudioMixer exposed parameters, AudioSource routing — configuration via MCP execute_code |
 | `srp-batcher-mcp` | SRP Batcher enable/verify, UI Raycast Target audit, post-processing Volume cleanup via MCP |
 | `particle-vfx` | ParticleSystem module config, URP particle shaders, VFX pool, VContainer wiring, event-driven playback |
@@ -79,8 +80,10 @@ Infrastructure skills that govern how Codex agents reason and act across tasks:
 | Skill | Covers |
 |-------|--------|
 | `dotween` | Tween creation, sequences, callbacks, memory management |
+| `netcode` | Netcode for GameObjects 2.x lifecycle, RPCs, NetworkVariable, NetworkList, spawning, scene management, UnityTransport |
 | `nsubstitute` | NSubstitute setup, configuration, and usage patterns for Unity test assemblies |
 | `odin-inspector` | Custom attributes, validators, group drawers |
+| `probuilder` | ProBuilder in-editor mesh modeling — geometry creation, mesh edits, UVs, materials, prefab integration |
 | `textmeshpro` | Font assets, rich text, SDF materials, localization |
 | `unitask` | Async patterns, cancellation, `Forget()`, UniTaskVoid |
 | `unity-editor-tools` | AssetDatabase, AssetPostprocessor, InitializeOnLoad, EditorPrefs, PrefabUtility, build pipeline hooks |
