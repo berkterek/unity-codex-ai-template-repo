@@ -184,7 +184,7 @@ public sealed class BadMonoService : MonoBehaviour
         var service = new AudioService();
     }
 }' \
-  "monobehaviour-new-service"
+  "new-service"
 
 assert_block \
   "Concrete service constructor dependency is blocked" \
