@@ -46,6 +46,12 @@ If the user says `n` → stop. If `y` → continue.
 
 ---
 
+## Routing (hybrid mode)
+
+When `hybrid_graph` is enabled in `.codex/project/FEATURES.json`, the four call-graph queries (`callers`, `impact`, `path`, `god-nodes`) are dispatched via `mcp__graph_mcp__*` tools per `.codex/packs/unity-game/skills/core/knowledge-graph-hybrid/SKILL.md`. All other subcommands and all output formats are unchanged.
+
+---
+
 ## Subcommands
 
 ### summary
@@ -53,14 +59,15 @@ If the user says `n` → stop. If `y` → continue.
 One-screen project overview.
 
 ```bash
-jq '{
+jq --slurpfile scenes .codex/graph/scenes.json \
+   --slurpfile prefabs .codex/graph/prefabs.json '{
   classes:    (.codebase.classes    | length),
   interfaces: (.codebase.interfaces | length),
   events:     (.codebase.events     | length),
   installers: (.codebase.vcontainer.installers | length),
   assemblies: (.codebase.assemblies | length),
-  scenes:     (.codebase.scenes     | length),
-  prefabs:    (.codebase.prefabs    | length),
+  scenes:     ($scenes[0]  | length),
+  prefabs:    ($prefabs[0] | length),
   generated_at,
   mcp_status: .codebase.mcp_extraction.status,
   errors:     (.validation.errors   | length),
@@ -154,8 +161,8 @@ jq '
 Show components, variant status, base prefab, and domain for a given prefab.
 
 ```bash
-jq --arg name "<PrefabName>" '
-  .codebase.prefabs[]
+jq --slurpfile prefabs .codex/graph/prefabs.json --arg name "<PrefabName>" '
+  $prefabs[0][]
   | select(.name == $name)
   | {name: .name, path: .path, domain: .domain, isVariant: .isVariant,
      basePrefab: .basePrefab, components: .components, confidence: .confidence}
@@ -254,6 +261,49 @@ jq '[.codebase.calls[] | .caller, .callee]
     | sort_by(-.count) | .[0:10]' .codex/graph/graph.json
 ```
 
+### communities [--scope \<ScopeName\>]
+
+List all detected community groups (class clusters identified by `graph_cluster.py`).
+Each community shows its top 5 members; full member list available via jq.
+
+**Requires:** `codebase.communities[]` — absent on graphs built without call edges or before a v1.2.0 build.
+
+```bash
+# All communities
+jq '(.codebase.communities // []) | map({id, label, size, scope, algorithm, members: .members[0:5]})' .codex/graph/graph.json
+```
+
+```bash
+# Filter by VContainer scope
+jq '(.codebase.communities // []) | map(select(.scope == "<ScopeName>"))
+    | map({id, label, size, members})' .codex/graph/graph.json
+```
+
+Empty-state message: if `codebase.communities` is missing or `[]`, communities have not yet been computed — run `/build-knowledge-graph` to trigger `graph_cluster.py`.
+
+---
+
+### surprising [--severity warning|info] [--limit N]
+
+List cross-boundary call edges that indicate architectural drift.
+Default: warnings first, limit 20. Reasons: `CROSS_SCOPE` (warning), `CROSS_ASSEMBLY` (info), `CROSS_COMMUNITY` (info).
+
+**Requires:** `analysis.surprising_connections[]` — computed by `graph_analyze.py` after clustering.
+
+```bash
+# All surprising connections (warnings first, limit 20)
+jq '(.analysis.surprising_connections // [])
+    | sort_by(.severity != "warning") | .[0:20]' .codex/graph/graph.json
+```
+
+```bash
+# Filter by severity
+jq '(.analysis.surprising_connections // [])
+    | map(select(.severity == "warning"))' .codex/graph/graph.json
+```
+
+Empty-state message: if `analysis` is missing or `surprising_connections` is `[]`, either no cross-boundary edges exist (healthy codebase) or `graph_analyze.py` has not run yet — rebuild with `/build-knowledge-graph`.
+
 ---
 
 ## When to use which
@@ -267,3 +317,5 @@ jq '[.codebase.calls[] | .caller, .callee]
 | "Who implements this interface?" | `implementers` |
 | "Which installer registers this type?" | `registrations` |
 | "Who publishes/subscribes to this event?" | `publishers` / `subscribers` |
+| "Which classes form a module?" | `communities` |
+| "Architecture drifting where?" | `surprising` |

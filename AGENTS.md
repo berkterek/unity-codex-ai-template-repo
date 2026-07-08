@@ -351,6 +351,7 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | `five` | Quick 5-minute codebase summary |
 | `grill-me` | Codebase interrogation mode |
 | `mermaid` | Mermaid diagram generation |
+| `knowledge-graph-hybrid` | Routes call-graph queries through graph MCP tools with CLI fallback |
 | `bootstrap-pattern` | Project-specific VContainer bootstrap reference |
 | `input-system` | Project-specific InputService/InputHandler input action reference |
 | `scene-hierarchy` | Scene container and placement reference |

@@ -1,6 +1,6 @@
 # Knowledge Graph
 
-The template ships with a Graphify-inspired knowledge graph at `.codex/graph/graph.json` (schema v1.1.0).
+The template ships with a Graphify-inspired knowledge graph at `.codex/graph/graph.json` (schema v1.3.0).
 Opt-in via `.codex/project/FEATURES.json` (`"graph": true`). When enabled, it is the single source of truth
 for `/catch-up`, `/orchestrate` pre-scan, and `/context-prime`.
 
@@ -29,14 +29,14 @@ Lessons from live testing — read before debugging graph output.
 - **Multi-line class declarations** (`class Foo\n  : IBar`) are handled by a python3 parser that joins up to 6 lines. Single-line and multi-line declarations both produce correct `base_types[]` and `implements[]`.
 - **Fully qualified interface names** (`Game.Abstracts.IFoo`) are reduced to their last segment (`IFoo`) before being stored. Both short and qualified names produce correct `implements[]`.
 - **methods[] extraction** — every public/private/protected method is captured per class (name, signature, line, is_async, is_static, return_type). Confidence: `INFERRED` (regex mode).
-- **partial_calls[] extraction** — call sites are extracted per file and merged into `codebase.calls[]` by `graph-builder.sh`. BCL types (`Debug`, `Mathf`, `Vector3`…) and C# keywords are filtered out. Confidence: `INFERRED`.
-- **Stale MCP cache** — when `mcp-extract.json` is older than 60 minutes, `graph-builder.sh` retains prefabs and scenes from the existing `graph.json` instead of dropping them. Run `/build-knowledge-graph` with Unity Editor open to refresh MCP data. `--full` always invalidates the MCP cache regardless of age; retained prefabs are cross-checked against disk and stale paths emit `STALE_PREFAB_PATH` warnings in `validation.warnings[]`.
-- **Missing scripts** — null component entries during MCP extraction set `has_missing_scripts: true` on the GameObject or prefab. `graph-builder.sh` collects these into `MISSING_SCRIPT` warnings in `validation.warnings[]`. Surface them with `/knowledge-graph violations`.
-- **Python JSON passing** — both `STALE_PREFAB_PATH` and `MISSING_SCRIPT` warning blocks pass data via environment variables (`MCP_PREFABS_JSON`, `MISSING_INPUT_JSON`) plus `json.loads(os.environ[...])`, not `echo | python3 -`. Bash heredocs override stdin, so the pipe pattern silently delivers empty input to Python.
-- **Subfolder layout (`UNITY_FOLDER`)** — stale path detection passes `UNITY_FOLDER` to Python and prepends it to `Assets/...` paths before `os.path.exists()`. Without this, every prefab appears stale when the Unity project lives in a subfolder.
-- **`gameObjects` key casing** — missing-script detection reads `scene.get("gameObjects", scene.get("gameobjects", []))` to handle both camelCase MCP cache output and older lowercase extractions.
+- **partial_calls[] extraction** — call sites are extracted per file and merged into `codebase.calls[]` by `graph-builder.py`. BCL types (`Debug`, `Mathf`, `Vector3`…) and C# keywords are filtered out. Confidence: `INFERRED`.
+- **Stale MCP cache** — when `mcp-extract.json` is older than 60 minutes, `graph-builder.py` retains prefabs and scenes from the existing `graph.json` instead of dropping them. Run `/build-knowledge-graph` with Unity Editor open to refresh MCP data. `--full` always invalidates the MCP cache regardless of age — retained prefabs are cross-checked against disk and stale paths emit `STALE_PREFAB_PATH` warnings in `validation.warnings[]`.
+- **Missing scripts** — null component entries (`"null"` in `comps=(...)`) during MCP extraction set `has_missing_scripts: true` on the GO/prefab. `graph-builder.py` collects these into `MISSING_SCRIPT` warnings in `validation.warnings[]`. Surface with `/knowledge-graph violations`.
+- **Python JSON passing** — both `STALE_PATH_WARNINGS` and `MISSING_SCRIPT_WARNINGS` blocks pass data via env vars (`MCP_PREFABS_JSON`, `MISSING_INPUT_JSON`) + `json.loads(os.environ[...])`, not `echo | python3 -`. Bash heredoc overrides stdin so the pipe pattern silently delivers empty input to Python.
+- **Subfolder layout (UNITY_FOLDER)** — `STALE_PATH_WARNINGS` passes `UNITY_FOLDER` to Python and prepends it to the `Assets/...` path before `os.path.exists()`. Without this, every prefab appears stale on projects where `Assets/` is not at repo root.
+- **gameObjects key casing** — MISSING_SCRIPT detection reads `scene.get("gameObjects", scene.get("gameobjects", []))` to handle both camelCase (MCP cache output) and lowercase (older extractions).
 
-### graph-builder.sh call edge merge
+### graph-builder.py call edge merge
 
 - **Full build (`--full`):** discards retained call edges, uses only freshly extracted `partial_calls[]`.
 - **Incremental with changed files:** retains edges from unchanged files, replaces edges for changed files only.
@@ -68,3 +68,122 @@ These MCP tool behaviors were discovered during live Editor testing — they dif
 | `VContainer.Unity.ParentReference` | Is a **struct** — `!= null` won't compile in CodeDom. Use `.TypeName` (string) field; empty string = no parent. |
 
 Full working code snippets for all patterns: see `.codex/graph/extractors/mcp-extractor.md`.
+
+
+## v1.2.0 Fields (new in Graph Module v2)
+
+| Field | jq path | Description |
+|-------|---------|-------------|
+| Communities | `.codebase.communities` | Class community groups from `graph_cluster.py` |
+| Surprising connections | `.analysis.surprising_connections` | Cross-scope/assembly/community call edges |
+| Enhanced god-nodes | `.analysis.enhanced_god_nodes` | God-nodes enriched with `community_id` and `severity` |
+| Accuracy report | `.validation.accuracy` | Extraction accuracy spot-check vs source files |
+
+### graph_cluster.py
+
+New in v1.2.0. Detects class communities from call edges using greedy modularity (stdlib) or Louvain (via optional `networkx`). Writes `codebase.communities[]`.
+
+- `algorithm: "greedy-modularity-stdlib"` — default, no pip install needed. Works on all graphs but produces coarser clusters on sparse codebases.
+- `algorithm: "louvain-networkx"` — higher quality, recommended for projects with > 30 classes; requires `pip install networkx`
+
+> **Recommendation:** Run `pip install networkx` once after setup. On sparse graphs (few call edges, early-stage projects) the stdlib algorithm may group everything into one large community or produce no merges at all. Louvain handles this correctly.
+
+### graph_analyze.py
+
+New in v1.2.0. Classifies surprising cross-boundary edges and enriches god-nodes with community data.
+
+- `CROSS_SCOPE` → severity `warning` (two classes in different VContainer scopes calling each other directly)
+- `CROSS_ASSEMBLY` → severity `info`
+- `CROSS_COMMUNITY` → severity `info`
+
+### graph_validate.py
+
+Two-mode validator — always runs during graph-builder.
+
+**Mode 1 — Consistency (default, fast):** Checks `graph.json` internal integrity. No source files read.
+- Orphan events: published/subscribed but not declared in graph
+- Dangling call edges: callee class not in graph
+- Installer registrations referencing missing classes
+- Results → `validation.consistency.{issues[], issue_count, passed}`
+
+**Mode 2 — Accuracy (`--accuracy` flag, slow):** Re-extracts a sample of source files via `csharp_extractor.py` (tree-sitter) and compares against graph facts. Single parse source — no duplicate regex logic.
+- `--sample N` (default 20), `--seed N` (default 42)
+- Results → `validation.accuracy.{agreement_pct, matches, mismatches, checks[]}`
+- If `< 90%`, `low_accuracy_warning: true` recommends `--full` rebuild
+- Skipped automatically if tree-sitter is unavailable (exit 2)
+- Run manually: `python3 .codex/graph/graph_validate.py --graph .codex/graph/graph.json --accuracy`
+
+**Never touches `validation.warnings[]`** — that array is owned by `graph-validator.sh`
+
+### Query cheatsheet additions (v1.2.0)
+
+- "Which classes form a module?" → `/knowledge-graph communities`
+- "Architecture drifting where?" → `/knowledge-graph surprising`
+- "God-nodes with community context?" → `/knowledge-graph god-nodes` (now uses `analysis.enhanced_god_nodes[]` when present)
+
+---
+
+## Hybrid Architecture
+
+The knowledge graph uses a two-backend split when `hybrid_graph` is enabled in `.codex/project/FEATURES.json` (default `false`):
+
+| Query group | Backend | Queries |
+|---|---|---|
+| Call-graph (4) | `graph-mcp-server.py` via `graph_bfs_core.py` | `callers`, `impact`, `path`, `god-nodes` |
+| Unity-semantic (11) | `jq` / `graph.json` (unchanged) | `summary`, `implementers`, `publishers`, `subscribers`, `registrations`, `scope-tree`, `prefab`, `violations`, `diff`, `communities`, `surprising` |
+
+**`hybrid_graph` flag** in `.codex/project/FEATURES.json` gates all routing. Default is `false`.
+
+- **Off (default):** behaviour identical to today — all 15 subcommands resolved via `jq`/`graph-traversal.py`, zero stderr output, no pip probe.
+- **On + MCP connected (State A):** call-graph queries dispatched via `mcp__graph_mcp__*` tools backed by `graph_bfs_core.py`. Unity-semantic queries unchanged.
+- **On + MCP absent (State B):** Bash-emitted warning on stderr + automatic fallback to `graph-traversal.py` (same result, slower startup due to lazy `pip` probe).
+
+**Routing skill:** `.codex/skills/core/knowledge-graph-hybrid.md` — read before dispatching any call-graph query when `hybrid_graph` is enabled.
+
+---
+
+## Hybrid MCP Registration (User-applied)
+
+The graph MCP server (`graph-mcp-server.py`) exposes the knowledge graph as MCP tools (`mcp__graph_mcp__*`) so Codex can query it directly during a session. Register it in the Codex MCP configuration used by your local CLI session.
+
+### Prerequisites
+
+Run this once in the same environment whose `python3` Codex CLI invokes:
+
+```bash
+pip install mcp
+```
+
+### MCP server entry
+
+Add a `graph-mcp` server entry that runs the repo-local server:
+
+```json
+"mcpServers": {
+  "graph-mcp": {
+    "command": "python3",
+    "args": [".codex/graph/graph-mcp-server.py"]
+  }
+}
+```
+
+**Merge example** — if your MCP config already has another server:
+
+```json
+"mcpServers": {
+  "existing-server": { "command": "..." },
+  "graph-mcp": {
+    "command": "python3",
+    "args": [".codex/graph/graph-mcp-server.py"]
+  }
+}
+```
+
+### Notes
+
+- No `--watch` argument is needed — the server checks file mtime on each handler call and reloads automatically.
+- The server reads `graph.json`, `scenes.json`, and `prefabs.json` from `.codex/graph/`.
+
+### Verification
+
+After editing the MCP config, restart Codex CLI. In the new session, `mcp__graph_mcp__*` tools should appear in the tool list. If they do not appear, confirm `pip install mcp` succeeded for the correct `python3` binary and that the config syntax is valid.

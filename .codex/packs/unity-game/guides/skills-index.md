@@ -44,6 +44,7 @@ Infrastructure skills that govern how Codex agents reason and act across tasks:
 | `dump` | Save current session notes and decisions to `.codex/project/logs/` as markdown |
 | `five` | 5 Whys root cause analysis — drill down to true cause of a bug or architectural problem |
 | `mermaid` | Generate a Mermaid architecture diagram for a module, system, or the full project |
+| `knowledge-graph-hybrid` | Routes call-graph queries through graph MCP tools with `graph-traversal.py` fallback |
 
 ## Platform (`skills/platform/`)
 
