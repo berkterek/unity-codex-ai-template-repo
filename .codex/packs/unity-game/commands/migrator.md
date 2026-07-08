@@ -73,7 +73,7 @@ LoadDataAsync(this.GetCancellationTokenOnDestroy()).Forget();
 
 1. Remove static Instance field and Awake singleton setup.
 2. Make class `sealed`, add constructor injection.
-3. Create `[ModuleName]Installer : ModuleInstaller` if not exists.
+3. Create static `[ModuleName]Module.Install(...)` if not exists, then wire `AppModules.cs` and `ConfigCatalog.cs`.
 4. Register in AppScope or scene scope as appropriate.
 5. Update all `ClassName.Instance.Method()` call sites to injected field.
 
@@ -83,7 +83,7 @@ LoadDataAsync(this.GetCancellationTokenOnDestroy()).Forget();
 
 1. Ensure `PlayerControls.inputactions` exists — if not, note it must be created
    manually.
-2. Create or update `InputView.cs` following the InputView pattern.
+2. Create or update `InputService` and needed `InputHandler` classes.
 3. Replace all direct `Input.*` calls with service method calls.
 4. Remove legacy input references from service/system classes.
 

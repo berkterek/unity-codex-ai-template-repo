@@ -268,15 +268,11 @@ public async UniTaskVoid PlayAndReturnAsync(VFXController vfx, IVFXPool pool, Ca
 ## VContainer Registration
 
 ```csharp
-public sealed class VFXInstaller : ModuleInstaller
+public static class VFXModule
 {
-    [SerializeField] private VFXController _explosionPrefab;
-    [SerializeField] private VFXController _hitSparkPrefab;
-
-    public override void Install(IContainerBuilder builder)
+    public static void Install(IContainerBuilder builder, VFXConfiguration config)
     {
         builder.Register<VFXPool>(Lifetime.Singleton)
-            .WithParameter(_explosionPrefab)
             .As<IVFXPool>();
     }
 }

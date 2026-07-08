@@ -1,138 +1,179 @@
-# Bootstrap & Installer Pattern (NON-NEGOTIABLE)
+# Bootstrap & Static Module Pattern
+
+The project uses code-first static module installation. Do not use a
+`ModuleInstaller : ScriptableObject` chain for new work.
 
 ## Layer Structure
 
-```
-IInstaller (interface)          ← Framework layer
-    ↑
-ModuleInstaller (abstract SO)   ← Framework layer — ScriptableObject + IInstaller
-    ↑
-[Module]Installer (sealed SO)   ← Game layer — registers a single module's dependencies
-    ↑
-AppInstaller (sealed SO)        ← Game layer — lists modules, calls them in order
-    ↑
-AppScope (LifetimeScope)        ← Bootstrap scene — calls AppInstaller
+```text
+ConfigCatalog : ScriptableObject       <- aggregates all module config assets
+    |
+[Domain]Module.Install(builder, config) <- static class per module
+    |
+AppModules.Install(builder, catalog)    <- single module wiring point
+    |
+AppScope.Configure()                    <- validates catalog and calls AppModules
 ```
 
-## IInstaller
+## ConfigCatalog
+
+`ConfigCatalog` is the only drag-drop point for module configuration assets.
 
 ```csharp
-// _Framework/Installers/IInstaller.cs
-namespace Framework.Installers
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Game.Concretes.Infrastructure
 {
-    public interface IInstaller
+    [CreateAssetMenu(menuName = "Game/Infrastructure/Config Catalog", fileName = "ConfigCatalog")]
+    public sealed class ConfigCatalog : ScriptableObject
     {
-        void Install(IContainerBuilder builder);
+        [SerializeField] private AudioConfiguration _audio;
+
+        public AudioConfiguration Audio => _audio;
+
+        public bool Validate()
+        {
+            var missing = new List<string>();
+            if (_audio == null) missing.Add(nameof(_audio));
+
+            if (missing.Count == 0)
+            {
+                return true;
+            }
+
+            Debug.LogError($"[ConfigCatalog] Missing configs: {string.Join(", ", missing)}", this);
+            return false;
+        }
     }
 }
 ```
 
-## ModuleInstaller
+Rules:
+
+- Config fields are private `[SerializeField]`.
+- Public properties expose config read-only.
+- `Validate()` reports missing configs and returns `false`.
+- Do not scatter config references across scene prefabs.
+
+## Static Module
+
+Each module owns one static installer class:
 
 ```csharp
-// _Framework/Installers/ModuleInstaller.cs
 using UnityEngine;
 using VContainer;
 
-namespace Framework.Installers
+namespace Game.Concretes.Audio
 {
-    public abstract class ModuleInstaller : ScriptableObject, IInstaller
+    public static class AudioModule
     {
-        public abstract void Install(IContainerBuilder builder);
-    }
-}
-```
-
-Lives under `_Framework/Installers/` — contains `ScriptableObject` so must NOT go in `Games/Abstracts/`.
-
-## AppInstaller
-
-```csharp
-[CreateAssetMenu(menuName = "Game/Infrastructure/App Installer", fileName = "AppInstaller")]
-public sealed class AppInstaller : ScriptableObject, IInstaller
-{
-    [SerializeField] private List<ModuleInstaller> _modules = new();
-
-    public void Install(IContainerBuilder builder)
-    {
-        foreach (var module in _modules)
+        public static void Install(IContainerBuilder builder, AudioConfiguration config)
         {
-            if (module == null) continue;
-            module.Install(builder);
+            if (config == null)
+            {
+                Debug.LogError("[AudioModule] AudioConfiguration missing.");
+                return;
+            }
+
+            builder.RegisterInstance(config);
+            builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
         }
     }
 }
 ```
 
-- Only iterates the list — never registers anything directly
-- `EventBusInstaller` is always the **first** element
-- Null modules silently skipped
+Rules:
 
-## [Module]Installer
+- Module classes are `public static class [Domain]Module`.
+- They do not inherit `ScriptableObject` or `MonoBehaviour`.
+- Install signature is `Install(IContainerBuilder builder, [Domain]Configuration config)`.
+- Null guard uses `Debug.LogError` + `return`, never `throw`.
+- Use `.AsImplementedInterfaces()` for services and entry points.
+- Register providers separately with `RegisterComponentInHierarchy` or scene scope
+  wiring when a Unity API boundary is required.
+
+## AppModules
+
+`AppModules` is the only place where global modules are ordered.
 
 ```csharp
-[CreateAssetMenu(menuName = "Game/Installers/Audio", fileName = "AudioInstaller")]
-public sealed class AudioInstaller : ModuleInstaller
-{
-    [SerializeField] private AudioConfiguration _config;
+using VContainer;
 
-    public override void Install(IContainerBuilder builder)
+namespace Game.Concretes.Infrastructure
+{
+    public static class AppModules
     {
-        if (_config == null)
+        public static void Install(IContainerBuilder builder, ConfigCatalog configs)
         {
-            Debug.LogError("[AudioInstaller] AudioConfiguration is missing.", this);
-            return;
+            EventBusModule.Install(builder);
+            AudioModule.Install(builder, configs.Audio);
         }
-
-        builder.RegisterInstance(_config);
-        builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
     }
 }
 ```
 
-- `Debug.LogError` + `return` on null config — never `throw`
-- `.AsImplementedInterfaces()` — covers lifecycle interfaces automatically
-- Registers only its own module's dependencies
+Rules:
 
-## EventBusInstaller (required, always first)
-
-```csharp
-[CreateAssetMenu(menuName = "Game/Installers/EventBus", fileName = "EventBusInstaller")]
-public sealed class EventBusInstaller : ModuleInstaller
-{
-    public override void Install(IContainerBuilder builder)
-    {
-        builder.Register<EventBus>(Lifetime.Singleton).AsImplementedInterfaces();
-    }
-}
-```
+- `EventBusModule.Install(builder)` is first.
+- New modules add one line here.
+- Do not register module services directly in `AppScope`.
 
 ## AppScope
 
+`AppScope` validates config and delegates.
+
 ```csharp
-public sealed class AppScope : LifetimeScope
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
+
+namespace Game.Concretes.Infrastructure
 {
-    [SerializeField] private AppInstaller     _appInstaller;
-    [SerializeField] private AppConfiguration _appConfiguration;
-
-    protected override void Configure(IContainerBuilder builder)
+    public sealed class AppScope : LifetimeScope
     {
-        if (_appConfiguration == null) { Debug.LogError("[AppScope] AppConfiguration missing."); return; }
-        if (_appInstaller == null) { Debug.LogError("[AppScope] AppInstaller missing."); return; }
+        [SerializeField] private ConfigCatalog _configs;
 
-        builder.RegisterInstance(_appConfiguration);
-        builder.RegisterComponentInHierarchy<UIRoot>();
-        builder.RegisterComponentInHierarchy<AudioRoot>();
-        _appInstaller.Install(builder);
+        protected override void Configure(IContainerBuilder builder)
+        {
+            if (_configs == null)
+            {
+                Debug.LogError("[AppScope] ConfigCatalog missing.", this);
+                return;
+            }
+
+            if (!_configs.Validate())
+            {
+                return;
+            }
+
+            builder.RegisterInstance(_configs);
+            AppModules.Install(builder, _configs);
+        }
     }
 }
 ```
 
-**`AppScope.cs` NEVER changes.** To add a new module, add it to `AppInstaller.asset`.
+Rules:
 
-## GameScope
+- `AppScope.cs` should not change when adding a module.
+- Global pure C# services install through `AppModules`.
+- Scene objects install through scene scopes or provider registration.
 
-Registers scene-specific dependencies (MonoBehaviours present in the scene):
+## SceneModules And GameScope
+
+Scene-lifetime pure C# services use `SceneModules`; scene MonoBehaviours use
+`GameScope`.
+
+```csharp
+public static class SceneModules
+{
+    public static void Install(IContainerBuilder builder)
+    {
+        // Scene-local pure C# services only.
+    }
+}
+```
 
 ```csharp
 public sealed class GameScope : LifetimeScope
@@ -141,30 +182,35 @@ public sealed class GameScope : LifetimeScope
 
     protected override void Configure(IContainerBuilder builder)
     {
-        if (_playerProvider == null) { Debug.LogError("[GameScope] PlayerProvider missing."); return; }
-        builder.RegisterComponent(_playerProvider);
+        builder.RegisterComponent(_playerProvider).AsImplementedInterfaces();
+        SceneModules.Install(builder);
     }
 }
 ```
 
-- Only `builder.RegisterComponent(...)` — never `builder.Register<T>(...)`
-- `[SerializeField]` fields populated on **scene instance**, not prefab
+Rules:
 
-## New Module Addition Flow
+- `GameScope` registers scene component instances only.
+- Do not put inline pure C# `builder.Register<T>()` calls in `GameScope`;
+  place them in `SceneModules`.
 
-1. Write `[Module]Installer.cs` — derive from `ModuleInstaller`, add `[CreateAssetMenu]`
-2. Create the asset in Unity: `Assets → Create → Game/Installers/[ModuleName]`
-3. Assign config ScriptableObject in Inspector
-4. Open `AppInstaller.asset` → add to `_modules` list
-5. **Do not touch** `AppScope.cs`
+## New Module Flow
 
-## Common Mistakes
+1. Create `I[Domain]Service`.
+2. Create `[Domain]Service`.
+3. Create `[Domain]Configuration`.
+4. Create static `[Domain]Module`.
+5. Create `[Domain]Events` when needed.
+6. Add config to `ConfigCatalog`.
+7. Add one line to `AppModules.Install`.
+8. Create and assign the config asset in Unity.
 
-| Mistake | Solution |
-|---------|----------|
-| EventBus registered directly in AppScope | Create EventBusInstaller, add first in AppInstaller list |
-| AppScope modified for new module | Add to AppInstaller.asset — AppScope.cs never changes |
-| ModuleInstaller placed in GameFolders/Abstracts/ | Must live under _Framework/Installers/ |
-| `throw` in null guard | Use `return` + `Debug.LogError` |
-| `.As<IEventBus>()` instead of `.AsImplementedInterfaces()` | Use AsImplementedInterfaces — covers lifecycle too |
-| AppInstaller._modules declared as array | Use `List<ModuleInstaller>` for Inspector reordering |
+## Forbidden Patterns
+
+| Forbidden | Use Instead |
+|-----------|-------------|
+| `ModuleInstaller : ScriptableObject` for new modules | static `[Domain]Module.Install(...)` |
+| Editing `AppScope.cs` for every module | one line in `AppModules.cs` |
+| Module config fields on random prefabs | `ConfigCatalog` |
+| `throw` in install null guard | `Debug.LogError` + `return` |
+| Direct service registration in `GameScope` | `SceneModules` or module installer |

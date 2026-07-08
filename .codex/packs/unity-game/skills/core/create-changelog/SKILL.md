@@ -37,7 +37,7 @@ Creates or updates `CHANGELOG.md` at the repo root with recent changes, followin
 - `EnemySpawner` no longer calls `Instantiate` in Update loop
 
 ### Removed
-- Legacy `InputManager.cs` (replaced by InputView + New Input System)
+- Legacy `InputManager.cs` (replaced by InputService/InputHandler + New Input System)
 ```
 
 ## Notes

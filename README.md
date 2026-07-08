@@ -28,12 +28,12 @@ slash commands instantly.
 
 ## What This Is
 
-Codex CLI reads `AGENTS.md` and `.codex/` at the project root. This template
+Codex CLI reads `AGENTS.md`, `.codex/`, and repo-scoped `.agents/skills/` at the project root. This template
 ships that folder pre-configured with:
 
 - **Guardrails** — Hook equivalents: BLOCK (git push, .unity text edit, UnityEvent, static singleton, MonoBehaviour business logic), WARN (async void, SOLID/OOP drift, hot-path alloc, LINQ, null propagation), GATE (Director Gate, reviewer requirement)
 - **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 28+ more
-- **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/game-plan`, `/build-knowledge-graph`, `/smart-commit-selected` and 55+ more
+- **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/roadmap`, `/plan-module`, `/orchestrate`, `/build-knowledge-graph`, `/smart-commit-selected` and 55+ more
 - **Rules** — Architecture, SOLID/OOP, naming, testing, ECS, serialization, Addressables, bootstrap, async, input, lifecycle, and prefab standards
 - **Skills** — 71 skill files: audio, URP, Cinemachine, Netcode, ProBuilder, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
 
@@ -46,6 +46,8 @@ ships that folder pre-configured with:
 ```
 your-unity-project/
 ├── AGENTS.md          ← Root config read by Codex
+├── .agents/
+│   └── skills/        ← Codex command wrappers
 └── .codex/
     ├── project/       ← Fill in per project
     ├── packs/
@@ -81,6 +83,8 @@ or manually:
 /implement <feature description>
 /fix <bug description>
 /architect
+/roadmap
+/plan-module 01
 ```
 
 ---
@@ -123,7 +127,7 @@ These packages must be installed in the Unity project:
 │       ├── guides/      21 guides (including guardrails)
 │       └── skills/      71 skill files
 ├── project/             Per-project overlay — fill in each project
-├── templates/           GDD, TDD, CODING_CONVENTIONS templates
+├── templates/           GDD, TDD, CODING_CONVENTIONS, module plan templates
 └── manifests/           Import and migration decisions
 ```
 
@@ -143,8 +147,10 @@ fills that gap. Every agent and command reads this file at startup.
 | Use `UnityEvent` | Use `IEventBus` instead |
 | Directly assign `Time.timeScale` | Use `IEventBus + PauseService` |
 | Static singleton (`static Instance`) | VContainer is the only DI mechanism |
-| Business logic in MonoBehaviour | MonoBehaviour is limited to View/Provider roles |
-| `new SomeService()` in MonoBehaviour | Dependencies must come from VContainer injection |
+| Business logic in MonoBehaviour | MonoBehaviour is limited to shell/provider roles |
+| `new SomeService()` / `new SomeProvider()` | Dependencies must come from VContainer injection |
+| `*Handler : MonoBehaviour` | Handlers are pure C# |
+| `*Module : ScriptableObject` | Modules are static classes |
 | Concrete service constructor dependencies | Depend on interfaces for DIP and testability |
 | `UnityEditor` namespace without `#if UNITY_EDITOR` | Player build crashes |
 | Weaken config files | Fix the code, not the config |
@@ -218,7 +224,7 @@ Review scope:
 - Unity compilation verification (MCP: `refresh_unity` + `read_console`)
 - Runtime validation (MCP: enter/exit Play mode, console error check)
 - Architecture, UI compliance, performance, rendering/GPU, C# quality, encapsulation
-- Input System compliance (legacy API forbidden, Enable/Disable pairing)
+- Input System compliance (legacy API forbidden, `InputService` owns generated controls)
 - Unused code detection (private members, public members, using directives, parameters)
 - PASS / FAIL verdict — Critical and Major issues cause FAIL
 
@@ -234,7 +240,7 @@ Review scope:
 
 | Agent | Role |
 |-------|------|
-| `unity-coder` | MonoBehaviour, provider, installer, scene wiring |
+| `unity-coder` | MonoBehaviour shell, provider, static module wiring, scene wiring |
 | `unity-coder-lite` | Small C# changes |
 | `unity-fixer` | Bug — root cause + regression test + fix |
 | `unity-fixer-lite` | Fast single-file fix |
@@ -295,11 +301,11 @@ otherwise use a lite path. GPT-5.5 is reserved for producing or revising plans.
 
 ### Unity — Planning
 
-`/architect` · `/create-plan` · `/update-plan` · `/plan-workflow` · `/game-idea` · `/refine-gdd` · `/refine-tdd` · `/adr`
+`/architect` · `/create-plan` · `/update-plan` · `/roadmap` · `/plan-module` · `/plan-workflow` legacy · `/game-idea` · `/refine-gdd` · `/refine-tdd` · `/adr`
 
 ### Unity — Implementation
 
-`/implement` · `/implement-lite` · `/add-feature` · `/new-module` · `/fix` · `/fix-lite` · `/fix-deep` · `/fix-codex` · `/game-plan` · `/scene-setup` · `/create-prefab-scene` · `/unity-scene-update` · `/update-scene-hierarchy` · `/setup-project`
+`/implement` · `/implement-lite` · `/add-feature` · `/new-module` · `/fix` · `/fix-lite` · `/fix-deep` · `/fix-codex` · `/game-plan` legacy · `/scene-setup` · `/create-prefab-scene` · `/unity-scene-update` · `/update-scene-hierarchy` · `/setup-project`
 
 ### Unity — Testing
 
@@ -325,7 +331,7 @@ otherwise use a lite path. GPT-5.5 is reserved for producing or revising plans.
 
 | File | Covers |
 |------|--------|
-| `architecture.md` | VContainer DI, IEventBus, Provider, InputView, AppScope |
+| `architecture.md` | VContainer DI, IEventBus, Provider, InputService, AppScope |
 | `solid-oop.md` | MonoBehaviour View/Provider boundaries, SRP, OCP, DIP |
 | `csharp-unity.md` | Naming, namespace, null check, UniTask, encapsulation |
 | `performance.md` | Zero-alloc hot path, caching, pooling, draw calls, UI canvas |
@@ -336,9 +342,9 @@ otherwise use a lite path. GPT-5.5 is reserved for producing or revising plans.
 | `scene-hierarchy.md` | 6 required root containers, prefab domain, logic/visual separation |
 | `ecs-dots.md` | Authoring/Baker, ISystem+IJobEntity, ECB, Hybrid linking |
 | `addressables.md` | No Resources.Load, async loading, handle lifecycle |
-| `bootstrap-pattern.md` | VContainer installer hierarchy — IInstaller, ModuleInstaller, AppInstaller, AppScope, GameScope |
+| `bootstrap-pattern.md` | Static Module hierarchy — ConfigCatalog, AppModules, AppScope, GameScope |
 | `unity-async.md` | UniTask, cancellation, fire-and-forget, coroutine migration |
-| `unity-input.md` | New Input System hard rules and InputView pattern |
+| `unity-input.md` | New Input System hard rules and InputService/InputHandler pattern |
 | `unity-lifecycle.md` | Editor/runtime boundary, platform defines, DOTween cleanup |
 | `unity-prefabs.md` | Prefab ownership, variants, BaseCanvas, package prefab duplication |
 
@@ -410,7 +416,7 @@ Skills live under `.codex/packs/unity-game/skills/` and are read-only reference 
 | `grill-me` | Codebase interrogation mode |
 | `mermaid` | Mermaid diagram generation |
 | `bootstrap-pattern` | Project-specific VContainer bootstrap reference |
-| `input-system` | Project-specific InputView/input action reference |
+| `input-system` | Project-specific InputService/InputHandler input action reference |
 | `scene-hierarchy` | Scene container and placement reference |
 | `unity-git` | Unity-aware git hygiene and commit grouping |
 | `unity-ugui` | UGUI setup and conventions |
@@ -483,7 +489,11 @@ cd your-unity-project
 /setup-project
 
 # 3. Start developing
-/implement <feature description>
+/game-idea
+/architect
+/roadmap
+/plan-module 01
+/orchestrate docs/modules/01-core-loop/tasks.md
 ```
 
 ---
@@ -493,22 +503,23 @@ cd your-unity-project
 ```
 Unity Scene
     └── LifetimeScope (VContainer)
-            ├── AppScope          — application-wide dependencies
-            ├── ModuleInstaller   — module registrations
+            ├── AppScope          — validates ConfigCatalog
+            ├── AppModules        — static module registration order
+            ├── [Domain]Module    — static Install(builder, config)
             └── Providers         — Unity API bridges
                     │
                     ↓
             Pure C# Services      — IEventBus, business logic
                     │
                     ↓
-            InputView             — New Input System → service methods
+            InputService/Handlers — New Input System → service methods
 ```
 
 - **No singletons** — VContainer `Lifetime.Singleton`
-- **No MonoBehaviour business logic** — MonoBehaviour is View/Provider only
+- **No MonoBehaviour business logic** — MonoBehaviour is shell/provider only
 - **No concrete service dependencies** — Constructors depend on interfaces
 - **No coroutines** — `async UniTask`
-- **No legacy input** — New Input System, InputView pattern
+- **No legacy input** — New Input System, InputService/InputHandler pattern
 - **No UnityEngine in service layer** — Provider pattern
 
 ---

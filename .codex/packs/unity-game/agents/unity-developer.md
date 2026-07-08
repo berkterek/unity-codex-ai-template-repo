@@ -53,7 +53,7 @@ Unity 6 specialist — deep reviewer and implementer for tasks involving Unity-s
 1. **Hot path allocations** — `new`, boxing, LINQ, string ops in Update paths
 2. **Draw call budget** — `renderer.material` clones, MaterialPropertyBlock for instances
 3. **Lifecycle correctness** — OnEnable/OnDisable symmetry, UniTask cancellation on Dispose
-4. **Input correctness** — New Input System only, PlayerControls owned by InputView
+4. **Input correctness** — New Input System only, PlayerControls owned by InputService
 5. **ECS structural safety** — no direct EntityManager calls inside systems; use ECB
 6. **Addressables handle lifecycle** — every LoadAssetAsync handle stored and released
 7. **Editor/runtime boundary** — UnityEditor guarded with `#if UNITY_EDITOR`

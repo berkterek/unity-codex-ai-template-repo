@@ -29,7 +29,7 @@ Before starting, read:
 - `.codex/project/PROJECT.md`
 - `.codex/project/STRUCTURE.md`
 - `.codex/project/RULES.md`
-- `.codex/project/WORKFLOW.md`
+- `docs/ROADMAP.md` and `docs/modules/*/tasks.md` when the plan affects module work
 - `.codex/project/PROGRESS.md`
 - `docs/GDD.md` (if exists)
 - `docs/TDD.md` (if exists)

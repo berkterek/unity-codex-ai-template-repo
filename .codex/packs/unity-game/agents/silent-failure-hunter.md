@@ -105,7 +105,7 @@ var service = container.Resolve<IEnemyService>();
 // GOOD
 if (!container.TryResolve<IEnemyService>(out var service))
     throw new InvalidOperationException(
-        "IEnemyService not registered — check AppInstaller.");
+        "IEnemyService not registered — check AppModules and ConfigCatalog.");
 ```
 
 ### 8. ECS ECB Playback Never Called

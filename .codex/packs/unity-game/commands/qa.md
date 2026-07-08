@@ -9,6 +9,7 @@ Runs a four-stage quality check on the current codebase state: executable guardr
 
 ```
 /qa
+/qa docs/modules/01-core-loop/tasks.md
 /qa --phase 2
 /qa --files Assets/_GameFolders/Scripts/Games/Concretes/Audio/
 ```
@@ -16,7 +17,7 @@ Runs a four-stage quality check on the current codebase state: executable guardr
 | Argument | Effect |
 |----------|--------|
 | *(none)* | Audit all recently changed files, validate most recently completed phase |
-| `--phase N` | Validate a specific phase from WORKFLOW.md |
+| `--phase N` | Validate a specific phase/checkpoint from the active module `tasks.md` |
 | `--files <path>` | Scope silent failure hunt to specific files or folder |
 
 ---
@@ -107,24 +108,25 @@ Print all findings or `✓ Stage 2 — Silent failures: CLEAN.`
 
 ## Stage 3 — Validate
 
-Determine which phase to validate:
-- If `--phase N` given → validate phase N
-- Otherwise → validate the most recently completed phase from `docs/PROGRESS.md`
+Determine what to validate:
+- If a `tasks.md` path is given → validate that module plan
+- If `--phase N` given → validate phase/checkpoint N in the active module
+- Otherwise → validate the most recently completed checkpoint from `docs/PROGRESS.md`
 
-If no WORKFLOW.md or PROGRESS.md exists → skip this stage and note: `Stage 3 skipped — no WORKFLOW.md found.`
+If no module `tasks.md`, legacy `WORKFLOW.md`, or `PROGRESS.md` exists → skip this stage and note: `Stage 3 skipped — no plan found.`
 
 Spawn a native Codex subagent suitable for read-only verification, or perform
 the verification locally if subagents are unavailable, with this prompt:
 
 ```
-You are a strict QA gate. Validate phase [N] — [Phase Name].
+You are a strict QA gate. Validate module phase/checkpoint [N] — [Name].
 
 Read:
-- docs/WORKFLOW.md — task definitions and acceptance criteria for this phase
+- docs/modules/<module>/tasks.md — task definitions and acceptance criteria for this module
 - docs/PROGRESS.md — reported completion status
 
 Checks:
-1. All output files listed in WORKFLOW.md for this phase exist at the specified paths
+1. All output files listed in tasks.md for this phase/checkpoint exist at the specified paths
 2. Files are not empty or placeholder stubs
 3. Every acceptance criterion is met — read the actual code to verify, do not assume
 

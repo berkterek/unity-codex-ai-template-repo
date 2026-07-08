@@ -16,14 +16,14 @@ Infrastructure skills that govern how Codex agents reason and act across tasks:
 | `unity-asmdef` | .asmdef authoring — references, platforms, define constraints, user-invocable |
 | `source-driven-development` | Fetch official Unity docs before writing API calls — cites sources, flags deprecated APIs, surfaces version conflicts |
 | `documentation-and-adrs` | ADR creation for architectural decisions — `/adr` command, `docs/decisions/` folder, lifecycle management |
-| `planning-and-task-breakdown` | Vertical slice decomposition + per-task acceptance criteria for `/create-plan` and `/plan-workflow` |
+| `planning-and-task-breakdown` | Vertical slice decomposition + per-task acceptance criteria for `/create-plan`, `/roadmap`, and `/plan-module` |
 | `code-simplification` | Chesterton's Fence discipline for `/clean-slop` — understand before removing, behavior-preserving refactor |
 | `commit-trailers` | Conventional commit trailers — co-author, ticket links, sign-off |
 | `event-systems` | Decide which event mechanism to use — C# events vs IEventBus vs Action vs UnityEvent |
 | `event-bus` | Project IEventBus implementation — location, namespace, Subscribe/Unsubscribe/Publish API, EventBusAccessor |
 | `solid-oop` | MonoBehaviour View/Provider boundaries, SRP one-sentence test, OCP polymorphism, DIP interface dependencies |
-| `bootstrap-pattern` | IInstaller → ModuleInstaller → AppInstaller → AppScope layer structure, new module addition flow |
-| `input-system` | New Input System & InputView pattern, OnEnable/OnDisable subscription rules, action map switching |
+| `bootstrap-pattern` | ConfigCatalog → static Module → AppModules → AppScope layer structure, new module flow |
+| `input-system` | New Input System InputService/InputHandler pattern, lifecycle subscription rules, action map switching |
 | `scene-hierarchy` | 6-container scene structure, GO classification table, prefab domain mapping |
 | `logging` | Project-specific DLog pattern — logging implementation, location, and usage |
 | `save-load` | Project-specific SaveLoadSystem pattern — location, namespace, and usage |

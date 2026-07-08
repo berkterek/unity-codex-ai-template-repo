@@ -1,5 +1,12 @@
 # Event & Callback Patterns
 
+## Mono Shell Rule
+
+A Mono Shell (`*Controller` or `*View`) must not publish or subscribe to
+`IEventBus` directly. Shells have no injected event bus. Event publishing and
+subscriptions belong in Handlers or Services; shells only forward Unity
+lifecycle and user-interface callbacks.
+
 ## UnityEvent is FORBIDDEN (NON-NEGOTIABLE)
 
 `UnityEvent`, `UnityEvent<T>`, and `using UnityEngine.Events` are **blocked** by hook.
@@ -16,12 +23,14 @@
 ## Decision Tree: Which Pattern to Use?
 
 ```
-Is the event crossing module boundaries?
-├── YES → IEventBus (publish/subscribe)
-└── NO — is it a one-time callback passed into a method?
-    ├── YES → System.Action / System.Func<T>
-    └── NO — is it an internal module notification?
-        └── YES → C# event keyword
+Is this a Mono Shell?
+├── YES → delegate to Handler or Service; shell does not publish/subscribe
+└── NO — is the event crossing module boundaries?
+    ├── YES → IEventBus (publish/subscribe)
+    └── NO — is it a one-time callback passed into a method?
+        ├── YES → System.Action / System.Func<T>
+        └── NO — is it an internal module notification?
+            └── YES → C# event keyword
 ```
 
 ---
@@ -53,6 +62,7 @@ private void OnEnemyDied(EnemyDiedEvent e) { }
 - Name: past tense + `Event` suffix (`LevelStartedEvent`, `CoinsChangedEvent`)
 - Always unsubscribe in `Dispose()` (plain C#) or `OnDisable()` (MonoBehaviour)
 - Never subscribe in `Awake()` or constructors
+- Handlers and Services may publish. Mono Shells must delegate event work.
 
 ---
 

@@ -16,7 +16,7 @@ rules, and guides are organized under `.codex/`.
 ├── guardrails/    — Executable Codex validators for BLOCK/WARN rules
 ├── graph/         — Optional Unity knowledge graph extractors and validators
 ├── manifests/     — Import decisions and migration notes
-└── templates/     — Starter templates
+└── templates/     — Starter templates, including module spec/design/tasks
 .agents/
 └── skills/        — Repo-scoped Codex skills wrapping command workflows
 ```
@@ -173,9 +173,9 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 
 | Command | Role |
 |---------|------|
-| `/orchestrate` | Run full workflow pipeline |
-| `/continue` | Resume an interrupted pipeline |
-| `/dry-run` | Simulate pipeline — no file changes |
+| `/orchestrate` | Run module `tasks.md` orchestration pipeline |
+| `/continue` | Resume an interrupted module pipeline |
+| `/dry-run` | Simulate module pipeline — no file changes |
 | `/status` | Current workflow status |
 | `/stop` | Stop pipeline |
 | `/validate` | Verify completed work |
@@ -188,9 +188,11 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 | `/architect` | Architectural design and decision making |
 | `/create-plan` | Create a task plan |
 | `/update-plan` | Update an existing plan |
-| `/plan-workflow` | Workflow design |
+| `/roadmap` | Module roadmap generator — GDD + TDD → docs/ROADMAP.md |
+| `/plan-module` | Just-in-time module planner — spec/design/tasks.md |
+| `/plan-workflow` | Legacy WORKFLOW.md design |
 | `/game-idea` | Game idea development |
-| `/game-plan` | Game completion planner — GDD + TDD → module plans → orchestrate-ready |
+| `/game-plan` | Legacy game completion planner — prefer `/roadmap` + `/plan-module` |
 | `/refine-gdd` | GDD refinement |
 | `/refine-tdd` | TDD refinement |
 | `/adr` | Write an Architecture Decision Record |
@@ -201,12 +203,14 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 | `/implement` | Feature implementation via TDD pipeline |
 | `/implement-lite` | Lightweight single-class implementation — no test writer, no reviewer |
 | `/add-feature` | Add a feature to an existing system |
-| `/new-module` | Scaffold a new module |
+| `/new-module` | Scaffold a static Module + ConfigCatalog/AppModules wiring |
 | `/fix` | Bug fix pipeline |
 | `/fix-lite` | Fast single-file fix — no analyzer, no reviewer |
 | `/fix-deep` | Deep root-cause analysis and bug fix |
 | `/fix-codex` | Codex-driven fix — unbiased analysis for large or stuck bugs |
-| `/game-plan` | Game completion planner — GDD → module plans → orchestrate-ready |
+| `/orchestrate` | Execute `docs/modules/<module>/tasks.md` |
+| `/continue` | Resume interrupted module task execution |
+| `/dry-run` | Preview module task execution without changes |
 | `/scene-setup` | Scene setup |
 | `/create-prefab-scene` | Create prefab and scene |
 | `/unity-scene-update` | Scene update |
@@ -270,7 +274,7 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 
 | File | Covers |
 |------|--------|
-| `architecture.md` | VContainer DI, IEventBus, Provider, InputView, AppScope |
+| `architecture.md` | VContainer DI, IEventBus, Provider, InputService, AppScope |
 | `solid-oop.md` | MonoBehaviour role boundaries, SRP, OCP, DIP |
 | `csharp-unity.md` | Naming, namespace, null check, UniTask, encapsulation |
 | `performance.md` | Zero-alloc hot path, caching, pooling, draw calls, UI canvas |
@@ -281,9 +285,9 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 | `scene-hierarchy.md` | 6 required root containers, prefab domain, logic/visual separation |
 | `ecs-dots.md` | Authoring/Baker, ISystem+IJobEntity, ECB, Hybrid linking |
 | `addressables.md` | No Resources.Load, async loading, handle lifecycle |
-| `bootstrap-pattern.md` | VContainer installer hierarchy — IInstaller, ModuleInstaller, AppInstaller, AppScope, GameScope |
+| `bootstrap-pattern.md` | Static Module hierarchy — ConfigCatalog, AppModules, AppScope, GameScope |
 | `unity-async.md` | UniTask, cancellation, fire-and-forget, coroutine migration |
-| `unity-input.md` | New Input System hard rules and InputView pattern |
+| `unity-input.md` | New Input System hard rules and InputService/InputHandler pattern |
 | `unity-lifecycle.md` | Editor/runtime boundary, platform defines, DOTween cleanup |
 | `unity-prefabs.md` | Prefab ownership, variants, BaseCanvas, package prefab duplication |
 
@@ -348,7 +352,7 @@ Read-only reference files loaded by commands on demand. They do not execute code
 | `grill-me` | Codebase interrogation mode |
 | `mermaid` | Mermaid diagram generation |
 | `bootstrap-pattern` | Project-specific VContainer bootstrap reference |
-| `input-system` | Project-specific InputView/input action reference |
+| `input-system` | Project-specific InputService/InputHandler input action reference |
 | `scene-hierarchy` | Scene container and placement reference |
 | `unity-git` | Unity-aware git hygiene and commit grouping |
 | `unity-ugui` | UGUI setup and conventions |
@@ -441,4 +445,6 @@ or manually:
 3. Fill `.codex/project/TOOLING.md`
 4. Fill `.codex/project/CODING_CONVENTIONS.md`
 5. Fill `.codex/project/RULES.md`
-6. Start development with `/implement`
+6. Start design with `/game-idea` and `/architect`
+7. Plan modules with `/roadmap` and `/plan-module <n>`
+8. Execute module work with `/orchestrate docs/modules/<module>/tasks.md`

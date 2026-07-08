@@ -8,7 +8,7 @@ These are NOT manual — `/setup-project` Step 5d handles them via `manage_scene
 
 - Scene creation: Bootstrap.unity, Menu.unity, Game.unity
 - AppScope GameObject + component attachment in Bootstrap scene
-- AppInstaller ScriptableObject creation and wiring to AppScope
+- ConfigCatalog ScriptableObject creation and wiring to AppScope
 - Build Settings scene order (Bootstrap at index 0)
 
 ## Truly Manual (cannot be automated)
@@ -77,7 +77,7 @@ When first adding this template to a new project, run `/setup-project`. It:
 1. **Detects existing state** — checks folder structure and `manifest.json`, compares against `.codex/project/FEATURES.json` if it exists, reports conflicts and offers sync-only mode
 2. **Asks feature questions** — Addressables (yes/no), Testing (yes/no), ECS (yes/no) — with detected signals as defaults
 3. **Writes `.codex/project/FEATURES.json`** — commands read this to skip disabled features
-4. **Generates** assembly definitions, base framework classes (`IEventBus`, `EventBus`, `EventBusAccessor`, `ModuleInstaller`, `AppInstaller`, `AppScope`), and test templates (if Testing=yes + NSubstitute present)
+4. **Generates** assembly definitions, base framework classes (`IEventBus`, `EventBus`, `EventBusAccessor`, `ConfigCatalog`, `AppModules`, `SceneModules`, `AppScope`, `GameScope`), and test templates (if Testing=yes + NSubstitute present)
 5. **Updates `AGENTS.md` / project overlay docs** — records enabled/disabled features when needed
 
 Then follow the checklist above. **Note:** never text-edit `.unity`, `.prefab`, or `.asset` files. Use MCP tools (`manage_scene`, `manage_gameobject`, `manage_components`) to create and wire scenes through the Unity Editor.

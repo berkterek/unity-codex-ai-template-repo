@@ -54,9 +54,14 @@ input, update UI, trigger animation, or wrap Unity APIs, but they must not own
 business logic, scoring, state orchestration, event publishing, or service
 coordination. Move that work to injected services.
 
-### Never instantiate services from MonoBehaviour
-`new SomeService()` inside a MonoBehaviour is forbidden. Dependencies must be
-registered through VContainer and injected by interface.
+### Never instantiate services or providers directly
+`new SomeService()` and `new SomeProvider()` are forbidden in runtime code.
+Dependencies must be registered through VContainer and injected by interface.
+
+### Restrict handler construction
+`new SomeHandler()` is only allowed inside the owning `*Controller` or `*View`
+shell. Handlers are prefab-local pure C# objects and must not be constructed by
+unrelated services.
 
 ### Never depend on concrete services in constructors
 Service constructors must accept interfaces, not concrete service classes. This
@@ -68,7 +73,7 @@ forbidden. Without the `#if UNITY_EDITOR` guard the player build will fail to
 compile.
 
 ### Never modify critical architecture files without reading dependencies first
-`AppScope`, `InputView`, `ModuleInstaller`, `AppInstaller`, `.asmdef`,
+`AppScope`, `InputService`, `AppModules`, `ConfigCatalog`, `.asmdef`,
 `EventBus` files must not be modified before reading their dependents. Use
 `Read` + `Grep` to map the impact area first.
 
@@ -77,10 +82,19 @@ compile.
 `Packages/packages-lock.json` — fix the code, not the config. Test assembly
 `.asmdef` files are the narrow exception.
 
-### Never put Unity object inheritance in service/domain folders
+### Never put Unity object inheritance in service/domain files
 Files under `_Framework/`, `Games/Abstracts`, `Games/Concretes`,
 `Game/Abstracts`, and `Game/Concretes` must not inherit `MonoBehaviour` or
-`ScriptableObject`. Move Unity API access to Provider/View classes.
+`ScriptableObject` unless they are approved Unity boundary files:
+`*Provider`, `*View`, `*Controller`, `*Scope`, `*Configuration`, `*Config`,
+`*Catalog`, or `*Definition`.
+
+### Never make handlers MonoBehaviours
+`*Handler : MonoBehaviour` is forbidden. Handlers are pure C#.
+
+### Never make modules ScriptableObjects
+`*Module : ScriptableObject` is forbidden. Modules are static classes with an
+`Install(IContainerBuilder builder, Config config)` method.
 
 ### ECS/IEvent enums must use byte backing
 Enums inside ECS components or `IEvent` structs must have a `byte` base type:
@@ -145,7 +159,10 @@ will call methods on a destroyed object — the most common subtle Unity bug.
 
 ### UnityEngine import in pure C# services
 `using UnityEngine` is forbidden in `_Framework/`, `Game/Abstracts/`,
-`Game/Concretes/` (except provider classes).
+`Game/Concretes/` pure service/domain files. Boundary exceptions:
+`*Provider`, `*View`, `*Controller`, `*Scope`, `*Configuration`, `*Config`,
+`*Catalog`, `*Definition`, and event payload files when Unity value types are
+intentional.
 
 ### ECS structural changes inside a query loop
 `EntityManager.AddComponent`, `RemoveComponent`, `DestroyEntity`, `Instantiate`

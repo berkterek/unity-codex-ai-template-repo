@@ -23,7 +23,7 @@ Fast pipeline for simple, single-class additions or changes. No test writer, no 
 
 - Creating a new module folder
 - Adding or modifying a new `IEventBus` event
-- Modifying `AppScope`, `AppInstaller`, `GameScope`, or any `ModuleInstaller`
+- Modifying `AppScope`, `AppModules`, `ConfigCatalog`, `GameScope`, or any static Module
 - Touching more than 2 files
 
 ```

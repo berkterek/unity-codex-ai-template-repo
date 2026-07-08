@@ -41,7 +41,7 @@ Before spawning any agents, score the task complexity (0.0–1.0):
 | 0.4–0.6 | **Medium** | Full pipeline |
 | 0.7–1.0 | **Complex** | Full pipeline + unity-developer review after Reviewer |
 
-Scoring signals: new module folder +0.3, IEventBus events +0.2, ECS/Addressables +0.3, AppScope/InputView/Installer +0.2, single method −0.3.
+Scoring signals: new module folder +0.3, IEventBus events +0.2, ECS/Addressables +0.3, AppScope/AppModules/ConfigCatalog/InputService/static Module +0.2, single method -0.3.
 
 Print:
 ```

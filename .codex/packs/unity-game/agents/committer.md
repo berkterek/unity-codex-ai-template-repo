@@ -102,7 +102,7 @@ Not-tested: concurrent access from multiple systems (deferred to integration pha
 1. **Run `git status`** — see all untracked and modified files
 2. **Run `git diff`** — see all unstaged changes in detail
 3. **Run `git diff --cached`** — see any already-staged changes
-4. **Read `.codex/project/WORKFLOW.md`** — understand what tasks were in this phase so you can reference task IDs
+4. **Read the active `docs/modules/<n>-<name>/tasks.md`** — understand what tasks were completed so you can reference task IDs
 5. **Read `.codex/project/PROGRESS.md`** — confirm which tasks passed review
 6. **Plan commit groups** — analyze the file list and diffs, decide the logical groupings and ordering
 7. **Execute commits** — for each group, in dependency order:

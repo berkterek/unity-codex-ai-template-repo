@@ -1,71 +1,77 @@
 # Pipeline Status Reporter
 
-You are a concise status reporter for the Game Factory pipeline. Quickly assess and display the current state of the game development pipeline.
+Report the current Unity template pipeline state. Prefer the module roadmap
+system, but still recognize legacy `docs/WORKFLOW.md` projects.
 
 ## Process
 
-1. Check which documents exist and read them:
-   - `docs/GDD.md` — Game Design Document
-   - `docs/TDD.md` — Technical Design Document
-   - `docs/WORKFLOW.md` — Execution Plan
-   - `docs/PROGRESS.md` — Orchestration Progress
+1. Check which documents exist:
+   - `docs/GDD.md`
+   - `docs/TDD.md`
+   - `docs/ROADMAP.md`
+   - `docs/modules/*/tasks.md`
+   - `docs/PROGRESS.md`
+   - `docs/EVENTS.jsonl`
+   - legacy `docs/WORKFLOW.md`
 
-2. Determine the current pipeline stage:
-   - **No docs** → Pipeline not started. Suggest `/game-idea`.
-   - **GDD only** → GDD complete. Next step: `/architect`
-   - **GDD + TDD** → Architecture complete. Next step: `/plan-workflow`
-   - **GDD + TDD + WORKFLOW** → Plan ready. Next step: `/orchestrate`
-   - **GDD + TDD + WORKFLOW + PROGRESS** → Orchestration in progress or complete. Read PROGRESS.md for details.
+2. Determine the current stage:
+   - No docs -> suggest `/game-idea`
+   - GDD only -> suggest `/architect`
+   - GDD + TDD, no ROADMAP -> suggest `/roadmap`
+   - ROADMAP exists, missing module plans -> suggest `/plan-module <next>`
+   - Module `tasks.md` exists with pending tasks -> suggest `/orchestrate <tasks.md>`
+   - All module tasks complete -> suggest `/validate` or `/smart-commit`
+   - Legacy WORKFLOW only -> report legacy mode and suggest migrating through `/roadmap`
 
-3. If PROGRESS.md exists, report:
-   - Current phase and task status
-   - How many tasks complete / total
-   - Any blockers or failed reviews
-   - Estimated completion (tasks remaining)
+3. If `docs/ROADMAP.md` exists, summarize module counts by status.
 
-4. If `docs/EVENTS.jsonl` exists, read the last 10 events and show a timeline:
-   ```
-   ### Recent Events
-   - [10:35:00] phase_transition → Phase 3: Pure C# Logic
-   - [10:34:00] review_verdict → P2.T3 PASS
-   - [10:30:00] agent_completed → coder-1 finished P2.T3
-   ...
-   ```
+4. If module task files exist, summarize:
+   - Total tasks
+   - Complete tasks
+   - Pending tasks
+   - Blocked markers
 
-5. Scan the project for generated code:
-   - Count `.cs` files in `Assets/`
-   - Count test files in `Assets/_GameFolders/Scripts/Tests/`
-   - Count ScriptableObject assets in `Assets/_GameFolders/Configs/`
-   - Count prefabs in `Assets/_GameFolders/Prefabs/`
+5. If `docs/EVENTS.jsonl` exists, show the last 10 relevant events.
+
+6. Scan generated project assets when `Assets/` exists:
+   - C# files
+   - Test files
+   - Config assets
+   - Prefabs
 
 ## Output Format
 
-```
-## Game Factory — Pipeline Status
+```markdown
+## Unity Pipeline Status
 
-**Project:** [Game name from GDD or "Not started"]
-**Current Stage:** [Stage name]
-**Next Action:** [What to run next]
+Project: <name or Not started>
+Current Stage: <stage>
+Next Action: <command>
 
 ### Documents
-- [✓|✗] GDD  — docs/GDD.md
-- [✓|✗] TDD  — docs/TDD.md
-- [✓|✗] Plan — docs/WORKFLOW.md
-- [✓|✗] Progress — docs/PROGRESS.md
+- GDD: yes/no
+- TDD: yes/no
+- Roadmap: yes/no
+- Module plans: <count>
+- Legacy WORKFLOW: yes/no
 
-### Orchestration Progress (if applicable)
-- Phase: X/Y
-- Tasks: completed/total
-- Status: [Running | Paused | Complete | Blocked]
-- Blockers: [list or "None"]
+### Module Progress
+- Pending: <count>
+- In Progress: <count>
+- Complete: <count>
+- Blocked: <count>
+- Tasks: <complete>/<total>
+
+### Recent Events
+- <timestamp> <event> <summary>
 
 ### Generated Assets
-- C# Scripts: [count]
-- Test Files: [count]
-- ScriptableObjects: [count]
-- Prefabs: [count]
+- C# Scripts: <count>
+- Test Files: <count>
+- Config Assets: <count>
+- Prefabs: <count>
 ```
 
-Keep the output short and scannable. The developer wants a quick glance, not a report.
+Keep the output short and actionable.
 
 $ARGUMENTS

@@ -10,7 +10,8 @@ project, then generates all project-specific boilerplate.
 The template provides rules and commands that work for any Unity project. But
 every project needs its own:
 - Assembly definition files (with correct project name)
-- Base framework classes (IEventBus, EventBus, EventBusAccessor, ModuleInstaller, AppScope, AppInstaller)
+- Base framework classes (IEventBus, EventBus, EventBusAccessor, AppScope,
+  GameScope, AppModules, SceneModules, ConfigCatalog)
 - NSubstitute test assembly setup
 - Sample test templates
 
@@ -115,12 +116,14 @@ cat > .codex/project/FEATURES.json << 'EOF'
 {
   "addressables": <true|false>,
   "testing": <true|false>,
-  "ecs": <true|false>
+  "ecs": <true|false>,
+  "graph": <true|false>
 }
 EOF
 ```
 
-Replace `<true|false>` with actual answers. This file is read by agents and commands to skip irrelevant rules.
+Replace `<true|false>` with actual answers. This file is read by agents and
+commands to skip irrelevant rules and choose graph-backed pre-scans.
 
 ---
 
@@ -136,6 +139,7 @@ Assets/
 │   └── Game.unity
 ├── _Framework/
 │   ├── Events/                     ← FrameworkEvents.asmdef
+│   ├── Installers/                 ← IInstaller.cs only if needed by legacy projects
 │   ├── Logging/                    ← FrameworkLogging.asmdef
 │   └── SaveLoadSystems/            ← FrameworkSaveLoadSystems.asmdef
 ├── Plugins/
@@ -153,7 +157,7 @@ Assets/
         ├── Games/                  ← [ProjectName]Games.asmdef
         │   ├── Abstracts/
         │   ├── Concretes/
-        │   │   └── Infrastructure/
+        │   │   └── Infrastructure/ ← AppScope, GameScope, AppModules, SceneModules, ConfigCatalog
         │   └── Ecs/                ← only if ECS=yes
         │       ├── Authorings/
         │       ├── Components/
@@ -163,6 +167,10 @@ Assets/
             ├── [ProjectName]EditModeTest/
             └── [ProjectName]PlayModeTest/
 ```
+
+New projects use static `[Domain]Module.Install(...)` classes rather than
+`ModuleInstaller : ScriptableObject` assets. `ConfigCatalog` is the only
+ScriptableObject aggregator for module configs.
 
 ---
 
@@ -498,52 +506,80 @@ namespace Framework.Events
 }
 ```
 
-#### `_GameFolders/Scripts/Games/Concretes/Infrastructure/ModuleInstaller.cs`
-
-> Lives in `Concretes/Infrastructure/` because it uses `ScriptableObject` (requires `using UnityEngine`). Do NOT place in `Abstracts/` — that folder is pure C# only.
-
+#### `_GameFolders/Scripts/Games/Concretes/Infrastructure/ConfigCatalog.cs`
 ```csharp
+using System.Collections.Generic;
 using UnityEngine;
-using VContainer;
 
 namespace Game.Concretes.Infrastructure
 {
-    public abstract class ModuleInstaller : ScriptableObject
+    [CreateAssetMenu(menuName = "Game/Infrastructure/Config Catalog", fileName = "ConfigCatalog")]
+    public sealed class ConfigCatalog : ScriptableObject
     {
-        public abstract void Install(IContainerBuilder builder);
+        public bool Validate()
+        {
+            var missing = new List<string>();
+
+            // Add module config checks here:
+            // if (_audio == null) missing.Add(nameof(_audio));
+
+            if (missing.Count == 0)
+            {
+                return true;
+            }
+
+            Debug.LogError($"[ConfigCatalog] Missing configs: {string.Join(", ", missing)}", this);
+            return false;
+        }
     }
 }
 ```
 
-#### `_GameFolders/Scripts/Games/Concretes/Infrastructure/AppInstaller.cs`
+#### `_GameFolders/Scripts/Games/Concretes/Infrastructure/EventBusModule.cs`
 ```csharp
-using UnityEngine;
+using Framework.Events;
 using VContainer;
 
 namespace Game.Concretes.Infrastructure
 {
-    [CreateAssetMenu(menuName = "Game/Infrastructure/App Installer", fileName = "AppInstaller")]
-    public sealed class AppInstaller : ScriptableObject
+    public static class EventBusModule
     {
-        #region Fields
-
-        [SerializeField] private ModuleInstaller[] _installers;
-
-        #endregion
-
-        #region Public Methods
-
-        public void Install(IContainerBuilder builder)
+        public static void Install(IContainerBuilder builder)
         {
-            if (_installers == null) return;
-            foreach (var installer in _installers)
-            {
-                if (installer == null) continue;
-                installer.Install(builder);
-            }
+            builder.Register<EventBus>(Lifetime.Singleton).AsImplementedInterfaces();
         }
+    }
+}
+```
 
-        #endregion
+#### `_GameFolders/Scripts/Games/Concretes/Infrastructure/AppModules.cs`
+```csharp
+using VContainer;
+
+namespace Game.Concretes.Infrastructure
+{
+    public static class AppModules
+    {
+        public static void Install(IContainerBuilder builder, ConfigCatalog configs)
+        {
+            EventBusModule.Install(builder);
+        }
+    }
+}
+```
+
+#### `_GameFolders/Scripts/Games/Concretes/Infrastructure/SceneModules.cs`
+```csharp
+using VContainer;
+
+namespace Game.Concretes.Infrastructure
+{
+    public static class SceneModules
+    {
+        public static void Install(IContainerBuilder builder)
+        {
+            // Register scene-lifetime pure C# services here.
+        }
     }
 }
 ```
@@ -561,7 +597,7 @@ namespace Game.Concretes.Infrastructure
     {
         #region Fields
 
-        [SerializeField] private AppInstaller _appInstaller;
+        [SerializeField] private ConfigCatalog _configs;
 
         #endregion
 
@@ -569,9 +605,19 @@ namespace Game.Concretes.Infrastructure
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.Register<EventBus>(Lifetime.Singleton).As<IEventBus>();
+            if (_configs == null)
+            {
+                Debug.LogError("[AppScope] ConfigCatalog missing.", this);
+                return;
+            }
 
-            _appInstaller?.Install(builder);
+            if (!_configs.Validate())
+            {
+                return;
+            }
+
+            builder.RegisterInstance(_configs);
+            AppModules.Install(builder, _configs);
 
             builder.RegisterBuildCallback(container =>
             {
@@ -580,6 +626,23 @@ namespace Game.Concretes.Infrastructure
         }
 
         #endregion
+    }
+}
+```
+
+#### `_GameFolders/Scripts/Games/Concretes/Infrastructure/GameScope.cs`
+```csharp
+using VContainer;
+using VContainer.Unity;
+
+namespace Game.Concretes.Infrastructure
+{
+    public sealed class GameScope : LifetimeScope
+    {
+        protected override void Configure(IContainerBuilder builder)
+        {
+            SceneModules.Install(builder);
+        }
     }
 }
 ```
@@ -711,21 +774,21 @@ manage_gameobject(action="modify", target="AppScope",
     components_to_add=["Game.Concretes.Infrastructure.AppScope"])
 ```
 
-#### Create AppInstaller Asset and Wire It
+#### Create ConfigCatalog Asset and Wire It
 
 ```python
 manage_scriptable_object(
     action="create",
     path="Assets/_GameFolders/Configs",
-    name="AppInstaller",
-    type_name="Game.Concretes.Infrastructure.AppInstaller"
+    name="ConfigCatalog",
+    type_name="Game.Concretes.Infrastructure.ConfigCatalog"
 )
 manage_components(
     action="set_property",
     target="AppScope",
     component_type="Game.Concretes.Infrastructure.AppScope",
-    property="_appInstaller",
-    value="Assets/_GameFolders/Configs/AppInstaller.asset"
+    property="_configs",
+    value="Assets/_GameFolders/Configs/ConfigCatalog.asset"
 )
 ```
 
@@ -792,8 +855,8 @@ File → New Scene → Save As:
 1. Open Bootstrap.unity
 2. Create empty GameObject "AppScope"
 3. Add AppScope component
-4. Right-click Assets/_GameFolders/Configs → Create → Game/Infrastructure/App Installer
-5. Name it AppInstaller, drag onto AppScope._appInstaller field in Inspector
+4. Right-click Assets/_GameFolders/Configs → Create → Game/Infrastructure/Config Catalog
+5. Name it ConfigCatalog, drag onto AppScope._configs field in Inspector
 
 ### Build Settings (MCP unavailable)
 File → Build Settings → Add Open Scenes — Bootstrap at index 0.

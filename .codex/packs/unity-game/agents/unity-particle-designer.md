@@ -44,7 +44,7 @@ Select shader based on use case — Unlit for performance, Lit for quality.
 - `VFXController.cs` — serialized `ParticleSystem[]`, `Play()`, `Stop()`, optional `[Inject]`
 - `VFXPool.cs` — `Queue<VFXController>`, `Get()`, `Return()`, `Dispose()`
 - `VFXService.cs` — subscribes to IEventBus events, calls pool, positions effect
-- `VFXInstaller.cs` — `ModuleInstaller` subclass
+- `VFXModule.cs` — static module installer
 
 Namespace: `Game.Concretes.VFX`
 

@@ -1,9 +1,9 @@
 ---
 name: unity-plan-workflow
-description: "Use when the user asks to run the repository unity command plan-workflow, /plan-workflow, or the Plan Workflow — GDD + TDD → Parallelized Execution Plan workflow."
+description: "Use when the user asks to run the legacy repository unity command plan-workflow or /plan-workflow. Prefer unity-roadmap and unity-plan-module for new work."
 ---
 
-# Plan Workflow — GDD + TDD → Parallelized Execution Plan
+# Plan Workflow — Legacy WORKFLOW.md Planner
 
 This skill is a Codex-native wrapper for the repository command file:
 

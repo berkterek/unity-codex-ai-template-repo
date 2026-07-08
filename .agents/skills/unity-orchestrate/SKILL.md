@@ -1,9 +1,9 @@
 ---
 name: unity-orchestrate
-description: "Use when the user asks to run the repository unity command orchestrate, /orchestrate, or the Orchestrate — Automated WORKFLOW.md Executor workflow."
+description: "Use when the user asks to run the repository unity command orchestrate, /orchestrate, or the Orchestrate — Module Tasks Executor workflow."
 ---
 
-# Orchestrate — Automated WORKFLOW.md Executor
+# Orchestrate — Module Tasks Executor
 
 This skill is a Codex-native wrapper for the repository command file:
 

@@ -36,7 +36,7 @@ Full Unity C# implementation — MonoBehaviours, providers, installers, scene wi
 - No singletons, no `FindObjectOfType`, no `static` mutable state
 - Pure C# classes: constructor injection. MonoBehaviours: `[Inject] public void Construct(...)`
 - `builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces()`
-- New module → create `[Module]Installer : ModuleInstaller`, add to `AppInstaller.asset` — NEVER modify `AppScope.cs`
+- New module → create static `[Module]Module.Install(...)`, add one line to `AppModules.cs`, add config to `ConfigCatalog.cs` — NEVER modify `AppScope.cs`
 
 ### UniTask — No Coroutines
 - All async work uses `UniTask`, never `IEnumerator` / `StartCoroutine`
@@ -52,7 +52,7 @@ Full Unity C# implementation — MonoBehaviours, providers, installers, scene wi
 
 ### Input System
 - New Input System only — `Input.GetKey` / `Input.GetAxis` is blocked
-- Input lives in `InputView : MonoBehaviour` — the only class that touches `PlayerControls`
+- Input lives in pure C# `InputService` — the only class that touches `PlayerControls`; prefab routing uses pure C# `InputHandler`
 - Enable in `OnEnable`, disable + unsubscribe in `OnDisable` (mandatory pair)
 - Systems expose methods like `SetMoveInput(Vector2)`, `Jump()` — never reference `InputAction`
 

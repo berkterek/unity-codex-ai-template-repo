@@ -164,7 +164,7 @@ $MIGRATION_DESCRIPTION
 
 ### Legacy Input → New Input System
 - Input.GetKey / Input.GetAxis → PlayerControls actions
-- All input reading must go through InputView
+- All input reading must go through pure C# InputService; routing goes through InputHandler
 
 ## When Done
 List every file you changed with a one-line summary of what was migrated.

@@ -14,7 +14,7 @@ the legacy hook suite. These are the highest-risk checks to apply first:
 
 | Check | What it catches | Migration path |
 |------|---------------|----------------|
-| Input System | `Input.GetKey`, `Input.GetAxis` | Create `PlayerControls.inputactions`, wrap in `InputView` |
+| Input System | `Input.GetKey`, `Input.GetAxis` | Create `PlayerControls.inputactions`, own it in pure C# `InputService` |
 | VContainer singleton | Static singletons | Replace with VContainer registration in scope |
 | Editor/runtime boundary | Bare `using UnityEditor` in runtime | Wrap with `#if UNITY_EDITOR` |
 | Pure C# boundary | `using UnityEngine` in services | Move Unity calls to a Provider in `Games/Concretes/` |

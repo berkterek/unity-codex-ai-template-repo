@@ -154,25 +154,25 @@ Canvas Splitting, Camera Culling Layers, Texture Import Settings.
 
 ## 8. Input System Setup (MANDATORY for any game with player input)
 
-1. Create `Assets/Input/PlayerControls.inputactions`.
+1. Create `Assets/_GameFolders/Input/PlayerControls.inputactions`.
 2. Define action maps: at minimum `Player` map with `Move` (Value, Vector2),
    `Jump` (Button), and game-specific actions.
 3. Add bindings (WASD + Arrow Keys + Gamepad Stick for Move; Space + Gamepad
    South for Jump).
-4. Enable "Generate C# Class", set path to `Assets/Input/PlayerControls.cs`,
+4. Enable "Generate C# Class", set path to `Assets/_GameFolders/Input/PlayerControls.cs`,
    click Apply.
 5. Verify `PlayerControls.cs` exists and compiles.
-6. Create InputView MonoBehaviour:
-   - Creates `PlayerControls` in Awake.
-   - Enables action map in OnEnable, subscribes callbacks.
-   - Disables action map in OnDisable, unsubscribes callbacks.
-   - Reads continuous input in Update, forwards to Systems.
-7. Place InputView under `[Services]` container in scene.
-8. Register in VContainer: `builder.RegisterComponentInHierarchy<InputView>()`.
+6. Create pure C# InputService:
+   - Owns generated `PlayerControls`.
+   - Enables action map in `Initialize`, subscribes callbacks.
+   - Disables action map in `Dispose`, unsubscribes callbacks.
+   - Reads continuous input in `Tick`, exposes state through `IInputService`.
+7. Create pure C# InputHandler classes for prefab/domain routing when needed.
+8. Register once in VContainer: `builder.RegisterEntryPoint<InputService>().AsImplementedInterfaces()`.
 9. Smoke test: Press Play, verify input triggers actions, check console.
 
-**Common failures:** PlayerControls not generated, InputView not in scene,
-action map not enabled, callbacks subscribed in Awake instead of OnEnable.
+**Common failures:** PlayerControls not generated, InputService registered more
+than once, action map not enabled, callbacks not unsubscribed in Dispose.
 
 ---
 

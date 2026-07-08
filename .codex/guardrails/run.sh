@@ -170,14 +170,24 @@ check_monobehaviour_new_service() {
   local file="$1"
   local line
 
-  if ! grep -qE ':[[:space:]]*MonoBehaviour\b' "$file" 2>/dev/null; then
-    return
-  fi
+  is_non_runtime_path "$file" && return
 
   while IFS=: read -r line _; do
     [ -n "$line" ] || continue
-    emit_block "$file" "$line" "monobehaviour-new-service" "Do not instantiate services from MonoBehaviour; inject dependencies with VContainer."
-  done < <(grep -nE 'new[[:space:]]+[A-Z][A-Za-z0-9_]*Service[[:space:]]*\(' "$file" 2>/dev/null || true)
+    emit_block "$file" "$line" "new-service" "Do not instantiate services directly; inject dependencies with VContainer."
+  done < <(grep -nE '\bnew[[:space:]]+[A-Z][A-Za-z0-9_]*Service[[:space:]]*\(' "$file" 2>/dev/null || true)
+
+  while IFS=: read -r line _; do
+    [ -n "$line" ] || continue
+    emit_block "$file" "$line" "new-provider" "Do not instantiate providers directly; providers are Unity component instances registered through VContainer."
+  done < <(grep -nE '\bnew[[:space:]]+[A-Z][A-Za-z0-9_]*Provider[[:space:]]*\(' "$file" 2>/dev/null || true)
+
+  if ! printf '%s\n' "$file" | grep -qiE '(Controller|View)\.cs$'; then
+    while IFS=: read -r line _; do
+      [ -n "$line" ] || continue
+      emit_block "$file" "$line" "new-handler-scope" "new *Handler(...) is only allowed inside its owning Controller/View shell."
+    done < <(grep -nE '\bnew[[:space:]]+[A-Z][A-Za-z0-9_]*Handler[[:space:]]*\(' "$file" 2>/dev/null || true)
+  fi
 }
 
 check_service_unity_inheritance() {
@@ -190,15 +200,46 @@ check_service_unity_inheritance() {
 
   base="$(basename "$file")"
   case "$base" in
-    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs)
+    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs|*Configuration.cs|*Config.cs|*Catalog.cs|*Definition.cs)
       return
       ;;
   esac
 
   while IFS=: read -r line _; do
     [ -n "$line" ] || continue
+    emit_block "$file" "$line" "handler-monobehaviour" "Handler classes must be pure C# and must not inherit MonoBehaviour."
+  done < <(grep -nE 'class[[:space:]]+[A-Za-z_][A-Za-z0-9_]*Handler[[:space:]]*:[^{]*(MonoBehaviour|UnityEngine\.MonoBehaviour)' "$file" 2>/dev/null || true)
+
+  while IFS=: read -r line _; do
+    [ -n "$line" ] || continue
+    emit_block "$file" "$line" "module-scriptableobject" "*Module classes must be static; do not inherit ScriptableObject."
+  done < <(grep -nE 'class[[:space:]]+[A-Za-z_][A-Za-z0-9_]*Module[[:space:]]*:[^{]*(ScriptableObject|UnityEngine\.ScriptableObject)' "$file" 2>/dev/null || true)
+
+  while IFS=: read -r line _; do
+    [ -n "$line" ] || continue
     emit_block "$file" "$line" "service-unity-inheritance" "Domain/service files must not inherit MonoBehaviour or ScriptableObject; move Unity API to providers/views."
   done < <(grep -nE 'class[[:space:]]+[A-Za-z_][A-Za-z0-9_]*[[:space:]:,A-Za-z0-9_]*\b(MonoBehaviour|ScriptableObject)\b' "$file" 2>/dev/null || true)
+}
+
+check_service_unity_import() {
+  local file="$1"
+  local base
+  local line
+
+  is_service_domain_path "$file" || return
+  is_non_runtime_path "$file" && return
+
+  base="$(basename "$file")"
+  case "$base" in
+    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs|*Configuration.cs|*Config.cs|*Catalog.cs|*Definition.cs|*Events.cs|*Event.cs)
+      return
+      ;;
+  esac
+
+  while IFS=: read -r line _; do
+    [ -n "$line" ] || continue
+    emit_block "$file" "$line" "service-unityengine-import" "Pure service/domain files must not import UnityEngine; move Unity API access to Provider/View/Controller/config boundary files."
+  done < <(grep -nE '^using[[:space:]]+UnityEngine[[:space:]]*;' "$file" 2>/dev/null || true)
 }
 
 check_concrete_service_dependency() {
@@ -424,6 +465,7 @@ check_cs_file() {
   check_unity_editor_runtime "$file"
   check_monobehaviour_new_service "$file"
   check_service_unity_inheritance "$file"
+  check_service_unity_import "$file"
   check_concrete_service_dependency "$file"
   check_runtime_gameobject_lifecycle "$file"
   check_async_void "$file"

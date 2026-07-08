@@ -9,7 +9,7 @@ description: "Use when working with URP Quality Settings System in this Unity Co
 
 ```
 URPQualityConfiguration (ScriptableObject)
-    ↓ registered in AppInstaller
+    ↓ registered in AppModules
 URPQualityService (implements IURPQualityService)
     ↓ applies pipeline asset at runtime
 QualitySettings.renderPipeline = urpAsset
@@ -300,16 +300,17 @@ public sealed class AdaptiveQualityController : MonoBehaviour, IInitializable
 ## VContainer Registration
 
 ```csharp
-public sealed class GraphicsInstaller : ModuleInstaller
+public static class GraphicsModule
 {
-    [SerializeField] private URPQualityConfiguration _config;
-
-    public override void Install(IContainerBuilder builder)
+    public static void Install(IContainerBuilder builder, URPQualityConfiguration config)
     {
-        if (_config == null)
-            throw new InvalidOperationException($"{nameof(GraphicsInstaller)}: _config not assigned.");
+        if (config == null)
+        {
+            Debug.LogError("[GraphicsModule] URPQualityConfiguration missing.");
+            return;
+        }
 
-        builder.RegisterInstance(_config);
+        builder.RegisterInstance(config);
         builder.Register<URPQualityService>(Lifetime.Singleton).As<IURPQualityService>();
     }
 }

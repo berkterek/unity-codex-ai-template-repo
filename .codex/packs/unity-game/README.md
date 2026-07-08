@@ -89,7 +89,7 @@ a Codex session or as instructions in a task assignment.
 | `rules/addressables.md` | Asset loading, handle lifecycle, address management. |
 | `rules/unity-specifics.md` | Editor/runtime boundary, lifecycle order, threading, .meta files. |
 | `rules/unity-async.md` | UniTask, cancellation, and coroutine migration rules. |
-| `rules/unity-input.md` | New Input System hard rules and InputView pattern. |
+| `rules/unity-input.md` | New Input System hard rules and InputService/InputHandler pattern. |
 | `rules/unity-lifecycle.md` | Editor/runtime boundary, platform defines, DOTween cleanup. |
 | `rules/unity-prefabs.md` | Prefab ownership, variants, BaseCanvas, and duplication rules. |
 

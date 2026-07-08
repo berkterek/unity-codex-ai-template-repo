@@ -646,7 +646,7 @@ public sealed class MainMenuView : MonoBehaviour
 }
 ```
 
-Subscribe in `OnEnable`, unsubscribe in `OnDisable` — same pattern as InputView.
+Subscribe in `OnEnable`, unsubscribe in `OnDisable` for MonoBehaviours; pure C# services subscribe in `Initialize` and unsubscribe in `Dispose`.
 
 ---
 

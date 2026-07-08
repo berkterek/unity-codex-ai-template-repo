@@ -17,7 +17,7 @@ suite as a checklist for `guardrails.md`, `/validate`, and reviewer passes.
 | `check-time-scale.sh` | `Time.timeScale =` assignment — use IEventBus + PauseService instead |
 | `check-enum-byte-base.sh` | `enum` without `: byte` base in ECS component or IEvent files — use `ushort` if 255+ values needed |
 | `check-no-runtime-instantiate.sh` | `new GameObject(...)` in runtime C# |
-| `guard-critical-files.sh` | Edits to `AppScope`, `InputView`, `*Installer`, `IEventBus`, `.asmdef` without investigation — **exception: files under `TestScopes/`, `EditModeTest/`, or `PlayModeTest/` paths** |
+| `guard-critical-files.sh` | Edits to `AppScope`, `InputService`, `AppModules`, `ConfigCatalog`, `IEventBus`, `.asmdef` without investigation — **exception: files under `TestScopes/`, `EditModeTest`, or `PlayModeTest` paths** |
 | `check-config-protection.sh` | Modifications to `.asmdef`, `Codex configuration`, `.inputactions`, `manifest.json` — **exception: test assemblies (`EditModeTest`, `PlayModeTest`)** |
 | `gateguard.sh` (historical pre-edit check) | Edit/Write on any C# file that has not been read in the current session |
 | `guard-gate-cleared.sh` (historical pre-agent check) | Agent spawn blocked if `.codex/project/state/gate-cleared` is missing — Director Gate must be shown and `go` received before spawning any coder/fixer/committer agent |

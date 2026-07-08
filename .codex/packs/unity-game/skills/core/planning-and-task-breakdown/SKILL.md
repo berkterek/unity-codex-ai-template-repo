@@ -1,207 +1,94 @@
 ---
 name: planning-and-task-breakdown
-description: "Use when working with Planning and Task Breakdown (Unity) in this Unity Codex template."
+description: "Use when breaking Unity work into roadmap modules and orchestrate-ready module tasks."
 ---
 
-# Planning and Task Breakdown (Unity)
+# Planning And Task Breakdown
 
-## Overview
+New work uses:
 
-Break work into small, verifiable tasks — each with clear acceptance criteria. Good task breakdown is the difference between an agent that produces reliable output and one that produces complex chaos. Every task should be sized so it can be implemented, tested, and verified in a single focused session.
+1. `docs/ROADMAP.md`
+2. `docs/modules/<n>-<name>/spec.md`
+3. `docs/modules/<n>-<name>/design.md`
+4. `docs/modules/<n>-<name>/tasks.md`
 
-## When to Use
+Legacy `docs/WORKFLOW.md` is supported only for older projects.
 
-- When `/create-plan` or `/plan-workflow` is invoked
-- When a task looks too large or ambiguous to start
-- When planning parallel agent work
-- Before creating WORKFLOW.md
+## When To Use
 
-## Planning Process
+- `/roadmap`
+- `/plan-module`
+- `/create-plan` for module-level or feature-level planning
+- Before parallel agent work
+- When a task is too broad or ambiguous
 
-### Step 1: Enter Plan Mode (Read-Only)
+## Task Shape
 
-Before writing any code:
-
-- Read the spec file and relevant codebase sections
-- Identify existing patterns and rules (.codex/project/PROJECT.md, architecture.md)
-- Map dependencies between components
-- Note risks and unknowns
-
-**Do not write code during planning.** The output is a plan document, not an implementation.
-
-### Step 2: Draw the Dependency Graph
-
-Map what depends on what:
-
-```
-IEnemyService (interface)
-    │
-    ├── EnemyService (implementation)
-    │       │
-    │       ├── EnemyInstaller (VContainer registration)
-    │       │
-    │       └── EnemyTests (test)
-    │
-    └── EnemyProvider (MonoBehaviour — Unity API)
-            │
-            └── EnemyAuthoring (ECS baker, if applicable)
-```
-
-Implementation order follows the dependency graph bottom-up: foundations first.
-
-### Step 3: Slice Vertically (Vertical Slice)
-
-Instead of writing all interfaces, then all services, then all installers — build one feature path end to end:
-
-**Bad (horizontal slicing):**
-```
-Task 1: Write all interfaces
-Task 2: Write all services
-Task 3: Write all installers
-Task 4: Connect everything
-```
-
-**Good (vertical slicing):**
-```
-Task 1: Enemy spawns (IAudioService → AudioService → AudioInstaller → test)
-Task 2: Enemy takes damage (IHealthService → HealthService → Installer → test)
-Task 3: Enemy dies (IDeathService → DeathService + event → test)
-Task 4: Enemy animation triggers (Provider + ECS bridge)
-```
-
-Each vertical slice delivers a working, testable piece of functionality.
-
-### Step 4: Write the Tasks
-
-Each task follows this structure:
+Each task in `tasks.md` should use:
 
 ```markdown
-## Task [N]: [Short descriptive title]
-
-**Description:** One paragraph explaining what this task accomplishes.
-
-**Acceptance Criteria:**
-- [ ] [Specific, testable condition]
-- [ ] [Specific, testable condition]
-- [ ] Tests green: `dotnet test --filter "ClassName"`
-- [ ] Compiles without errors
-
-**Dependencies:** [Task numbers this task depends on, or "None"]
-
-**Files likely affected:**
-- `_GameFolders/Scripts/Games/Abstracts/Audio/IAudioService.cs`
-- `_GameFolders/Scripts/Games/Concretes/Audio/AudioService.cs`
-- `_GameFolders/Scripts/Tests/AudioTests/AudioServiceTests.cs`
-
-**Estimated scope:** [Small: 1-2 files | Medium: 3-5 files | Large: 5+ files]
+- [ ] T001 [parallel_group:1] `Assets/.../File.cs` — concise task title
+  - Type: Add | Modify | Delete
+  - Agent: coder | unity-coder | unity-setup | tester
+  - Test type: EditMode | PlayMode | NoTest
+  - Inputs: `path`
+  - Outputs: `path`
+  - Acceptance: specific, testable condition
 ```
 
-### Step 5: Order and Add Checkpoints
+## Dependency Rules
 
-Arrange tasks so that:
+- Interfaces before implementations.
+- Tests before implementations when behavior is logic-heavy.
+- `ConfigCatalog` and `AppModules` edits are sequential unless the write scope is
+  isolated.
+- Scene/prefab tasks run through `unity-setup` and MCP.
+- Shared output files cannot be in the same `parallel_group`.
 
-1. Dependencies are satisfied (foundations first)
-2. Each task leaves the system in a working state
-3. A validation checkpoint follows every 2-3 tasks
-4. High-risk tasks come early (fail fast)
+## Vertical Slices
 
-Checkpoints should be explicit:
+Prefer tasks that deliver a working slice:
+
+```text
+IService -> failing test -> Service -> Module wiring -> checkpoint
+```
+
+Avoid horizontal batches like "all interfaces" unless they are truly independent
+and small.
+
+## Parallelization
+
+Can parallelize:
+
+- Independent interfaces
+- Independent tests
+- Independent providers/prefabs
+- Documentation-only tasks
+
+Must be sequential:
+
+- Shared public interface changes
+- `AppModules.cs`
+- `ConfigCatalog.cs`
+- Scene or prefab operations touching the same asset
+- Any task that depends on generated code from a prior task
+
+## Checkpoints
+
+Add a checkpoint after each playable slice:
 
 ```markdown
-## Checkpoint: After Tasks 1-3
-- [ ] All tests green
-- [ ] Unity compiles without errors
-- [ ] Core player flow works end to end
-- [ ] Human approval before proceeding
+**Checkpoint: Phase 1 independent test passes.**
 ```
 
-## Task Size Guide
-
-| Size | Files | Scope | Example |
-|------|-------|-------|---------|
-| **XS** | 1 | Single method or config | Add a validation rule |
-| **S** | 1-2 | Single component or service | Write a new event struct |
-| **M** | 3-5 | One feature slice | AudioService + Installer + test |
-| **L** | 5-8 | Multi-component feature | Full spawn system |
-| **XL** | 8+ | **Too large — split further** | — |
-
-**Split a task if:**
-- The task title contains "and" (sign of two tasks)
-- Acceptance criteria has more than 3 items
-- It touches two or more independent systems
-- VContainer scope change + ECS change + UI change all at once
-
-## WORKFLOW.md Template
-
-```markdown
-# Implementation Plan: [Feature/Project Name]
-
-## Overview
-[One paragraph summary of what we are building]
-
-## Architectural Decisions
-- [Key decision 1 and rationale — or ADR reference]
-- [Key decision 2 and rationale]
-
-## Task List
-
-### Phase 1: Core Infrastructure
-- [ ] Task 1: ...
-- [ ] Task 2: ...
-
-### Checkpoint: Core Infrastructure
-- [ ] Tests green, compile clean
-
-### Phase 2: Core Features
-- [ ] Task 3: ...
-- [ ] Task 4: ...
-
-### Checkpoint: Core Features
-- [ ] End-to-end flow working
-
-### Phase 3: Integration
-- [ ] Task 5: ...
-
-### Checkpoint: Complete
-- [ ] All acceptance criteria met
-- [ ] Ready for review
-
-## Risks and Mitigations
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Scene reference lost during ECS migration | High | Test in test scene first |
-
-## Open Questions
-- [Question requiring human input]
-```
-
-## Parallelization Opportunities
-
-When multiple agents or sessions are available:
-
-- **Can parallelize:** Independent feature slices, tests for existing implementations, documentation
-- **Must be sequential:** Database/schema migrations, shared state changes, dependency chains
-- **Requires coordination:** Features sharing a common interface (lock the interface first, then parallelize)
-
-Use `parallel_group` annotations in WORKFLOW.md — `/orchestrate` detects these automatically.
-
-## Common Rationalizations
-
-| Rationalization | Reality |
-|-----------------|---------|
-| "I'll figure it out as I go" | This is how complex, tangled code gets written and rewritten. 10 minutes of planning saves hours. |
-| "The tasks are obvious" | Write them anyway. Explicit tasks surface hidden dependencies and forgotten edge cases. |
-| "Planning is extra work" | Planning is the task. Without a plan, implementation is just typing. |
-| "I can keep it all in my head" | The context window is finite. Written plans survive session boundaries. |
+At a checkpoint, `/orchestrate` should run guardrails, compile/test verification,
+and ask before proceeding.
 
 ## Verification Checklist
 
-Before starting implementation:
-
-- [ ] Every task has acceptance criteria
-- [ ] Every task has a verification step (test command or manual check)
-- [ ] Task dependencies are identified and ordered
-- [ ] No task touches more than ~5 files
-- [ ] Checkpoints exist between major phases
-- [ ] Tasks that can run in parallel are marked with `parallel_group`
-- [ ] Human has approved the plan document
+- [ ] Every task has outputs.
+- [ ] Every logic task has test type or NoTest rationale.
+- [ ] Acceptance criteria are observable.
+- [ ] Parallel groups have no output conflicts.
+- [ ] Critical architecture files are called out.
+- [ ] Human approves the plan before execution.

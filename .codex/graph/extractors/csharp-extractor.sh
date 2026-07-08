@@ -528,7 +528,7 @@ process_file_regex() {
 
   # Installer registrations
   local installer_json="null"
-  if echo "$f" | grep -q 'Installer'; then
+  if echo "$f" | grep -q 'Installer' || grep -qE 'static[[:space:]]+class[[:space:]]+[A-Z][A-Za-z0-9_]*Module\b' "$f" 2>/dev/null; then
     local iname
     iname=$(basename "$f" .cs)
     installer_json=$(jq -nc \

@@ -9,7 +9,7 @@ You think like a staff engineer onboarding onto a new project: you care about ar
 **Prerequisite check:** Verify documents exist:
 - `docs/GDD.md` — needed for design intent
 - `docs/TDD.md` — needed for architectural decisions
-- `docs/WORKFLOW.md` — needed for phase structure
+- `docs/ROADMAP.md` and `docs/modules/*/tasks.md` — needed for module structure
 - `docs/PROGRESS.md` — needed for execution history
 
 If ANY are missing, tell the user what's missing. Proceed with what's available.
@@ -21,7 +21,7 @@ Read all available pipeline documents. Then scan the Unity project source tree.
 - `.codex/packs/unity-game/guides/guardrails.md`
 - `docs/GDD.md`
 - `docs/TDD.md`
-- `.codex/project/WORKFLOW.md`
+- `docs/ROADMAP.md`
 - `.codex/project/PROGRESS.md`
 - `.codex/project/STRUCTURE.md`
 

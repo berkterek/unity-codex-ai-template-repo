@@ -1,87 +1,60 @@
-# Continue Orchestration Agent
+# Continue — Resume Module Orchestration
 
-You are the orchestrator continuing from an interrupted execution. Pick up exactly where things left off, wasting no effort on completed work.
+Resume an interrupted `/orchestrate <tasks.md>` run. The checkbox state inside
+the module `tasks.md` is the primary source of truth.
 
 ## Initialization
 
-1. Read `.codex/project/RULES.md` for project constraints.
-2. Read `docs/GDD.md` for game design context.
-3. Read `docs/TDD.md` for technical architecture.
-4. Read `docs/WORKFLOW.md` for the full execution plan.
-5. Read `docs/PROGRESS.md` — this is your source of truth for what's done.
+Read:
 
-## Resume Process
+1. `AGENTS.md`
+2. `.codex/packs/unity-game/guides/guardrails.md`
+3. `.codex/project/RULES.md`
+4. `docs/ROADMAP.md` when present
+5. `docs/EVENTS.jsonl` when present
+6. The target module `tasks.md`
 
-### Step 1: Assess State via Event Journal
+If `$ARGUMENTS` includes a `tasks.md` path, resume that module. Otherwise infer
+the active module from the most recent `ORCHESTRATION_STARTED` event, then from
+`docs/ROADMAP.md` rows marked `In Progress`.
 
-**Primary method — Event replay (preferred):**
+If no module can be inferred, stop and ask for the `tasks.md` path.
 
-If `docs/EVENTS.jsonl` exists, read it line-by-line and replay events to reconstruct state:
+## Recovery Process
 
-1. Initialize: `phase=0, tasks={}, agents={}, commits=[], status="unknown"`
-2. For each event line, update the model:
-   - `orchestration_started` → set start time, initialize task/phase counts
-   - `task_status` → update task: `tasks[id].status = event.data.to`
-   - `agent_spawned` → register agent with task, type
-   - `agent_completed` / `agent_failed` → update agent status, record files
-   - `review_verdict` → update task review state (PASS → done, FAIL → failed)
-   - `phase_transition` → advance phase counter
-   - `commit_created` → record commit SHA
-   - `orchestration_paused` → note pause state
-   - `error` / `blocker` → record for display
-3. After replay, you have the **ground truth**: current phase, every task's final status, all commits made.
-4. Cross-reference with PROGRESS.md for display info (events are authoritative if they conflict).
-5. If PROGRESS.md is inconsistent with events, **rebuild PROGRESS.md** from event-derived state.
+1. Replay `docs/EVENTS.jsonl` when present.
+2. Parse every checkbox in `tasks.md`.
+3. Treat checked tasks as complete unless changed outputs are missing.
+4. Treat unchecked tasks as pending.
+5. For any task that has `TASK_STARTED` but no `TASK_COMPLETED`, inspect outputs:
+   - Complete and reviewed -> send to verification/review before checking it.
+   - Incomplete -> restart the task.
+6. Rebuild `docs/PROGRESS.md` if it conflicts with `tasks.md` and the event log.
 
-**Fallback method — PROGRESS.md heuristic:**
-
-If `docs/EVENTS.jsonl` does NOT exist, read PROGRESS.md and determine:
-- Which phase are we in?
-- Which tasks are COMPLETE (with PASS review)?
-- Which tasks are IN_PROGRESS (agents don't survive restarts — may need restart)?
-- Which tasks are PENDING?
-- Are there any FAILED reviews that need re-attempts?
-- Are there any blockers logged?
-
-### Step 2: Recovery Plan
-
-- **IN_PROGRESS tasks:** Check if output files exist and are complete. If yes, send to reviewer. If no, restart the task.
-- **FAILED tasks:** Re-attempt with the review feedback included in the agent prompt.
-- **PENDING tasks:** Schedule normally.
-
-### Step 3: Report to User
+## User Gate
 
 Before resuming, show:
 
-```
+```markdown
 ## Continuing Orchestration
 
-**Last checkpoint:** Phase X, Task Y
-**Completed:** N tasks
-**Needs restart:** M tasks (were in-progress)
-**Needs re-attempt:** K tasks (failed review)
-**Remaining:** J tasks
+Plan: <tasks.md path>
+Completed: <n>
+Needs verification: <n>
+Needs restart: <n>
+Remaining: <n>
 
-Ready to resume?
+Type `go` to resume.
 ```
 
-### Step 4: Continue Execution
-
-On user confirmation:
-
-```bash
-mkdir -p .codex/state && echo '{"started":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","phase":'$CURRENT_PHASE',"phaseName":"'"$PHASE_NAME"'"}' > .codex/state/orchestration-active.json
-```
-
-- Spawn agents for the current phase's remaining tasks
-- Follow the same parallel dispatch, review gate, and phase gate process as `/orchestrate`
-- Continue updating `docs/PROGRESS.md`
+After approval, continue using the same execution loop as `/orchestrate`.
 
 ## Rules
 
-- Do NOT re-run completed and reviewed tasks
-- Do NOT skip the review step, even for restarted tasks
-- Treat IN_PROGRESS tasks as potentially incomplete — verify before assuming done
-- If PROGRESS.md is corrupted or missing, scan the file system for what exists and rebuild state
+- Do not rerun completed and reviewed tasks.
+- Do not skip verification for tasks that were in progress during interruption.
+- Do not skip review unless review mode is `solo`.
+- Do not commit if Unity compilation errors are present.
+- Never run `git push`.
 
 $ARGUMENTS

@@ -50,7 +50,7 @@ Score the task (0.0–1.0):
 | 0.4–0.6 | **Medium** | 2–4 classes, new interface, or touches event bus | Full pipeline |
 | 0.7–1.0 | **Complex** | New module, cross-system events, ECS, or Addressables | Full pipeline + unity-developer review |
 
-Scoring signals: new module folder +0.3, IEventBus events +0.2, ECS/Addressables +0.3, AppScope/InputView/Installer +0.2, single method −0.3.
+Scoring signals: new module folder +0.3, IEventBus events +0.2, ECS/Addressables +0.3, AppScope/AppModules/ConfigCatalog/InputService/static Module +0.2, single method -0.3.
 
 Print:
 ```

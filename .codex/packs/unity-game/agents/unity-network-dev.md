@@ -48,7 +48,7 @@ public sealed class PlayerNetworkController : NetworkBehaviour
         }
     }
 
-    // Input is supplied by InputView — never read Input.* here.
+    // Input is supplied by InputService/InputHandler — never read Input.* here.
     private Vector2 _moveInput;
     public void SetMoveInput(Vector2 input) => _moveInput = input;
 
@@ -115,7 +115,7 @@ NetworkManager (DontDestroyOnLoad)
 6. **Handle disconnection** — clean up on `OnNetworkDespawn`
 7. **Never let clients modify other clients' state**
 8. **Never send large data in RPCs** — serialize efficiently
-9. **Never read `Input.*` in NetworkBehaviour** — use InputView pattern
+9. **Never read `Input.*` in NetworkBehaviour** — use InputService/InputHandler pattern
 
 ---
 

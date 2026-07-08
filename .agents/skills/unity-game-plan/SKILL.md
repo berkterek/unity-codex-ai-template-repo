@@ -1,9 +1,9 @@
 ---
 name: unity-game-plan
-description: "Use when the user asks to run the repository unity command game-plan, /game-plan, or the Game Plan — Game Completion Planner workflow."
+description: "Use when the user asks to run the legacy repository unity command game-plan or /game-plan. Prefer unity-roadmap and unity-plan-module for new work."
 ---
 
-# Game Plan — Game Completion Planner
+# Game Plan — Legacy Planner
 
 This skill is a Codex-native wrapper for the repository command file:
 

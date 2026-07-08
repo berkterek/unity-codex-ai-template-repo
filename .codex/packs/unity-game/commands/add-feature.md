@@ -11,7 +11,7 @@ Read these when they exist:
 
 - `.codex/project/RULES.md`
 - `.codex/project/PROJECT.md`
-- `.codex/project/WORKFLOW.md`
+- `docs/ROADMAP.md` and `docs/modules/*/tasks.md`
 - `.codex/project/PROGRESS.md`
 - `docs/GDD.md`
 - `docs/TDD.md`

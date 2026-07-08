@@ -18,7 +18,7 @@ Use these defaults unless the user overrides with a cheaper or stronger tier:
 
 | Agent / Work Type | Default Tier | Preferred Model |
 |-------------------|--------------|-----------------|
-| `lean-planner`, planner, architecture, `/create-plan`, `/update-plan`, `/plan-workflow` | **heavy** | GPT-5.5 |
+| `lean-planner`, planner, architecture, `/create-plan`, `/update-plan`, `/roadmap`, `/plan-module`, `/plan-workflow` | **heavy** | GPT-5.5 |
 | `unity-critic`, `unity-developer`, deep reviewer, root-cause debugger | **normal** | GPT-5.4 |
 | `coder`, `unity-coder`, `unity-coder-lite`, `tester`, `unity-reviewer`, `unity-verifier` | **normal** | GPT-5.4 |
 | `unity-fixer`, `unity-migrator`, `unity-setup`, `graphics-setup-agent`, `package-analyzer` | **normal** | GPT-5.4 |

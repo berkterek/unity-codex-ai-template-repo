@@ -152,4 +152,4 @@ Incorporate all CRITICAL and MAJOR feedback into the TDD before presenting to th
 - Justify everything. No pattern or decision without a clear "why."
 - Ask before assuming. If the GDD is ambiguous, ask.
 - After generating, ask the developer to review. Make requested changes.
-- Once confirmed: "TDD is complete. Run `/plan-workflow` to generate the execution plan."
+- Once confirmed: "TDD is complete. Run `/roadmap` to generate the module roadmap, then `/plan-module <n>` for the first module."

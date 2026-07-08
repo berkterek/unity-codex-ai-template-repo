@@ -19,7 +19,7 @@
 - `/update-plan --lean <file> <change>` — analyzer → **lean-planner** (medium reasoning effort) → reviewer → save. Output: updated 3-5 task table only. Implementer auto-spawn: **disabled**. Use when the change is small (adding/removing a task, adjusting a file path).
 - `/smart-commit` — analyze dirty working tree → group into logical commits → commit
 - `/smart-commit-selected` — analyze dirty working tree → plan commit groups → **show checklist (multiSelect)** → commit only selected groups
-- `/orchestrate` — **complexity score** → read WORKFLOW.md → check `parallel_group` annotations → per-task: **test-type-router** → [tester if not NoTest] → **coder** (pure C#) / **unity-coder-lite** (Simple Unity) / **unity-coder** (Medium/Complex Unity) → **unity-verifier** → **Codex** → unity-reviewer → [unity-developer if score ≥ 0.7] → committer; tasks with same `parallel_group` run simultaneously (complexity ≥ 0.4); phase gate runs **guardrails → ralph → silent-failure-hunter → validate** automatically before asking to proceed; emits `VERIFICATION_PASSED` event on success
+- `/orchestrate <tasks.md>` — **complexity score** → read a module `docs/modules/<n>-<name>/tasks.md` → checkbox resume → pre-scan codebase/graph → check `parallel_group` annotations → per-task: **test-type-router** → [tester if not NoTest] → **coder** (pure C#) / **unity-coder-lite** (Simple Unity) / **unity-coder** (Medium/Complex Unity/static module wiring) / **unity-setup** (scene/prefab) → **unity-verifier** → **Codex** → unity-reviewer → [unity-developer if score ≥ 0.7] → committer; tasks with same `parallel_group` run simultaneously only when outputs do not conflict; checkpoints run guardrails and QA before proceeding
 
 > Reviewer priority: Codex → unity-reviewer (falls back to unity-reviewer if Codex is unavailable).
 
@@ -41,11 +41,13 @@
 - `/refine-tdd` — Iterate on an existing TDD
 
 ### Game Completion Planning
-- `/game-plan [docs/GDD.md]` — **Game completion planner:** reads GDD + TDD + PROGRESS + codebase, identifies what's done vs stub vs missing, then produces `docs/0_MasterPlan.md` (master tracking table) + numbered module plan files (`docs/1_SlingshotPhysics.md`, `docs/2_VacuumCollection.md`, …). Each module plan is `/orchestrate`-ready: tasks with file paths, code skeletons, test types, and `parallel_group` annotations. Run after the architecture skeleton is built and gameplay needs to be completed module by module.
+- `/roadmap` — reads GDD + TDD + existing `docs/modules/` plans, then creates or updates `docs/ROADMAP.md` with module order, dependencies, priority, status, and plan links.
+- `/plan-module <n|slug>` — creates one `docs/modules/<n>-<name>/` folder with `spec.md`, `design.md`, and `/orchestrate`-ready `tasks.md` using checkbox tasks, explicit outputs, acceptance criteria, test type, and `parallel_group`.
+- `/game-plan [docs/GDD.md]` — legacy planner. Prefer `/roadmap` + `/plan-module` for new work.
 
 ### Development
-- `/plan-workflow` — Create a phased execution plan from a TDD — assigns integer `parallel_group` numbers (1, 2, `—`) compatible with `/orchestrate`; compile-time type dependencies force sequential even across different files
-- `/new-module` — Generate the 5-file module structure (Interface, Service, Config, Installer, Events)
+- `/plan-workflow` — legacy WORKFLOW.md planner. Prefer `/roadmap` + `/plan-module`.
+- `/new-module` — Generate the static module structure (Interface, Service, Config, static Module, Events, optional Provider) and wire `AppModules.cs` + `ConfigCatalog.cs`.
 
 ### Quality
 - `/review-code` — Code review on specific files via **unity-reviewer**
@@ -73,9 +75,9 @@
 - `/search <query>` — **complexity score** → Phase 1: **Explore** + **unity-scout** simultaneously (complexity ≥ 0.4) → write findings to `.codex/project/state/search-findings.md` → Phase 2: reviewer validates **completeness** (COMPLETE / INCOMPLETE / REJECT, max 5 iter) → Phase 3: present findings to user → Phase 4: **action router** recommends next command (`/fix`, `/fix-deep`, `/implement`, `/create-plan`, `/update-plan`, or no action) — never executes automatically
 - `/dump` — Save current session notes to `.codex/project/logs/` as markdown
 - `/five` — 5 Whys root cause analysis for a bug or architectural problem
-- `/continue` — Resume an interrupted orchestration run from the event journal (picks up where it left off)
-- `/status` — Report current pipeline stage: GDD → TDD → WORKFLOW progress summary
-- `/dry-run` — Preview the orchestration plan for a WORKFLOW.md without executing any tasks
+- `/continue [tasks.md]` — Resume an interrupted module orchestration run from task checkboxes and the event journal
+- `/status` — Report current pipeline stage: GDD → TDD → ROADMAP → module tasks progress
+- `/dry-run [tasks.md]` — Preview a module `tasks.md` orchestration plan without executing tasks
 - `/instincts` — Manage instinct library: status, list, evolve, promote, export, import
 
 ### Changelog

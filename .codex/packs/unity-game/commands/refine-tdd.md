@@ -11,7 +11,7 @@ Read these when they exist:
 - `docs/TDD.md` — required; this is the document you're refining.
 - `docs/GDD.md`
 - `.codex/project/RULES.md`
-- `.codex/project/WORKFLOW.md`
+- `docs/ROADMAP.md` and `docs/modules/*/tasks.md`
 - `.codex/project/PROGRESS.md`
 
 ## Process
@@ -60,7 +60,7 @@ If code exists:
 - Generate a migration checklist for existing code.
 - Suggest whether to refactor in-place or rebuild affected systems.
 
-If `.codex/project/WORKFLOW.md` exists:
+If `docs/ROADMAP.md` or module `tasks.md` files exist:
 - Warn that the execution plan needs updating.
 
 ## Rules

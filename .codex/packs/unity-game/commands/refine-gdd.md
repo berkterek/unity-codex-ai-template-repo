@@ -10,7 +10,7 @@ Read these when they exist:
 
 - `docs/GDD.md` — required; this is the document you're refining.
 - `.codex/project/RULES.md`
-- `.codex/project/WORKFLOW.md`
+- `docs/ROADMAP.md` and `docs/modules/*/tasks.md`
 - `docs/TDD.md`
 
 ## Process
@@ -27,7 +27,7 @@ If the user provided specific changes, analyze them. Otherwise, ask:
 Before making changes:
 - Identify all GDD sections affected.
 - If TDD exists: identify which technical systems are impacted.
-- If `.codex/project/WORKFLOW.md` exists: identify which tasks are affected.
+- If `docs/ROADMAP.md` or module `tasks.md` files exist: identify which modules/tasks are affected.
 - Present the impact to the developer.
 
 ### Make Changes
@@ -44,7 +44,7 @@ Before making changes:
 
 ### Cascade Warning
 
-If TDD or WORKFLOW exist, warn the developer:
+If TDD, ROADMAP, or module plans exist, warn the developer:
 "The GDD has been updated. The following downstream documents may need updating:
 - TDD: [affected sections]
 - Workflow: [affected tasks]

@@ -3,13 +3,15 @@
 ## Core Principle: Dependency Direction
 
 ```
-Views/Providers → Services → Models/Interfaces
-       ↓               ↓
-   IEventBus  (decoupled cross-system communication)
+Mono Shells / Providers -> Handlers -> Services -> Models/Interfaces
+          \                         /
+           IEventBus for cross-module communication
 ```
 
 - Services depend on interfaces, never concrete types.
-- MonoBehaviours (Views/Providers) depend on services via VContainer injection.
+- MonoBehaviours (Controllers/Views/Providers) are Unity boundaries only.
+- Handlers are pure C# and contain prefab-local behavior.
+- Services are pure C# and contain cross-module logic.
 - Models/data classes depend on nothing.
 - Cross-service communication goes through IEventBus, never direct references.
 - Assembly definitions enforce direction at compile time.
@@ -40,15 +42,17 @@ _GameFolders/        ← Depends on _Framework. All game-specific code.
 
 ## Module Structure (NON-NEGOTIABLE)
 
-Every service/system lives in its own folder and contains exactly these files:
+Every service/system lives in its own domain folder:
 
 ```
-Audio/
-├── IAudioService.cs       ← The only public API contract
-├── AudioService.cs        ← sealed implementation
+Abstracts/Audio/
+└── IAudioService.cs       ← Public API contract
+
+Concretes/Audio/
+├── AudioService.cs        ← sealed pure C# implementation
 ├── AudioConfiguration.cs  ← ScriptableObject config
-├── AudioInstaller.cs      ← VContainer registration
-└── AudioEvents.cs         ← IEvent structs for this module (if any)
+├── AudioModule.cs         ← static VContainer registration
+└── AudioEvents.cs         ← IEvent structs for this module
 ```
 
 Provider implementations live **outside** the module folder:
@@ -79,20 +83,21 @@ AppScope (Bootstrap scene — DontDestroyOnLoad, persistent root)
 - `MenuScope` / `GameScope` register scene-local dependencies.
 - A scope cannot access sibling scope services — only parent scope.
 
-### ModuleInstaller Pattern
+### Static Module Pattern
 
 ```csharp
-public class AudioInstaller : ModuleInstaller
+public static class AudioModule
 {
-    [SerializeField] private AudioConfiguration _config;
-
-    public override void Install(IContainerBuilder builder)
+    public static void Install(IContainerBuilder builder, AudioConfiguration config)
     {
-        if (_config == null)
-            throw new InvalidOperationException($"{nameof(AudioInstaller)}: _config is not assigned.");
+        if (config == null)
+        {
+            Debug.LogError("[AudioModule] AudioConfiguration missing.");
+            return;
+        }
 
-        builder.RegisterInstance(_config);
-        builder.Register<AudioService>(Lifetime.Singleton).As<IAudioService>();
+        builder.RegisterInstance(config);
+        builder.Register<AudioService>(Lifetime.Singleton).AsImplementedInterfaces();
     }
 }
 ```
@@ -146,36 +151,23 @@ public sealed class AudioService : IAudioService
 
 ## Input System Architecture (NON-NEGOTIABLE)
 
-Input is a View-layer concern. InputView reads raw input and calls Services.
-Services never touch Unity Input directly.
+Input is owned by a pure C# `InputService`. `InputHandler` routes input to
+domain services. Services never touch Unity Input directly.
 
 ```csharp
-public sealed class InputView : MonoBehaviour
+public sealed class InputService : IInputService, IInitializable, ITickable, IDisposable
 {
-    private PlayerControls _controls;
-    private IPlayerService _playerService;
+    private readonly PlayerControls _controls = new();
+    public Vector2 MoveInput { get; private set; }
 
-    private void Awake() => _controls = new PlayerControls();
+    public void Initialize() => _controls.Player.Enable();
 
-    [Inject]
-    public void Construct(IPlayerService playerService) => _playerService = playerService;
-
-    private void OnEnable()
+    public void Tick()
     {
-        _controls.Player.Enable();
-        _controls.Player.Jump.performed += OnJump;
+        MoveInput = _controls.Player.Move.ReadValue<Vector2>();
     }
 
-    private void OnDisable()
-    {
-        _controls.Player.Jump.performed -= OnJump;
-        _controls.Player.Disable();
-    }
-
-    private void Update() =>
-        _playerService.SetMoveInput(_controls.Player.Move.ReadValue<Vector2>());
-
-    private void OnJump(InputAction.CallbackContext ctx) => _playerService.Jump();
+    public void Dispose() => _controls.Dispose();
 }
 ```
 
