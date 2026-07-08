@@ -1,8 +1,9 @@
 .DS_Store
+__pycache__/
+*.pyc
 config.ini
 
-# Codex generated graph output and caches.
-.codex/graph/graph.json
+# Codex generated graph caches.
 .codex/graph/graph.json.bak
 .codex/graph/*.tmp
 .codex/graph/cache/*

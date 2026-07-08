@@ -27,7 +27,7 @@ bash .codex/graph/test/verify-graphify.sh --json   # JSON summary
 | T4 — Validator rules | R1–R6 (SINGLETON, EVENT_DANGLING, CONCRETE_UNREGISTERED, INTERFACE_MISPLACED, ASMDEF_UNRESOLVED, LAYER_VIOLATION) |
 | T5 — Pivot integrity | event count, installer count, scope tree, `.last-build` freshness, implementers (BUG#1), MCP prefab merge (BUG#2) |
 | T6 — /knowledge-graph | all 9 subcommands |
-| T7 — Triggers | graph-watch syntax and `purge_ghosts` |
+| T7 — Triggers | PostToolUse hook (.cs logged, .md filtered), graph-watch syntax, post-commit, `purge_ghosts` |
 | T8 — Known bugs | BUG#1, BUG#2, BUG#3 — auto-promoted to PASS when fixed |
 
 ## Sandbox (5 protected files — always restored)
@@ -49,7 +49,7 @@ When a bug listed in Task 8 of `docs/PLAN_graphify_test_coverage.md` is fixed:
 
 ## `--validate-with-codex`
 
-Intentionally skipped — it requires a live Codex review task and is not testable in a
+Intentionally skipped — it requires a live Codex API call and is not testable in a
 headless shell harness. The harness emits an explicit `[SKIP]` line for this flag.
 
 ## When to re-run
@@ -58,11 +58,12 @@ After editing any of:
 - `graph-builder.sh`
 - `graph-validator.sh`
 - `extractors/*.sh`
-- `graph-watch.sh`
+- `.codex/hooks/graph-auto-update.sh`
+- `.git/hooks/post-commit`
 
 ## AGENTS.md note
 
-Add this line under the `## Knowledge Graph` section if you want the harness to
-be discoverable from the top-level agent instructions:
+The project `AGENTS.md` cannot be edited by Codex. Add this line manually under
+the `## Knowledge Graph` section so the harness is discoverable:
 
 > Verify the toolchain with `bash .codex/graph/test/verify-graphify.sh` (exit 0 = clean).

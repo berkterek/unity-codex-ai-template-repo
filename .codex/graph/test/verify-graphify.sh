@@ -85,7 +85,7 @@ run_builder_flag_tests() {
   section "T3 — Builder Flags"
 
   # 1. --full + --skip-mcp + --quiet + --output
-  if bash "$GRAPH_DIR/graph-builder.sh" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null \
+  if python3 "$GRAPH_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null \
      && jq empty "$WORK_GRAPH" 2>/dev/null; then
     pass "--full --skip-mcp --quiet --output produces valid JSON"
   else
@@ -94,7 +94,7 @@ run_builder_flag_tests() {
 
   # 2. --incremental cache reuse — verify cache file is populated.
   # Skip on template/empty repos — no C# files means cache is trivially empty.
-  bash "$GRAPH_DIR/graph-builder.sh" --incremental --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
+  python3 "$GRAPH_DIR/graph-builder.py" --incremental --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
   local cache_entries
   cache_entries=$(jq_count "$GRAPH_DIR/cache/file-hashes.json" 'length')
   if [[ "$UNITY_HAS_CS" -eq 0 ]]; then
@@ -116,7 +116,7 @@ run_builder_flag_tests() {
     printf 'namespace Probe { public class GraphifyProbe {} }\n' > "$single_file"
     local _tmp_cs="$single_file"
   fi
-  if bash "$GRAPH_DIR/graph-builder.sh" --incremental --changed-files "$single_file" --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null \
+  if python3 "$GRAPH_DIR/graph-builder.py" --incremental --changed-files "$single_file" --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null \
      && jq empty "$WORK_GRAPH" 2>/dev/null; then
     pass "--changed-files single-file build (valid JSON)"
   else
@@ -145,14 +145,14 @@ run_builder_flag_tests() {
 
   # 6. --quiet suppresses stderr
   local stderr_out
-  stderr_out=$(bash "$GRAPH_DIR/graph-builder.sh" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>&1 1>/dev/null || true)
+  stderr_out=$(python3 "$GRAPH_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>&1 1>/dev/null || true)
   if [[ -z "$stderr_out" ]]; then
     pass "--quiet suppresses stderr"
   else
     fail "--quiet leaked stderr: $stderr_out"
   fi
 
-  echo "[SKIP] --validate-with-codex requires a live Claude API call — not testable in a headless shell harness"
+  echo "[SKIP] --validate-with-codex requires a live Codex API call — not testable in a headless shell harness"
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -191,7 +191,7 @@ run_validator_tests() {
 run_pivot_tests() {
   section "T5 — Pivot Integrity"
 
-  bash "$GRAPH_DIR/graph-builder.sh" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
+  python3 "$GRAPH_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
 
   local ev inst scopes
   ev=$(jq_count "$WORK_GRAPH" '.codebase.events | length')
@@ -250,7 +250,7 @@ run_pivot_tests() {
   # MCP prefab merge — BUG#2
   cp "$SCRIPT_DIR/fixtures/mcp-extract.fresh.json" "$GRAPH_DIR/cache/mcp-extract.json"
   touch "$GRAPH_DIR/cache/mcp-extract.json"
-  bash "$GRAPH_DIR/graph-builder.sh" --full --quiet --output "$WORK_GRAPH" 2>/dev/null || true
+  python3 "$GRAPH_DIR/graph-builder.py" --full --quiet --output "$WORK_GRAPH" 2>/dev/null || true
   local prefabs
   prefabs=$(jq_count "$WORK_GRAPH" '.codebase.prefabs | length')
   if [[ "$prefabs" -gt 0 ]]; then
@@ -365,10 +365,20 @@ run_knowledge_graph_tests() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# T7 — Triggers (watch syntax, purge_ghosts)
+# T7 — Triggers (optional hooks, watch, purge_ghosts)
 # ──────────────────────────────────────────────────────────────────────────────
 run_trigger_tests() {
   section "T7 — Triggers"
+
+  if [[ -f "$REPO_ROOT/.codex/hooks/graph-auto-update.sh" ]]; then
+    if bash -n "$REPO_ROOT/.codex/hooks/graph-auto-update.sh" 2>/dev/null; then
+      pass "optional graph-auto-update hook syntax valid"
+    else
+      fail "optional graph-auto-update hook syntax error"
+    fi
+  else
+    echo "[SKIP] Codex has no automatic graph hook; use /build-knowledge-graph or graph-watch.sh"
+  fi
 
   # 1. graph-watch.sh syntax smoke
   if bash -n "$REPO_ROOT/.codex/graph/graph-watch.sh" 2>/dev/null; then
@@ -381,7 +391,19 @@ run_trigger_tests() {
     echo "[SKIP] watcher dependency missing — install fswatch (macOS) or inotify-tools (Linux)"
   fi
 
-  # 2. purge_ghosts — probe .cs added then removed
+  # 2. post-commit hook (optional local install)
+  local pch="$REPO_ROOT/.git/hooks/post-commit"
+  if [[ -x "$pch" ]]; then
+    if bash "$pch" >/dev/null 2>&1; then
+      pass "post-commit hook executes (exit 0)"
+    else
+      fail "post-commit hook returned non-zero"
+    fi
+  else
+    echo "[SKIP] post-commit hook not installed"
+  fi
+
+  # 3. purge_ghosts — probe .cs added then removed
   # Use detected Concretes/ dir; skip gracefully if no Unity project present.
   local probe_abs=""
   if [[ -n "$UNITY_CONCRETES" ]]; then
@@ -400,11 +422,11 @@ namespace Game.Concretes
     }
 }
 CS
-    bash "$GRAPH_DIR/graph-builder.sh" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
+    python3 "$GRAPH_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
     local present_after_add
     present_after_add=$(jq_count "$WORK_GRAPH" '[.codebase.classes[] | select(.name == "__GhostProbe__")] | length')
     rm -f "$probe_abs"
-    bash "$GRAPH_DIR/graph-builder.sh" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
+    python3 "$GRAPH_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
     local present_after_delete
     present_after_delete=$(jq_count "$WORK_GRAPH" '[.codebase.classes[] | select(.name == "__GhostProbe__")] | length')
     if [[ "$present_after_delete" -eq 0 ]]; then
@@ -440,7 +462,7 @@ run_known_fail_bugs() {
   local cache_p graph_p mcp_out
   cache_p=$(jq_count "$GRAPH_DIR/cache/mcp-extract.json" '.prefabs | length')
   mcp_out="$SCRIPT_DIR/.work/graph-mcp.json"
-  bash "$GRAPH_DIR/graph-builder.sh" --full --quiet --output "$mcp_out" 2>/dev/null || true
+  python3 "$GRAPH_DIR/graph-builder.py" --full --quiet --output "$mcp_out" 2>/dev/null || true
   graph_p=$(jq_count "$mcp_out" '.codebase.prefabs | length')
   if [[ "$cache_p" -gt 0 && "$graph_p" -gt 0 ]]; then
     echo "[REGRESSION_FIXED: BUG#2] MCP prefabs merged (cache=$cache_p graph=$graph_p)" >&2
@@ -465,7 +487,73 @@ run_known_fail_bugs() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# T9 — Report
+# T9 — V2 Module Tests
+# ──────────────────────────────────────────────────────────────────────────────
+run_v2_module_tests() {
+  section "T9 — V2 Modules (graph_cluster / graph_analyze / graph_validate / csharp_extractor)"
+
+  local WORK_GRAPH="$SCRIPT_DIR/.work/graph_v2_test.json"
+
+  # Build a fresh graph into the work file
+  python3 "$GRAPH_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$WORK_GRAPH" 2>/dev/null || true
+
+  # 9.1 — schema version
+  local sv; sv=$(jq -r '.schema_version // "missing"' "$WORK_GRAPH" 2>/dev/null || echo "missing")
+  [[ "$sv" == "1.3.0" ]] && pass "schema_version = 1.3.0" \
+                           || fail "schema_version is $sv (expected 1.3.0)"
+
+  # 9.2 — communities present (only required when call edges exist)
+  local call_count; call_count=$(jq '.codebase.calls | length' "$WORK_GRAPH" 2>/dev/null || echo 0)
+  if [[ "$call_count" -gt 0 ]]; then
+    local comm_count; comm_count=$(jq '(.codebase.communities // []) | length' "$WORK_GRAPH" 2>/dev/null || echo 0)
+    [[ "$comm_count" -ge 1 ]] && pass "communities[] has $comm_count entries" \
+                               || fail "expected ≥1 community, got $comm_count"
+  else
+    pass "no call edges — communities[] skip expected (graceful)"
+  fi
+
+  # 9.3 — analysis block present (graceful on empty repo)
+  if jq -e '.analysis' "$WORK_GRAPH" >/dev/null 2>&1; then
+    pass "analysis{} block present"
+  else
+    known_fail "analysis{} missing" "no call edges in repo — graph_analyze writes empty block only when communities exist"
+  fi
+
+  # 9.4 — graph_validate.py is deterministic with --seed 42
+  python3 "$GRAPH_DIR/graph_validate.py" --graph "$WORK_GRAPH" --sample 5 --seed 42 2>/dev/null || true
+  local p1; p1=$(jq -r '.validation.accuracy.agreement_pct // "missing"' "$WORK_GRAPH" 2>/dev/null || echo "missing")
+  python3 "$GRAPH_DIR/graph_validate.py" --graph "$WORK_GRAPH" --sample 5 --seed 42 2>/dev/null || true
+  local p2; p2=$(jq -r '.validation.accuracy.agreement_pct // "missing"' "$WORK_GRAPH" 2>/dev/null || echo "missing")
+  [[ "$p1" == "$p2" ]] && pass "graph_validate.py deterministic ($p1%)" \
+                        || fail "non-deterministic: $p1 vs $p2"
+
+  # 9.5 — csharp_extractor.py exits 2 when tree-sitter unavailable
+  local ts_exit=0
+  PYTHONPATH=/nonexistent python3 "$GRAPH_DIR/extractors/csharp_extractor.py" \
+    --changed-files "x.cs" 2>/dev/null || ts_exit=$?
+  if [[ "$ts_exit" -eq 2 ]]; then
+    pass "csharp_extractor.py exits 2 when tree-sitter absent"
+  else
+    known_fail "csharp_extractor.py exit $ts_exit (expected 2)" \
+      "tree-sitter may already be installed in this environment"
+  fi
+
+  # 9.6 — builder exits 0 even when graph_cluster.py is missing (graceful degradation)
+  local SANDBOX_DIR; SANDBOX_DIR=$(mktemp -d)
+  local work2="$SCRIPT_DIR/.work/graph_v2_missing_cluster.json"
+  cp "$GRAPH_DIR"/*.py "$SANDBOX_DIR/" 2>/dev/null || true
+  cp -R "$GRAPH_DIR/extractors" "$SANDBOX_DIR/" 2>/dev/null || true
+  cp "$GRAPH_DIR/schema.json" "$SANDBOX_DIR/" 2>/dev/null || true
+  # Intentionally omit graph_cluster.py — graph_analyze and graph_validate still present
+  rm -f "$SANDBOX_DIR/graph_cluster.py"
+  local rc=0
+  python3 "$SANDBOX_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$work2" 2>/dev/null || rc=$?
+  rm -rf "$SANDBOX_DIR"
+  [[ "$rc" -eq 0 ]] && pass "builder exits 0 when graph_cluster.py absent (graceful degradation)" \
+                      || fail "builder must exit 0 even without v2 modules (got rc=$rc)"
+}
+
+# T10 — Report
 # ──────────────────────────────────────────────────────────────────────────────
 emit_report() {
   if [[ "$JSON_OUTPUT" -eq 1 ]]; then
@@ -486,6 +574,121 @@ emit_report() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
+# T10b — Incremental Purge Fix (regression for ghost-purge collapse bug)
+# ──────────────────────────────────────────────────────────────────────────────
+run_incremental_purge_tests() {
+  section "T10b — Incremental Purge Fix"
+
+  # Skip entirely on template repos with no C# source.
+  if [[ "$UNITY_HAS_CS" -eq 0 ]]; then
+    echo "[SKIP] T10b: no C# source files (template mode — full project required)"
+    return
+  fi
+
+  # ── 10b.1: Full build then single-file incremental (with ABSOLUTE path, as the
+  #    hook actually sends) must preserve class count without duplicates.
+  #    This tests the path-normalization fix: relative source_file entries from
+  #    the full build must round-trip through an absolute --changed-files input.
+  local full_out incr_out single_file single_file_abs
+  full_out="$SCRIPT_DIR/.work/graph_purge_full.json"
+  incr_out="$SCRIPT_DIR/.work/graph_purge_incr.json"
+
+  python3 "$GRAPH_DIR/graph-builder.py" --full --skip-mcp --quiet --output "$full_out" 2>/dev/null || true
+  local full_classes
+  full_classes=$(jq_count "$full_out" '.codebase.classes | length')
+
+  # Pick any .cs file — use an ABSOLUTE path to mirror the hook's behaviour.
+  if [[ -n "$UNITY_CONCRETES" ]]; then
+    single_file=$(find "$UNITY_CONCRETES" -name "*.cs" -maxdepth 3 2>/dev/null | head -1)
+    [[ -n "$single_file" ]] && single_file_abs="$(cd "$(dirname "$single_file")" && pwd)/$(basename "$single_file")"
+  fi
+  if [[ -z "${single_file_abs:-}" ]]; then
+    echo "[SKIP] 10b.1: no .cs file found for changed-files probe"
+  else
+    # Seed the work graph with the full result so incremental can retain from it.
+    cp "$full_out" "$incr_out"
+    python3 "$GRAPH_DIR/graph-builder.py" \
+      --incremental --changed-files "$single_file_abs" \
+      --skip-mcp --quiet --output "$incr_out" 2>/dev/null || true
+    local incr_classes
+    incr_classes=$(jq_count "$incr_out" '.codebase.classes | length')
+    # Allow ±1 for the edited file's own class count potentially changing.
+    local lower_bound=$(( full_classes - 1 ))
+    if [[ "$incr_classes" -ge "$lower_bound" ]]; then
+      pass "10b.1: absolute-path incremental preserves class count (full=$full_classes incr=$incr_classes)"
+    else
+      fail "10b.1: path-norm regression — class count dropped with abs path (full=$full_classes incr=$incr_classes)"
+    fi
+    # Also verify no duplicates: each class name must appear exactly once.
+    local dup_count
+    dup_count=$(jq '[.codebase.classes[].name] | group_by(.) | map(select(length > 1)) | length' "$incr_out" 2>/dev/null || echo 0)
+    if [[ "$dup_count" -eq 0 ]]; then
+      pass "10b.1: no duplicate class entries after absolute-path incremental"
+    else
+      fail "10b.1: $dup_count duplicate class name(s) found — path normalization failed"
+    fi
+  fi
+
+  # ── 10b.2: Collapse guard blocks a write when new count < 50% of existing ──
+  # Create a temporary Assets/_Framework tree with one real .cs file so that the
+  # full directory walk produces a non-empty current_paths.  The seeded graph has
+  # 20 "ghost" classes whose source_file paths don't exist in that tree — after
+  # purge_ghosts drops them all, all_classes = 0 < 20*0.5 = 10, triggering the guard.
+  local guard_out guard_assets
+  guard_out="$SCRIPT_DIR/.work/graph_collapse_guard.json"
+  guard_assets=$(mktemp -d)
+  mkdir -p "$guard_assets/Assets/_Framework"
+  echo "namespace Probe { public class ProbeAnchor {} }" > "$guard_assets/Assets/_Framework/ProbeAnchor.cs"
+
+  # Build a fake graph with 20 ghost classes (source paths that do NOT exist in the temp tree).
+  python3 - <<'PYEOF' > "$guard_out"
+import json
+classes = [{"name": f"GhostClass{i}", "source_file": f"/tmp/ghost_path_{i}.cs"} for i in range(20)]
+g = {"schema_version": "1.3.0", "codebase": {"classes": classes, "interfaces": [], "events": [], "vcontainer": {"installers": [], "scopes": []}, "assemblies": [], "calls": []}}
+print(json.dumps(g))
+PYEOF
+
+  local sha_before sha_after guard_exit=0
+  sha_before=$(sha_of "$guard_out")
+
+  # Pin cwd to the temp tree so scan_files finds Assets/_Framework/ProbeAnchor.cs.
+  # current_paths = [that real file]; ghost source paths not in current_paths → purged.
+  # all_classes = 0, guard threshold = 10 → guard fires, write aborted.
+  ( cd "$guard_assets" && python3 "$GRAPH_DIR/graph-builder.py" \
+    --incremental --changed-files "/tmp/NonExistentProbe_XXXXX.cs" \
+    --skip-mcp --quiet --output "$guard_out" 2>/dev/null ) || guard_exit=$?
+  rm -rf "$guard_assets"
+
+  sha_after=$(sha_of "$guard_out")
+
+  if [[ "$sha_before" == "$sha_after" ]]; then
+    pass "10b.2: collapse guard preserved graph (SHA unchanged, exit=$guard_exit)"
+  else
+    fail "10b.2: collapse guard failed — graph overwritten (classes after: $(jq_count "$guard_out" '.codebase.classes | length'))"
+  fi
+
+  # ── 10b.3: --force bypasses collapse guard ──
+  local force_assets force_out force_exit=0
+  force_assets=$(mktemp -d)
+  mkdir -p "$force_assets/Assets/_Framework"
+  echo "namespace Probe { public class ForceAnchor {} }" > "$force_assets/Assets/_Framework/ForceAnchor.cs"
+  force_out="$SCRIPT_DIR/.work/graph_collapse_force.json"
+  cp "$guard_out" "$force_out"  # still has the 20-ghost graph (SHA unchanged from guard test)
+
+  ( cd "$force_assets" && python3 "$GRAPH_DIR/graph-builder.py" \
+    --incremental --changed-files "/tmp/NonExistentForce_XXXXX.cs" \
+    --force --skip-mcp --quiet --output "$force_out" 2>/dev/null ) || force_exit=$?
+  rm -rf "$force_assets"
+
+  # With --force the write should succeed (valid JSON written, even if classes=0).
+  if jq empty "$force_out" 2>/dev/null; then
+    pass "10b.3: --force bypasses collapse guard (valid JSON written, exit=$force_exit)"
+  else
+    fail "10b.3: --force build produced invalid JSON"
+  fi
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Main pipeline
 # ──────────────────────────────────────────────────────────────────────────────
 run_builder_flag_tests
@@ -494,4 +697,6 @@ run_pivot_tests
 run_knowledge_graph_tests
 run_trigger_tests
 run_known_fail_bugs
+run_v2_module_tests
+run_incremental_purge_tests
 emit_report

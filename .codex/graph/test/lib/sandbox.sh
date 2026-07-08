@@ -12,7 +12,7 @@ PROTECTED=(
   "$GRAPH_DIR/.last-build"
   "$GRAPH_DIR/cache/file-hashes.json"
   "$GRAPH_DIR/cache/mcp-extract.json"
-  "$REPO_ROOT/.codex/project/state/graph-updates.log"
+  "$REPO_ROOT/.codex/state/graph-updates.log"
 )
 
 # Bash 3.2 (macOS default) lacks associative arrays — use a temp dir of marker files instead.
