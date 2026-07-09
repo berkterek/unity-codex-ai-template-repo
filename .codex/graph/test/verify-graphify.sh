@@ -221,10 +221,14 @@ run_pivot_tests() {
     fail "scopes missing one of AppScope/GameScope: $scopes"
   fi
 
-  # .last-build freshness
-  if [[ -f "$GRAPH_DIR/.last-build" ]]; then
+  # .last-build freshness for the isolated output directory. The live
+  # .codex/graph/.last-build file is an ignored build artifact and may be absent
+  # in a clean CI checkout.
+  local work_last_build
+  work_last_build="$(dirname "$WORK_GRAPH")/.last-build"
+  if [[ -f "$work_last_build" ]]; then
     local lb
-    lb=$(cat "$GRAPH_DIR/.last-build")
+    lb=$(cat "$work_last_build")
     if [[ "$lb" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]]; then
       pass ".last-build is ISO-8601 ($lb)"
     else
