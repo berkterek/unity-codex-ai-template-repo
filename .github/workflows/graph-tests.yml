@@ -1,0 +1,39 @@
+name: Graph Tests
+
+# Runs the knowledge-graph integration harness on every graph toolchain change.
+# This keeps the Codex graph port honest as the builder, extractors, and
+# verification harness evolve.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.codex/graph/**'
+      - '.github/workflows/graph-tests.yml'
+  pull_request:
+    paths:
+      - '.codex/graph/**'
+      - '.github/workflows/graph-tests.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  graph-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Run graph verification harness
+        run: bash .codex/graph/test/verify-graphify.sh
