@@ -18,3 +18,16 @@ code, editor folders, installer/scope classes, and `IEventBus` references.
 invoke the guardrail runner.
 
 The workflow uses `actions/checkout@v5`.
+
+## graph-tests.yml
+
+Runs the Codex knowledge graph integration harness on pushes and pull requests
+that touch graph tooling:
+
+```bash
+bash .codex/graph/test/verify-graphify.sh
+```
+
+The workflow installs `jq`, sets up Python 3.12, and verifies the builder,
+validator, traversal helpers, MCP cache merge behavior, and known regression
+fixtures from a clean checkout.

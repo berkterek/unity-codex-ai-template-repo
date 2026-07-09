@@ -35,7 +35,7 @@ ships that folder pre-configured with:
 - **Agents** — Specialized AI roles: `unity-coder`, `unity-fixer`, `unity-reviewer`, `tester`, `committer`, `unity-setup` and 28+ more
 - **Commands** — Slash commands for common workflows: `/implement`, `/fix`, `/fix-lite`, `/fix-codex`, `/roadmap`, `/plan-module`, `/orchestrate`, `/build-knowledge-graph`, `/smart-commit-selected` and 55+ more
 - **Rules** — Architecture, SOLID/OOP, naming, testing, ECS, serialization, Addressables, bootstrap, async, input, lifecycle, and prefab standards
-- **Skills** — 71 skill files: audio, URP, Cinemachine, Netcode, ProBuilder, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
+- **Skills** — 72 skill files: audio, URP, Cinemachine, Netcode, ProBuilder, VContainer, UniTask, DOTween, Unity git, UGUI, VFX, SOLID/OOP, and more
 
 ---
 
@@ -122,10 +122,10 @@ These packages must be installed in the Unity project:
 ├── packs/
 │   └── unity-game/
 │       ├── agents/      34 Unity specialist agents
-│       ├── commands/    62 Unity slash commands
+│       ├── commands/    64 Unity slash commands
 │       ├── rules/       16 rule files
 │       ├── guides/      21 guides (including guardrails)
-│       └── skills/      71 skill files
+│       └── skills/      72 skill files
 ├── project/             Per-project overlay — fill in each project
 ├── templates/           GDD, TDD, CODING_CONVENTIONS, module plan templates
 └── manifests/           Import and migration decisions
@@ -213,6 +213,8 @@ per project through `.codex/project/FEATURES.json`.
 The builder prefers the pure-Python `.codex/graph/graph-builder.py` path and
 falls back to `.codex/graph/graph-builder.sh` when needed. MCP extraction can
 merge scene and prefab data into the graph when the Unity Editor is open.
+Graph tooling changes are checked by `.github/workflows/graph-tests.yml`,
+which runs `.codex/graph/test/verify-graphify.sh`.
 
 ---
 

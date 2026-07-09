@@ -159,6 +159,8 @@ Primary command:
 The build command prefers `graph/graph-builder.py`, a pure-Python stdlib
 builder, and falls back to `graph/graph-builder.sh` when needed. Unity Editor
 MCP extraction can merge scene and prefab data into the graph cache.
+Graph toolchain changes are verified in CI by `.github/workflows/graph-tests.yml`,
+which runs `graph/test/verify-graphify.sh` from a clean checkout.
 
 ## What Goes Where
 

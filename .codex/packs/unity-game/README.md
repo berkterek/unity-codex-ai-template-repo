@@ -9,6 +9,8 @@ most Unity projects, not full gameplay implementations or genre recipes.
 
 Agents are orchestration role templates — the orchestrator spawns them for
 specific task types.
+This table highlights the main Unity roles; the full current inventory lives in
+`guides/agents-index.md` and root `AGENTS.md`.
 
 | Agent | Purpose |
 |-------|---------|
@@ -41,6 +43,8 @@ specific task types.
 
 Commands are directly invocable prompts — use them as the starting prompt for
 a Codex session or as instructions in a task assignment.
+This table highlights common commands; the full current inventory lives in
+`guides/commands.md` and root `AGENTS.md`.
 
 | Command | Purpose |
 |---------|---------|
@@ -61,6 +65,10 @@ a Codex session or as instructions in a task assignment.
 | `commands/knowledge-graph.md` | Queries the optional Unity knowledge graph. |
 
 ## Included Guides
+
+This table highlights the core guides; the full current guide inventory lives
+in root `AGENTS.md` and `README.md`. Command and skill inventories live in
+`guides/commands.md` and `guides/skills-index.md`.
 
 | Guide | Purpose |
 |-------|---------|

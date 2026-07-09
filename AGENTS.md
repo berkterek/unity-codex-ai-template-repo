@@ -309,6 +309,15 @@ wrapper so Codex can discover the workflow through `$skill` invocation.
 | `knowledge-graph.md` | Graph builder/query usage and extractor notes |
 | `quick-start.md` | New/existing project setup workflow |
 | `setup-checklist.md` | Manual setup checklist after `/setup-project` |
+| `agents-index.md` | Agent reference index |
+| `commands.md` | Command reference index |
+| `commands-as-skills.md` | Repo-scoped command skill wrapper guide |
+| `hooks-blocking.md` | Historical blocking hook checklist preserved as Codex guardrail reference |
+| `hooks-warning.md` | Historical warning hook checklist preserved as Codex guardrail reference |
+| `model-tiers.md` | Model routing guidance |
+| `orchestrate-rules.md` | Orchestration rule reference |
+| `skills-index.md` | Skill library index |
+| `subagents.md` | Native Codex subagent wrapper usage guide |
 
 ---
 
