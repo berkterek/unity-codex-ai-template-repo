@@ -77,6 +77,12 @@ compile.
 `EventBus` files must not be modified before reading their dependents. Use
 `Read` + `Grep` to map the impact area first.
 
+Executable guardrails enforce this as a deny-then-allow gate for existing
+critical files: the first run blocks and records the file in
+`.codex/project/state/guard-critical-denied.txt`; after the investigation is
+done, rerun guardrails to acknowledge the scoped edit. Creating a brand-new
+critical file is allowed.
+
 ### Never weaken config files to work around code problems
 `.asmdef`, `.inputactions`, `ProjectSettings/`, `Packages/manifest.json`, and
 `Packages/packages-lock.json` — fix the code, not the config. Test assembly
@@ -160,9 +166,11 @@ will call methods on a destroyed object — the most common subtle Unity bug.
 ### UnityEngine import in pure C# services
 `using UnityEngine` is forbidden in `_Framework/`, `Game/Abstracts/`,
 `Game/Concretes/` pure service/domain files. Boundary exceptions:
-`*Provider`, `*View`, `*Controller`, `*Scope`, `*Configuration`, `*Config`,
-`*Catalog`, `*Definition`, and event payload files when Unity value types are
-intentional.
+`*Provider`, `*View`, `*Controller`, `*Scope`, `*Loader`, `*Dal`, `*Client`,
+`*Configuration`, `*Config`, `*Catalog`, `*Definition`, and event payload files
+when Unity value types are intentional. `*Loader`, `*Dal`, and `*Client` are
+Tier 4 swappable-backend implementations described in
+`rules/architecture.md` Card 2.1.
 
 ### ECS structural changes inside a query loop
 `EntityManager.AddComponent`, `RemoveComponent`, `DestroyEntity`, `Instantiate`
@@ -200,6 +208,14 @@ If a PlayMode test file references a scene, that scene must exist under
 Pipeline agents (coder, tester, committer) must not be spawned until the
 Director Gate has been shown and the user has typed `go`. The pipeline does not
 start without the gate.
+
+Gate-cleared is not pipeline-executed. While
+`.codex/project/state/gate-cleared` exists and no subagent is currently running
+(`.codex/project/state/subagent-depth` is `0`), the main session must not do
+the coder/tester/committer work directly. `.codex/guardrails/run.sh` blocks
+direct `_GameFolders/Scripts/**/*.cs` changes in this state. Use
+`.codex/project/state/pipeline-override` only when the user explicitly approves
+skipping the pipeline for this specific task.
 
 ### Reviewer order
 The reviewer in this project is `unity-reviewer`. Call `unity-reviewer` to

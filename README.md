@@ -147,7 +147,7 @@ fills that gap. Every agent and command reads this file at startup.
 | Use `UnityEvent` | Use `IEventBus` instead |
 | Directly assign `Time.timeScale` | Use `IEventBus + PauseService` |
 | Static singleton (`static Instance`) | VContainer is the only DI mechanism |
-| Business logic in MonoBehaviour | MonoBehaviour is limited to shell/provider roles |
+| Business logic in MonoBehaviour | MonoBehaviour is limited to shell/provider/backend-boundary roles |
 | `new SomeService()` / `new SomeProvider()` | Dependencies must come from VContainer injection |
 | `*Handler : MonoBehaviour` | Handlers are pure C# |
 | `*Module : ScriptableObject` | Modules are static classes |
@@ -166,6 +166,13 @@ format violation, naming convention violation, `SerializeField` rename without
 
 Pipeline cannot start without Director Gate. `unity-reviewer` is required before every commit.
 
+Gate-cleared is not pipeline-executed: when `.codex/project/state/gate-cleared`
+exists and no subagent is running, the main session must not directly perform
+the coder/tester/committer step. The executable guardrail blocks direct
+`_GameFolders/Scripts/**/*.cs` changes in that state; use
+`.codex/project/state/pipeline-override` only for an explicit user-approved
+bypass.
+
 ---
 
 ## Executable Guardrails
@@ -182,6 +189,11 @@ bash .codex/guardrails/run.sh --files Assets/Scripts/Foo.cs
 Output uses `BLOCK` and `WARN` lines. Any `BLOCK` exits `1`; warnings exit `0`
 but must be reported. `/validate`, `/qa`, and `/smart-commit` are documented to
 run this before proceeding.
+
+The executable guardrails also mirror the newest upstream safety updates:
+critical architecture files use a deny-then-allow investigation gate, and
+swappable-backend implementations named `*Loader`, `*Dal`, or `*Client` are
+treated as Tier 4 boundaries rather than pure Tier 3 services.
 
 Test the guardrails with:
 

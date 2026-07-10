@@ -46,7 +46,7 @@ Three levels:
 |-------|---------|
 | **BLOCK** | `git push`, `.unity`/`.prefab` text edit, `UnityEvent`, `Time.timeScale`, static singleton, MonoBehaviour business logic, `UnityEditor` without guard |
 | **WARN** | `async void`, `GetComponent` in Awake, legacy Input API, SOLID/OOP drift, hot-path LINQ/alloc, null propagation on Unity objects |
-| **GATE** | Pipeline cannot start without Director Gate; `unity-reviewer` required before commit |
+| **GATE** | Pipeline cannot start without Director Gate; gate-cleared is not pipeline-executed; `unity-reviewer` required before commit |
 
 Run executable guardrails at workflow gates:
 
@@ -58,6 +58,12 @@ bash .codex/guardrails/run.sh --files Assets/Scripts/Foo.cs
 
 `BLOCK` findings exit `1` and must be fixed before `/validate`, `/qa`, or
 `/smart-commit` proceeds. `WARN` findings exit `0` but must be reported.
+
+When `.codex/project/state/gate-cleared` exists, the main session must spawn the
+appropriate pipeline agent instead of doing coder/tester/committer work
+directly. `.codex/guardrails/run.sh` blocks direct `_GameFolders/Scripts/**/*.cs`
+changes in that state unless `.codex/project/state/pipeline-override` contains
+an explicit user-approved bypass reason.
 
 For local git enforcement, enable the bundled hook once per clone:
 
