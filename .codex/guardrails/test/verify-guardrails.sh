@@ -348,6 +348,15 @@ public sealed class GameScope : MonoBehaviour
 {
 }'
 
+assert_clean \
+  "Swappable backend Dal may import UnityEngine" \
+  "Assets/_GameFolders/Scripts/Games/Concretes/SaveLoad/LocalSaveLoadDal.cs" \
+  'using UnityEngine;
+public sealed class LocalSaveLoadDal
+{
+    public string Path => Application.persistentDataPath;
+}'
+
 assert_warn \
   "Hot-path GetComponent warning" \
   "Assets/Scripts/WarnGetComponent.cs" \
@@ -495,6 +504,88 @@ CS
 serialize_status=$?
 if [ "$serialize_status" -eq 0 ]; then
   record_pass "SerializeField rename warning"
+else
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+fi
+
+pipeline_repo="$TMP_DIR/pipeline-repo"
+mkdir -p "$pipeline_repo/Assets/_GameFolders/Scripts/Game"
+(
+  cd "$pipeline_repo" || exit 1
+  git init -q
+  git config user.email "guardrails@example.test"
+  git config user.name "Guardrails Test"
+  cat > Assets/_GameFolders/Scripts/Game/PlayerService.cs <<'CS'
+public sealed class PlayerService
+{
+    public int Value => 1;
+}
+CS
+  git add Assets/_GameFolders/Scripts/Game/PlayerService.cs
+  git commit -q -m "baseline"
+  mkdir -p .codex/project/state
+  touch .codex/project/state/gate-cleared
+  cat > Assets/_GameFolders/Scripts/Game/PlayerService.cs <<'CS'
+public sealed class PlayerService
+{
+    public int Value => 2;
+}
+CS
+  output="$(bash "$RUNNER" --changed 2>&1)"
+  status=$?
+  if [ "$status" -ne 1 ]; then
+    printf '[FAIL] Pipeline direct work is blocked\nExpected exit 1, got %s. Output:\n%s\n' "$status" "$output"
+    exit 12
+  fi
+  if ! printf '%s\n' "$output" | grep -q "BLOCK.*pipeline-direct-work"; then
+    printf '[FAIL] Pipeline direct work is blocked\nExpected BLOCK containing pipeline-direct-work. Output:\n%s\n' "$output"
+    exit 13
+  fi
+)
+pipeline_status=$?
+if [ "$pipeline_status" -eq 0 ]; then
+  record_pass "Pipeline direct work is blocked"
+else
+  FAIL_COUNT=$((FAIL_COUNT + 1))
+fi
+
+critical_repo="$TMP_DIR/critical-repo"
+mkdir -p "$critical_repo/Assets/_GameFolders/Scripts/Games/Concretes/Infrastructure"
+(
+  cd "$critical_repo" || exit 1
+  git init -q
+  git config user.email "guardrails@example.test"
+  git config user.name "Guardrails Test"
+  cat > Assets/_GameFolders/Scripts/Games/Concretes/Infrastructure/AppScope.cs <<'CS'
+public sealed class AppScope
+{
+    public int Value => 1;
+}
+CS
+  git add Assets/_GameFolders/Scripts/Games/Concretes/Infrastructure/AppScope.cs
+  git commit -q -m "baseline"
+  cat > Assets/_GameFolders/Scripts/Games/Concretes/Infrastructure/AppScope.cs <<'CS'
+public sealed class AppScope
+{
+    public int Value => 2;
+}
+CS
+  output="$(bash "$RUNNER" --changed 2>&1)"
+  status=$?
+  if [ "$status" -ne 1 ] || ! printf '%s\n' "$output" | grep -q "BLOCK.*critical-architecture-investigation"; then
+    printf '[FAIL] Critical architecture edit blocks first pass\nExpected critical block. Status: %s Output:\n%s\n' "$status" "$output"
+    exit 14
+  fi
+  output="$(bash "$RUNNER" --changed 2>&1)"
+  status=$?
+  if [ "$status" -ne 0 ]; then
+    printf '[FAIL] Critical architecture edit passes after acknowledgement\nExpected exit 0, got %s. Output:\n%s\n' "$status" "$output"
+    exit 15
+  fi
+)
+critical_status=$?
+if [ "$critical_status" -eq 0 ]; then
+  record_pass "Critical architecture edit deny-then-allow"
 else
   FAIL_COUNT=$((FAIL_COUNT + 1))
 fi

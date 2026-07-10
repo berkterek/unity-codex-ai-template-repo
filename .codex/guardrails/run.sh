@@ -66,6 +66,46 @@ is_service_domain_path() {
   printf '%s\n' "$1" | grep -qiE '(_Framework|Games/Abstracts|Games/Concretes|Game/Abstracts|Game/Concretes)/.*\.cs$'
 }
 
+is_critical_architecture_file() {
+  local file="$1"
+  local rel
+  local base
+  local name
+  local ext
+
+  rel="$(display_path "$file")"
+  base="$(basename "$file")"
+  name="${base%.*}"
+  ext="${base##*.}"
+
+  if [ "$ext" = "asmdef" ]; then
+    return 0
+  fi
+
+  case "$name" in
+    AppScope|InputService|AppModules|ConfigCatalog|IEventBus|EventBus|EventBusAccessor)
+      return 0
+      ;;
+  esac
+
+  if printf '%s\n' "$name" | grep -qiE 'Installer$'; then
+    printf '%s\n' "$rel" | grep -qiE '(TestScopes|Tests?|EditModeTest|PlayModeTest|EditMode|PlayMode)/' && return 1
+    return 0
+  fi
+
+  return 1
+}
+
+is_tracked_file() {
+  local rel
+  rel="$(display_path "$1")"
+  git -C "$REPO_ROOT" ls-files --error-unmatch -- "$rel" >/dev/null 2>&1
+}
+
+is_pipeline_guarded_script() {
+  printf '%s\n' "$(display_path "$1")" | grep -qE '(^|/)_GameFolders/Scripts/.*\.cs$'
+}
+
 existing_file() {
   [ -f "$1" ]
 }
@@ -166,6 +206,69 @@ check_protected_config_file() {
   [ "$blocked" -eq 0 ]
 }
 
+check_critical_architecture_file() {
+  local file="$1"
+  local state_dir
+  local denied_file
+  local passed_file
+
+  [ "$MODE" = "all" ] && return 0
+  is_critical_architecture_file "$file" || return 0
+  is_tracked_file "$file" || return 0
+
+  state_dir="$REPO_ROOT/.codex/project/state"
+  denied_file="$state_dir/guard-critical-denied.txt"
+  passed_file="$state_dir/guard-critical-passed.txt"
+
+  mkdir -p "$state_dir"
+  touch "$denied_file" "$passed_file"
+
+  if grep -qxF "$(display_path "$file")" "$passed_file" 2>/dev/null; then
+    return 0
+  fi
+
+  if grep -qxF "$(display_path "$file")" "$denied_file" 2>/dev/null; then
+    printf '%s\n' "$(display_path "$file")" >> "$passed_file"
+    return 0
+  fi
+
+  printf '%s\n' "$(display_path "$file")" >> "$denied_file"
+  emit_block "$file" 1 "critical-architecture-investigation" "Critical architecture file changed; read the file, map dependents, then rerun guardrails to acknowledge the scoped edit."
+  return 1
+}
+
+check_pipeline_direct_work() {
+  local file="$1"
+  local state_dir
+  local gate_file
+  local depth_file
+  local override_file
+  local depth
+
+  [ "$MODE" = "all" ] && return 0
+  is_pipeline_guarded_script "$file" || return 0
+
+  state_dir="$REPO_ROOT/.codex/project/state"
+  gate_file="$state_dir/gate-cleared"
+  depth_file="$state_dir/subagent-depth"
+  override_file="$state_dir/pipeline-override"
+
+  [ -f "$gate_file" ] || return 0
+
+  if [ -f "$override_file" ]; then
+    rm -f "$override_file"
+    return 0
+  fi
+
+  depth="$(cat "$depth_file" 2>/dev/null || printf '0')"
+  if [ "$depth" -gt 0 ] 2>/dev/null; then
+    return 0
+  fi
+
+  emit_block "$file" 1 "pipeline-direct-work" "Director Gate is open but no subagent is running; spawn the pipeline agent or create .codex/project/state/pipeline-override with the explicit user-approved reason."
+  return 1
+}
+
 check_monobehaviour_new_service() {
   local file="$1"
   local line
@@ -200,7 +303,7 @@ check_service_unity_inheritance() {
 
   base="$(basename "$file")"
   case "$base" in
-    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs|*Configuration.cs|*Config.cs|*Catalog.cs|*Definition.cs)
+    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs|*Loader.cs|*Dal.cs|*Client.cs|*Configuration.cs|*Config.cs|*Catalog.cs|*Definition.cs)
       return
       ;;
   esac
@@ -231,7 +334,7 @@ check_service_unity_import() {
 
   base="$(basename "$file")"
   case "$base" in
-    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs|*Configuration.cs|*Config.cs|*Catalog.cs|*Definition.cs|*Events.cs|*Event.cs)
+    *Installer.cs|*Scope.cs|*Provider.cs|*View.cs|*Controller.cs|*Root.cs|*Loader.cs|*Dal.cs|*Client.cs|*Configuration.cs|*Config.cs|*Catalog.cs|*Definition.cs|*Events.cs|*Event.cs)
       return
       ;;
   esac
@@ -581,6 +684,14 @@ main() {
     existing_file "$file" || continue
 
     if ! check_protected_config_file "$file"; then
+      continue
+    fi
+
+    if ! check_critical_architecture_file "$file"; then
+      continue
+    fi
+
+    if ! check_pipeline_direct_work "$file"; then
       continue
     fi
 
